@@ -1,0 +1,20 @@
+{
+  "name": "adkwebsite",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "dev": "next dev",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.50.4",
+    "csv-parser": "^3.2.0",
+    "dotenv": "^17.2.0",
+    "mysql2": "^3.14.1"
+  }
+}

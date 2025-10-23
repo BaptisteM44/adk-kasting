@@ -1,0 +1,156 @@
+// styles/globals.scss
+@import 'variables';
+@import 'components';
+@import 'layout';
+@import 'hero';
+@import 'comedien-profile';
+@import 'collaborations';
+@import 'animations';
+@import 'footer';
+@import 'about';
+@import 'faq';
+@import 'inscription';
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: $font-primary;
+  font-size: $font-size-body;
+  line-height: $line-height-body;
+  color: $primary-black;
+  background-color: $primary-white;
+  scroll-behavior: smooth;
+}
+
+// Variable CSS globale pour le padding horizontal
+:root {
+  --padding-horizontal: 16px;
+}
+
+// body {
+//   padding: 0 16px; // Padding global de 16px sur les bords pour tout le site
+// }
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: $transition-base;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: $transition-base;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: $font-size-base;
+  border: 1px solid $border-gray;
+  border-radius: $border-radius-md;
+  padding: $spacing-md;
+  transition: $transition-base;
+
+  &:focus {
+    outline: none;
+    border-color: $accent-blue;
+    box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
+  }
+}
+
+.container {
+  margin: 0 auto;
+  // Padding retiré car il est maintenant global au niveau du body
+}
+
+// Classe pour les éléments pleine largeur qui ont besoin de padding interne
+.full-width-padded {
+  padding: 0 16px;
+  
+  @media (min-width: $breakpoint-md) {
+    padding: 0 16px;
+  }
+}
+
+.section {
+  padding: $spacing-3xl 0;
+
+  @media (min-width: $breakpoint-md) {
+    padding: $spacing-3xl * 1.5 0;
+  }
+}
+
+// Utilitaires typographiques selon le design system
+.text-body {
+  font-size: $font-size-body;
+  line-height: $line-height-body;
+}
+
+.text-title {
+  font-size: $font-size-title;
+  line-height: $line-height-title;
+  font-weight: 600;
+  
+  @media (max-width: $breakpoint-sm) {
+    font-size: $font-size-lg; // Plus petit sur mobile
+    line-height: $line-height-lg;
+  }
+}
+
+.text-big-title {
+  font-size: $font-size-big-title;
+  line-height: $line-height-big-title;
+  font-weight: 700;
+  
+  @media (max-width: $breakpoint-sm) {
+    font-size: $font-size-title; // Plus petit sur mobile
+    line-height: $line-height-title;
+  }
+}
+
+// Variantes de poids
+.font-light { font-weight: 300; }
+.font-normal { font-weight: 400; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+
+// Utilitaires généraux
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.hidden { display: none; }
+.block { display: block; }
+.inline-block { display: inline-block; }
+.flex { display: flex; }
+.grid { display: grid; }
+
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.items-center { align-items: center; }
+
+.mt-auto { margin-top: auto; }
+.mb-auto { margin-bottom: auto; }
+.ml-auto { margin-left: auto; }
+.mr-auto { margin-right: auto; }
+
+.w-full { width: 100%; }
+.h-full { height: 100%; }

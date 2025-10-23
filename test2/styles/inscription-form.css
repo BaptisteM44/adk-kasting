@@ -1,0 +1,174 @@
+.inscription-form-complete {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+.inscription-form-complete .form-section {
+  margin-bottom: 2.5rem;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.inscription-form-complete .form-section h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.inscription-form-complete .form-section .section-description {
+  margin: 0 0 1.5rem 0;
+  color: #666;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+.inscription-form-complete .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+@media (max-width: 640px) {
+  .inscription-form-complete .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+.inscription-form-complete .form-field {
+  margin-bottom: 1rem;
+}
+.inscription-form-complete .form-field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+}
+.inscription-form-complete .form-field input, .inscription-form-complete .form-field select, .inscription-form-complete .form-field textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+.inscription-form-complete .form-field input:focus, .inscription-form-complete .form-field select:focus, .inscription-form-complete .form-field textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+.inscription-form-complete .form-field input.error, .inscription-form-complete .form-field select.error, .inscription-form-complete .form-field textarea.error {
+  border-color: #ef4444;
+}
+.inscription-form-complete .form-field textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+.inscription-form-complete .photos-upload-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+@media (max-width: 640px) {
+  .inscription-form-complete .photos-upload-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.inscription-form-complete .photos-upload-grid .photo-upload-slot {
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 1rem;
+  transition: border-color 0.2s ease;
+}
+.inscription-form-complete .photos-upload-grid .photo-upload-slot:hover {
+  border-color: #3b82f6;
+}
+.inscription-form-complete .photos-upload-grid .photo-upload-slot:first-child {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+}
+.inscription-form-complete .checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+@media (max-width: 640px) {
+  .inscription-form-complete .checkbox-group {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.inscription-form-complete .checkbox-group .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 0.9rem;
+}
+.inscription-form-complete .checkbox-group .checkbox-label:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+.inscription-form-complete .checkbox-group .checkbox-label input[type=checkbox] {
+  width: auto;
+  margin: 0;
+}
+.inscription-form-complete .field-error {
+  display: block;
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+.inscription-form-complete .submit-button {
+  width: 100%;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 2rem;
+}
+.inscription-form-complete .submit-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+.inscription-form-complete .submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+@media (max-width: 768px) {
+  .inscription-form-complete {
+    padding: 1rem;
+  }
+  .inscription-form-complete .form-section {
+    padding: 1rem;
+  }
+  .inscription-form-complete .checkbox-group {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-section {
+  animation: slideInUp 0.6s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}/*# sourceMappingURL=inscription-form.css.map */

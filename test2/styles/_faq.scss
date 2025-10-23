@@ -1,0 +1,122 @@
+// styles/_faq.scss
+
+.faq-page {
+  background-color: #ffffff;
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+
+  // Utiliser exactement les mêmes styles que .main-hero-area .hero-part
+  .hero-part {
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    padding: 40px var(--padding-horizontal);
+    
+    // Styles communs pour le contenu - identiques à _hero.scss
+    .hero-content {
+      max-width: 800px;
+      width: 100%;
+      text-align: left;
+      
+      h1 {
+        font-family: Inter, sans-serif;
+        font-size: 48px;
+        font-weight: 400;
+        color: #393939;
+        margin-bottom: 1.5rem;
+        line-height: 56px;
+        letter-spacing: 0%;
+        
+        @media (max-width: 768px) {
+          font-size: 36px;
+          line-height: 44px;
+        }
+      }
+      
+      h2 {
+        font-family: Inter, sans-serif;
+        font-size: 36px;
+        font-weight: 400;
+        color: #393939;
+        margin-bottom: 1.5rem;
+        line-height: 48px;
+        letter-spacing: 0%;
+        
+        @media (max-width: 768px) {
+          font-size: 28px;
+          line-height: 36px;
+        }
+      }
+      
+      p {
+        font-size: clamp(1rem, 2vw, 18px);
+        color: #666;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        max-width: 627px;
+      }
+      
+      .cta-button {
+        background: linear-gradient(to right, #ad3630, #c2433c);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        font-size: 16px;
+        font-weight: 500;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 15px rgba(173, 54, 48, 0.3);
+        }
+      }
+
+      // Section FAQ spécifique
+      .faq-list {
+        .faq-item {
+          margin-bottom: 2rem;
+          
+          h3 {
+            font-family: Inter, sans-serif;
+            font-size: 20px;
+            font-weight: 500;
+            color: #393939;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+          }
+          
+          p {
+            margin-bottom: 0;
+          }
+        }
+      }
+
+      // Section support
+      .support-info {
+        .support-item {
+          margin-bottom: 2rem;
+          
+          h3 {
+            font-family: Inter, sans-serif;
+            font-size: 20px;
+            font-weight: 500;
+            color: #393939;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+          }
+          
+          p {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+  }
+}

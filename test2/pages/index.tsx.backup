@@ -1,0 +1,444 @@
+// pages/index.tsx
+import React, { useState, useEffect, useRef } from 'react'
+import Head from 'next/head'
+import Link from 'next/link'
+import { Layout } from '@/components/Layout'
+import { FilmCarousel } from '@/components/FilmCarousel'
+import { Button } from '@/components/ui/Button'
+import type { Film } from '@/types'
+import filmsData from '@/data/films.json'
+
+export default function HomePage() {
+  const [films, setFilms] = useState<Film[]>([])
+  const [loading, setLoading] = useState(true)
+  const filmsGridRef = useRef<HTMLDivElement>(null)
+  const posterRefs = useRef<HTMLDivElement[]>([])
+
+  // Créer une liste infinie de films en les dupliquant
+  const infiniteFilms = films.length > 0 ? [
+    ...films,
+    ...films.map(film => ({ ...film, id: `${film.id}_copy1` })),
+    ...films.map(film => ({ ...film, id: `${film.id}_copy2` })),
+    ...films.map(film => ({ ...film, id: `${film.id}_copy3` }))
+  ] : []
+
+  useEffect(() => {
+    const loadFilms = () => {
+      try {
+        // Charger les films depuis le fichier JSON local
+        const activeFilms = filmsData.filter(film => film.is_active)
+        setFilms(activeFilms as Film[])
+      } catch (error) {
+        console.error('Erreur lors du chargement des films:', error)
+        setFilms([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadFilms()
+  }, [])
+
+  // Plus besoin de JavaScript pour l'effet hover - géré par CSS
+  useEffect(() => {
+    // Cleanup et initialisation simple
+    if (films.length > 0) {
+      posterRefs.current.forEach((poster) => {
+        if (poster) {
+          poster.style.transform = ''
+          poster.style.zIndex = ''
+        }
+      })
+    }
+  }, [films])
+
+  // Drag horizontal pour faire défiler les affiches
+  useEffect(() => {
+    const filmsGrid = filmsGridRef.current
+    if (!filmsGrid) return
+
+    let isDown = false
+    let startX: number
+    let scrollLeft: number
+
+    const handleMouseDown = (e: MouseEvent) => {
+      isDown = true
+      filmsGrid.classList.add('dragging')
+      startX = e.pageX - filmsGrid.offsetLeft
+      scrollLeft = filmsGrid.scrollLeft
+      e.preventDefault()
+    }
+
+    const handleMouseLeave = () => {
+      isDown = false
+      filmsGrid.classList.remove('dragging')
+    }
+
+    const handleMouseUp = () => {
+      isDown = false
+      filmsGrid.classList.remove('dragging')
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDown) return
+      e.preventDefault()
+      const x = e.pageX - filmsGrid.offsetLeft
+      const walk = (x - startX) * 2 // Vitesse de scroll
+      filmsGrid.scrollLeft = scrollLeft - walk
+    }
+
+    // Touch events pour mobile
+    const handleTouchStart = (e: TouchEvent) => {
+      isDown = true
+      filmsGrid.classList.add('dragging')
+      startX = e.touches[0].pageX - filmsGrid.offsetLeft
+      scrollLeft = filmsGrid.scrollLeft
+    }
+
+    const handleTouchEnd = () => {
+      isDown = false
+      filmsGrid.classList.remove('dragging')
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDown) return
+      const x = e.touches[0].pageX - filmsGrid.offsetLeft
+      const walk = (x - startX) * 2
+      filmsGrid.scrollLeft = scrollLeft - walk
+    }
+
+    // Ajouter les événements
+    filmsGrid.addEventListener('mousedown', handleMouseDown)
+    filmsGrid.addEventListener('mouseleave', handleMouseLeave)
+    filmsGrid.addEventListener('mouseup', handleMouseUp)
+    filmsGrid.addEventListener('mousemove', handleMouseMove)
+    filmsGrid.addEventListener('touchstart', handleTouchStart)
+    filmsGrid.addEventListener('touchend', handleTouchEnd)
+    filmsGrid.addEventListener('touchmove', handleTouchMove)
+
+    // Cleanup
+    return () => {
+      filmsGrid.removeEventListener('mousedown', handleMouseDown)
+      filmsGrid.removeEventListener('mouseleave', handleMouseLeave)
+      filmsGrid.removeEventListener('mouseup', handleMouseUp)
+      filmsGrid.removeEventListener('mousemove', handleMouseMove)
+      filmsGrid.removeEventListener('touchstart', handleTouchStart)
+      filmsGrid.removeEventListener('touchend', handleTouchEnd)
+      filmsGrid.removeEventListener('touchmove', handleTouchMove)
+    }
+  }, [films])
+
+    // Auto-scroll simple et efficace
+  useEffect(() => {
+    const filmsGrid = filmsGridRef.current
+    if (!filmsGrid || infiniteFilms.length === 0) return
+
+    let animationId: number
+    let isUserInteracting = false
+    const scrollSpeed = 1.2 // Augmenté pour plus de fluidité
+
+    const smoothScroll = () => {
+      if (filmsGrid && !isUserInteracting) {
+        const currentScroll = filmsGrid.scrollLeft
+        const maxScroll = filmsGrid.scrollWidth - filmsGrid.clientWidth
+        
+        if (currentScroll >= maxScroll * 0.75) {
+          // Reset quand on atteint 75% pour éviter les à-coups
+          filmsGrid.scrollLeft = 0
+        } else {
+          filmsGrid.scrollLeft = currentScroll + scrollSpeed
+        }
+      }
+      animationId = requestAnimationFrame(smoothScroll)
+    }
+
+    // Pause sur interaction utilisateur
+    const pauseScroll = () => { 
+      isUserInteracting = true 
+      console.log('Auto-scroll pausé')
+    }
+    const resumeScroll = () => { 
+      setTimeout(() => { 
+        isUserInteracting = false 
+        console.log('Auto-scroll repris')
+      }, 1500) 
+    }
+
+    // Events pour pauser/reprendre
+    filmsGrid.addEventListener('mouseenter', pauseScroll)
+    filmsGrid.addEventListener('mouseleave', resumeScroll)
+    filmsGrid.addEventListener('mousedown', pauseScroll)
+    filmsGrid.addEventListener('touchstart', pauseScroll)
+
+    // Démarrage immédiat de l'auto-scroll
+    animationId = requestAnimationFrame(smoothScroll)
+    console.log('Auto-scroll démarré')
+
+    return () => {
+      if (animationId) cancelAnimationFrame(animationId)
+      filmsGrid.removeEventListener('mouseenter', pauseScroll)
+      filmsGrid.removeEventListener('mouseleave', resumeScroll)
+      filmsGrid.removeEventListener('mousedown', pauseScroll)
+      filmsGrid.removeEventListener('touchstart', pauseScroll)
+    }
+  }, [infiniteFilms])
+
+  return (
+    <Layout>
+      <Head>
+        <title>ADKcasting - Plateforme de casting professionnel</title>
+        <meta 
+          name="description" 
+          content="Découvrez plus de 9000 comédiens professionnels sur ADKcasting. Trouvez l'acteur parfait pour vos projets de cinéma, théâtre et publicité." 
+        />
+      </Head>
+
+      {/* Hero avec carousel de films */}
+      <FilmCarousel films={films} autoplay autoplayDelay={5000} />
+
+      {/* Zone Hero Principale - 100vh divisée en 2 parties */}
+      <div className="main-hero-area">
+        {/* Première partie - Recherche de comédiens (50vh) */}
+        <div className="hero-part hero-part--search">
+          <div className="hero-content">
+            <h2 className="text-reveal">
+              Vous êtes à la recherche d'un·e comédien·ne ?
+            </h2>
+            <p className="text-reveal text-reveal--delay-1">
+              L'agence ADK-Kasting dispose d'une base de données de près de 3000 comédiens belges et internationaux, professionnels ou non.
+              <br />
+              Vous aurez accès, sur ce site, à une galerie de plusieurs centaines de comédiens·nes, professionnel·les, non professionnel·les, enfants, adolescents ou adultes. Cette communauté riche et variée est le fruit de plusieurs années de castings sur plus d'une centaine de projets… longs-métrages ou autres.
+            </p>
+            <button className="hero-button button-reveal">
+              Contactez nous
+            </button>
+          </div>
+        </div>
+
+      {/* Section Inscription */}
+      <section className="section">
+        <div className="container">
+          <div style={{ textAlign: 'left', maxWidth: '800px', marginLeft: 'auto' }}>
+            <h2 className="text-title" style={{ marginBottom: '1.5rem' }}>
+              Vous êtes comédien·ne ?
+            </h2>
+            <p className="text-body" style={{ marginBottom: '2rem', color: '#666' }}>
+              ADK-Kasting est en permanence à la recherche de talents.
+              <br />
+              En vous inscrivant sur ce site, vous créez votre profil et le mettez à jour quand vous le souhaitez. Vous pouvez également ajouter des photos et extraits vidéos. ADK-Kasting.com étant régulièrement utilisé par des réalisateurs, vous augmentez ainsi vos chances de visibilité.
+            </p>
+            <Link href="/inscription">
+              <button
+                style={{
+                  width: '162px',
+                  height: '52px',
+                  borderRadius: '8px',
+                  padding: '12px 14px 14px 14px',
+                  gap: '6px',
+                  border: '1px solid #D8D8D8',
+                  backgroundColor: 'transparent',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  color: '#333',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f5f5f5'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                }}
+              >
+                Inscrivez vous
+              </button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+        {/* Deuxième partie - Inscription comédiens (50vh) */}
+        <div className="hero-part hero-part--register">
+          <div className="hero-content">
+            <h2 className="text-reveal text-reveal--delay-2">
+              Vous êtes comédien·ne ?
+            </h2>
+            <p className="text-reveal text-reveal--delay-3">
+              ADK-Kasting est en permanence à la recherche de talents.
+              <br />
+              En vous inscrivant sur ce site, vous créez votre profil et le mettez à jour quand vous le souhaitez. Vous pouvez également ajouter des photos et extraits vidéos. ADK-Kasting.com étant régulièrement utilisé par des réalisateurs, vous augmentez ainsi vos chances de visibilité.
+            </p>
+            <Link href="/inscription">
+              <button className="hero-button button-reveal text-reveal--delay-4">
+                Inscrivez vous
+              </button>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Section Nos Dernières Collaborations */}
+      <section className="collaborations-section" style={{ backgroundColor: '#F0F0F0' }}>
+        <div className="collaborations-container">
+          <h2>Nos Dernières Collaborations</h2>
+          <div 
+            ref={filmsGridRef}
+            className="films-grid morphing-grid"
+          >
+            {loading ? (
+              <p>Chargement des films...</p>
+            ) : (
+              infiniteFilms.map((film, index) => (
+                <div 
+                  key={film.id} 
+                  ref={(el) => {
+                    if (el) posterRefs.current[index] = el
+                  }}
+                  className="film-poster morphing-poster"
+                  data-film-id={film.id}
+                >
+                  <div className="poster-inner">
+                    <img 
+                      src={film.image_url} 
+                      alt={film.title}
+                      onError={(e) => {
+                        e.currentTarget.src = '/images/films/placeholder.jpg'
+                      }}
+                    />
+                  </div>
+                  <div className="film-info">
+                    <h3>{film.title},{film.year}</h3>
+                    <p></p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Section présentation */}
+      <section className="section">
+        <div className="container">
+          <div className="text-center" style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <h2 className="text-title" style={{ marginBottom: '1.5rem' }}>
+              La référence du casting professionnel
+            </h2>
+            <p className="text-body" style={{ marginBottom: '2rem', color: '#666' }}>
+              ADKcasting réunit plus de 9000 comédiens professionnels pour tous vos projets.
+              Trouvez rapidement l'acteur idéal grâce à nos filtres avancés et nos profils détaillés.
+            </p>
+            <Link href="/comediens">
+              <Button variant="primary" size="lg">
+                Découvrir les comédiens
+              </Button>
+            </Link>
+            <div style={{ marginTop: '1rem' }}>
+              <Link href="/inscription">
+                <Button variant="outline" size="lg">
+                  Devenir comédien
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section statistiques */}
+      <section className="section" style={{ backgroundColor: '#f5f5f5' }}>
+        <div className="container">
+          <div className="grid grid--3">
+            <div className="text-center">
+              <h3 className="text-big-title" style={{ marginBottom: '0.5rem', color: '#1a1a1a' }}>
+                9000+
+              </h3>
+              <p className="text-body" style={{ color: '#666' }}>
+                Comédiens professionnels
+              </p>
+            </div>
+            <div className="text-center">
+              <h3 className="text-big-title" style={{ marginBottom: '0.5rem', color: '#1a1a1a' }}>
+                50+
+              </h3>
+              <p className="text-body" style={{ color: '#666' }}>
+                Filtres de recherche
+              </p>
+            </div>
+            <div className="text-center">
+              <h3 className="text-big-title" style={{ marginBottom: '0.5rem', color: '#1a1a1a' }}>
+                24/7
+              </h3>
+              <p className="text-body" style={{ color: '#666' }}>
+                Plateforme disponible
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section fonctionnalités */}
+      <section className="section">
+        <div className="container">
+          <h2 className="text-center text-title" style={{ marginBottom: '3rem' }}>
+            Pourquoi choisir ADKcasting ?
+          </h2>
+
+          <div className="grid grid--3">
+            <div className="card">
+              <div className="card__body text-center">
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎭</div>
+                <h3 className="text-body" style={{ marginBottom: '1rem' }}>Profils détaillés</h3>
+                <p className="text-body">
+                  Photos, expérience, compétences, langues... 
+                  Toutes les informations nécessaires pour faire le bon choix.
+                </p>
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="card__body text-center">
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</div>
+                <h3 className="text-body" style={{ marginBottom: '1rem' }}>Recherche avancée</h3>
+                <p className="text-body">
+                  Filtrez par âge, genre, compétences, localisation et bien plus 
+                  pour trouver exactement ce que vous cherchez.
+                </p>
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="card__body text-center">
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📱</div>
+                <h3 className="text-body" style={{ marginBottom: '1rem' }}>Contact direct</h3>
+                <p className="text-body">
+                  Contactez directement les comédiens par email ou téléphone. 
+                  Téléchargez leurs fiches complètes en PDF.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Call to action final */}
+      <section className="section" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+        <div className="container text-center">
+          <h2 className="text-title" style={{ marginBottom: '1.5rem' }}>
+            Prêt à trouver votre prochain talent ?
+          </h2>
+          <p className="text-body" style={{ marginBottom: '2rem', opacity: 0.9 }}>
+            Explorez notre base de données de comédiens professionnels dès maintenant.
+          </p>
+          <Link href="/comediens">
+            <Button variant="secondary" size="lg">
+              Commencer la recherche
+            </Button>
+          </Link>
+        </div>
+      </section>
+    </Layout>
+  )
+}

@@ -1,0 +1,261 @@
+// Animations réutilisables pour le site
+
+// Animation Reveal Text - Apparition fluide du texte
+@keyframes revealText {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Classes de base pour les animations (inactives par défaut)
+.text-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  // Animation active quand la classe 'animate' est ajoutée
+  &.animate {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  // Délais échelonnés pour plusieurs éléments
+  &--delay-1.animate {
+    transition-delay: 0.1s;
+  }
+  
+  &--delay-2.animate {
+    transition-delay: 0.2s;
+  }
+  
+  &--delay-3.animate {
+    transition-delay: 0.3s;
+  }
+  
+  &--delay-4.animate {
+    transition-delay: 0.4s;
+  }
+  
+  &--delay-5.animate {
+    transition-delay: 0.5s;
+  }
+}
+
+// Version alternative avec effet de slide depuis la gauche
+.text-reveal--slide-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  &.animate {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// Version alternative avec effet de slide depuis la droite
+.text-reveal--slide-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  &.animate {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// Animation pour les boutons
+.button-reveal {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  &.animate {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition-delay: 0.4s;
+  }
+}
+
+// Animation cascade pour les affiches de films
+.film-poster {
+  opacity: 0;
+  transform: translateY(40px) scale(0.9);
+  transition: opacity 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  &.animate {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  
+  // Délais en cascade pour effet de vague
+  &:nth-child(1).animate { transition-delay: 0.1s; }
+  &:nth-child(2).animate { transition-delay: 0.15s; }
+  &:nth-child(3).animate { transition-delay: 0.2s; }
+  &:nth-child(4).animate { transition-delay: 0.25s; }
+  &:nth-child(5).animate { transition-delay: 0.3s; }
+  &:nth-child(6).animate { transition-delay: 0.35s; }
+  &:nth-child(7).animate { transition-delay: 0.4s; }
+  &:nth-child(8).animate { transition-delay: 0.45s; }
+  &:nth-child(9).animate { transition-delay: 0.5s; }
+  &:nth-child(10).animate { transition-delay: 0.55s; }
+  &:nth-child(11).animate { transition-delay: 0.6s; }
+  &:nth-child(12).animate { transition-delay: 0.65s; }
+}
+
+// Animation cascade pour les boutons CTA du footer
+.footer-cta-cascade {
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+  transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  &.animate {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  
+  // Délais pour cascade des 3 boutons
+  &:nth-child(1).animate { transition-delay: 0.1s; }
+  &:nth-child(2).animate { transition-delay: 0.2s; }
+  &:nth-child(3).animate { transition-delay: 0.3s; }
+}
+
+// Animation pour le titre ADK-CASTING du hero
+.hero-brand-cascade {
+  opacity: 0;
+  transform: translateY(50px) scale(0.9);
+  transition: opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  &.animate {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  
+  // Délai pour arriver après les autres éléments
+  &.animate { transition-delay: 2.6s; }
+}
+
+// Animation d'apparition générale pour la section hero
+.hero-appear {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  &.animate {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  // Délais échelonnés pour les différentes parties du hero
+  &--delay-1.animate { transition-delay: 0.1s; }
+  &--delay-2.animate { transition-delay: 0.2s; }
+  &--delay-3.animate { transition-delay: 0.3s; }
+  &--delay-4.animate { transition-delay: 0.4s; }
+  &--delay-5.animate { transition-delay: 0.5s; }
+}
+
+// Animations pour le FilmCarousel existant
+.brand-cascade-animate {
+  // Le container est toujours visible
+  opacity: 1;
+  
+  // Animation cascade pour chaque lettre
+  .letter-cascade {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(-30px);
+    transition: opacity 0.4s ease, 
+                transform 0.4s ease;
+    
+    &.animate {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    // Délais en cascade pour chaque lettre (0.05s entre chaque)
+    &[data-delay="0"].animate { transition-delay: 0.5s; }
+    &[data-delay="1"].animate { transition-delay: 0.5s; }
+    &[data-delay="2"].animate { transition-delay: 0.60s; }
+    &[data-delay="3"].animate { transition-delay: 0.65s; }
+    &[data-delay="4"].animate { transition-delay: 0.70s; }
+    &[data-delay="5"].animate { transition-delay: 0.75s; }
+    &[data-delay="6"].animate { transition-delay: 0.80s; }
+    &[data-delay="7"].animate { transition-delay: 0.85s; }
+    &[data-delay="8"].animate { transition-delay: 0.90s; }
+    &[data-delay="9"].animate { transition-delay: 0.95s; }
+    &[data-delay="10"].animate { transition-delay: 1.00s; }
+  }
+}
+
+.film-image-animate {
+  opacity: 0;
+  transform: scale(1.1);
+  transition: opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  &.animate {
+    opacity: 1;
+    transform: scale(1);
+    transition-delay: 0.2s;
+  }
+}
+
+.film-hero-animate {
+  opacity: 0;
+  
+  &.animate {
+    opacity: 1;
+    transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+// Animation cascade pour les indicateurs du carousel - apparition initiale
+.carousel__indicator {
+  &.indicator-animate {
+    opacity: 0;
+    transform: scale(0.5) translateY(10px);
+    transition: opacity 0.4s ease, 
+                transform 0.4s ease;
+    
+    &.show {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    
+    // Délais en cascade pour chaque indicateur (0.05s entre chaque)
+    &:nth-child(1).show { transition-delay: 1.5s; }
+    &:nth-child(2).show { transition-delay: 1.55s; }
+    &:nth-child(3).show { transition-delay: 1.6s; }
+    &:nth-child(4).show { transition-delay: 1.65s; }
+    &:nth-child(5).show { transition-delay: 1.7s; }
+    &:nth-child(6).show { transition-delay: 1.75s; }
+    &:nth-child(7).show { transition-delay: 1.8s; }
+    &:nth-child(8).show { transition-delay: 1.85s; }
+    &:nth-child(9).show { transition-delay: 1.9s; }
+    &:nth-child(10).show { transition-delay: 1.95s; }
+    &:nth-child(11).show { transition-delay: 2.0s; }
+    &:nth-child(12).show { transition-delay: 2.05s; }
+  }
+  
+  // Responsive pour les indicateurs du carousel
+  @media (max-width: 768px) {
+    width: 40px;
+  }
+  
+  @media (max-width: 480px) {
+    width: 30px;
+  }
+}

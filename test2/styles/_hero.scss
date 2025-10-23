@@ -1,0 +1,134 @@
+// Section principale du site - 100vh divisée en 2 parties de 50%
+
+.main-hero-area {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 16px; // Padding global de 16px
+  position: relative; // Pour permettre le positionnement du titre
+  
+  .hero-part {
+    height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    padding: 0 var(--padding-horizontal);
+    
+    // Styles communs pour le contenu
+    .hero-content {
+      max-width: 800px;
+      width: 100%;
+      text-align: left;
+      
+      h2 {
+        font-family: Inter, sans-serif;
+        font-size: 36px;
+        font-weight: 400;
+        color: #393939;
+        margin-bottom: 1.5rem;
+        line-height: 48px;
+        letter-spacing: 0%;
+      }
+      
+      p {
+        font-size: clamp(1rem, 2vw, 18px);
+        color: #666;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        max-width: 600px;
+      }
+      
+      .hero-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 162px;
+        height: 52px;
+        border-radius: 8px;
+        padding: 12px 14px;
+        border: 1px solid #D8D8D8;
+        background: transparent;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        
+        &:hover {
+          background: #f5f5f5;
+          border-color: #bbb;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+      }
+    }
+    
+    // Variantes spécifiques
+    &--search {
+      background: transparent;
+    }
+    
+    // &--register {
+    //   background: rgba(255, 255, 255, 0.3);
+    // }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .main-hero-area {
+    .hero-part {
+      height: 50vh;
+      padding: 0 20px;
+      
+      .hero-content {
+        text-align: center;
+        
+        h2 {
+          font-family: Inter, sans-serif;
+          font-size: clamp(24px, 6vw, 36px);
+          font-weight: 400;
+          color: #393939;
+          line-height: clamp(32px, 8vw, 48px);
+          letter-spacing: 0%;
+          margin-bottom: 1rem;
+        }
+        
+        p {
+          font-size: 1rem;
+          margin-bottom: 1.5rem;
+          br {
+            display: none; // Masquer les breaks sur mobile
+          }
+        }
+        
+        .hero-button {
+          width: 140px;
+          height: 44px;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .main-hero-area {
+    .hero-part {
+      height: 50vh;
+      padding: 0 16px;
+      
+      .hero-content {
+        h2 {
+          font-size: 1.75rem;
+        }
+        
+        p {
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+}

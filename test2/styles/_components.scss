@@ -1,0 +1,443 @@
+// styles/_components.scss
+
+// Boutons
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-md $spacing-lg;
+  font-size: $font-size-base;
+  font-weight: 500;
+  border-radius: $border-radius-md;
+  transition: $transition-base;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  // Variantes
+  &--primary {
+    background-color: $primary-black;
+    color: $primary-white;
+
+    &:hover:not(:disabled) {
+      background-color: $dark-gray;
+    }
+  }
+
+  &--secondary {
+    background-color: $primary-gray;
+    color: $primary-white;
+
+    &:hover:not(:disabled) {
+      background-color: darken($primary-gray, 10%);
+    }
+  }
+
+  &--outline {
+    background-color: transparent;
+    color: $primary-black;
+    border: 1px solid $border-gray;
+
+    &:hover:not(:disabled) {
+      background-color: $light-gray;
+    }
+  }
+
+  // Bouton Header - Selon spécifications Figma
+  &--header {
+    background-color: #393939;
+    color: $primary-white;
+    width: 166px;
+    height: 52px;
+    border-radius: 8px;
+    padding: 12px 14px 14px 14px;
+    gap: 10px;
+    font-size: $font-size-base;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover:not(:disabled) {
+      background-color: darken(#393939, 10%);
+    }
+
+    // Icon dans le bouton
+    .btn-icon {
+      font-size: 16px;
+    }
+  }
+
+  // Tailles
+  &--sm {
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-sm;
+  }
+
+  &--lg {
+    padding: $spacing-lg $spacing-xl;
+    font-size: $font-size-lg;
+  }
+}
+
+// Comedien Card
+.comedien-card {
+  position: relative;
+  width: 260px;
+  min-width: 260px;
+  max-width: 260px;
+  height: 369px;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: $primary-white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: $transition-base;
+  cursor: pointer;
+  display: block;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    
+    .comedien-card__info {
+      height: 161px;
+      top: 208px;
+    }
+  }
+
+  &__header {
+    position: relative;
+    overflow: hidden;
+    height: 295px; // Plus grande hauteur
+  }
+
+  &__image {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: none;
+    }
+  }
+
+  &__placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: $font-size-sm;
+  }
+
+  &__controls {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+  }
+
+  &__pdf-badge {
+    background:rgba(183, 183, 183, 0.8);;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    transition: $transition-base;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    &:hover:not(:disabled) {
+      background: rgba(220, 53, 69, 1);
+      transform: scale(1.05);
+    }
+  }
+
+  &__rating {
+    background: rgb(183 183 183 / 80%);
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    height: 36px;
+    opacity: 0.8;
+  }
+
+  &__info {
+    position: absolute;
+    top: 295px;
+    left: 0;
+    right: 0;
+    width: 260px;
+    height: 75px;
+    background: rgba(255, 255, 255, 1);
+    color: #333;
+    padding: 10px;
+    transition: all 0.3s ease-in-out;
+    backdrop-filter: blur(10px);
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    opacity: 1;
+    overflow: hidden;
+  }
+
+  &__name {
+    margin: 0 0 0.2rem 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.2;
+  }
+
+  &__age {
+    font-size: 16px;
+    color: #666;
+    margin: 0 0 0.2rem 0;
+  }
+
+  &__detail {
+    margin: 0.3rem 0;
+    font-size: 16px;
+    line-height: 1.4;
+
+    strong {
+      color: #222;
+      font-weight: 500;
+    }
+  }
+
+  &__email,
+  &__phone {
+    text-decoration: none;
+    font-size: 16px;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__footer {
+    padding: 0.75rem 0 0 0;
+  }
+}
+
+// Cards (général)
+.card {
+  background-color: $primary-white;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-md;
+  overflow: hidden;
+  transition: $transition-base;
+
+  &:hover {
+    box-shadow: $shadow-lg;
+    transform: translateY(-2px);
+  }
+
+  &__header {
+    padding: $spacing-lg;
+    border-bottom: 1px solid $border-gray;
+  }
+
+  &__body {
+    padding: $spacing-lg;
+  }
+
+  &__footer {
+    padding: $spacing-lg;
+    border-top: 1px solid $border-gray;
+    background-color: $light-gray;
+  }
+}
+
+// Inputs
+.form-group {
+  margin-bottom: $spacing-lg;
+
+  label {
+    display: block;
+    margin-bottom: $spacing-sm;
+    font-weight: 500;
+    color: $dark-gray;
+  }
+
+  .input {
+    width: 100%;
+    padding: $spacing-md;
+    border: 1px solid $border-gray;
+    border-radius: $border-radius-md;
+    font-size: $font-size-base;
+    transition: $transition-base;
+
+    &:focus {
+      outline: none;
+      border-color: $accent-blue;
+      box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
+    }
+
+    &--error {
+      border-color: $accent-red;
+
+      &:focus {
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+      }
+    }
+  }
+
+  .error-message {
+    color: $accent-red;
+    font-size: $font-size-sm;
+    margin-top: $spacing-sm;
+  }
+}
+
+// Modals
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+
+  &__content {
+    background-color: $primary-white;
+    border-radius: $border-radius-lg;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: $shadow-xl;
+  }
+
+  &__header {
+    padding: $spacing-lg;
+    border-bottom: 1px solid $border-gray;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h2 {
+      margin: 0;
+    }
+  }
+
+  &__body {
+    padding: $spacing-lg;
+  }
+
+  &__footer {
+    padding: $spacing-lg;
+    border-top: 1px solid $border-gray;
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-md;
+  }
+}
+
+// Étoiles (ratings)
+.stars {
+  display: flex;
+  gap: $spacing-xs;
+
+  &__star {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    transition: $transition-fast;
+
+    &--filled {
+      color: white;
+    }
+
+    &--empty {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+}
+
+// Loading
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid $border-gray;
+  border-radius: 50%;
+  border-top-color: $accent-blue;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Toast notifications
+.toast {
+  position: fixed;
+  top: $spacing-lg;
+  right: $spacing-lg;
+  padding: $spacing-md $spacing-lg;
+  border-radius: $border-radius-md;
+  color: $primary-white;
+  font-weight: 500;
+  z-index: 1001;
+  animation: slideInRight 0.3s ease;
+
+  &--success {
+    background-color: $accent-green;
+  }
+
+  &--error {
+    background-color: $accent-red;
+  }
+
+  &--info {
+    background-color: $accent-blue;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

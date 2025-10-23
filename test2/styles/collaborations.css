@@ -1,0 +1,172 @@
+.collaborations-section {
+  padding: 80px 16px !important;
+  background-color: #F0F0F0 !important;
+  width: 100vw;
+  height: auto;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  position: relative;
+}
+.collaborations-section .collaborations-container {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.collaborations-section .collaborations-container h2 {
+  font-size: 2.5rem;
+  text-align: left;
+  font-weight: 400;
+  margin-bottom: 60px;
+  color: #2C2C2C;
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 16px !important;
+  overflow-x: auto;
+  overflow-y: visible;
+  width: 100%;
+  min-height: 600px;
+  cursor: grab;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid::-webkit-scrollbar {
+  display: none;
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid.dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid.dragging .film-poster.morphing-poster {
+  pointer-events: none;
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster {
+  position: relative;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  height: 500px;
+  width: 261px;
+  opacity: 1;
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster .poster-inner {
+  width: 261px;
+  height: 386px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: 50% 0%;
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster .poster-inner img {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: 50% 100%;
+  opacity: 1;
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster .film-info {
+  padding: 16px 0px;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: flex;
+  align-items: center;
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster .film-info h3 {
+  font-size: 1.1rem;
+  font-weight: 400;
+  margin-bottom: 4px;
+  color: #2C2C2C;
+  line-height: 1.3;
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster .film-info p {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 400;
+  margin: 0;
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover {
+  z-index: 100;
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover .poster-inner {
+  transform: scale(1.25);
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover .poster-inner img {
+  transform: scale(1.03);
+  filter: brightness(1.15) contrast(1.08) saturate(1.1);
+  transform-origin: 50% 100% !important;
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover .film-info {
+  transform: translateY(90px) translateX(-32px);
+  opacity: 0.9;
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover + .film-poster.morphing-poster {
+  transform: translateX(20px);
+  filter: blur(0.7px);
+  opacity: 0.95;
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover + .film-poster.morphing-poster + .film-poster.morphing-poster {
+  transform: translateX(10px);
+  filter: blur(0.5px);
+  opacity: 0.95;
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:has(+ .film-poster.morphing-poster:hover) {
+  transform: translateX(-20px);
+  filter: blur(0.75px);
+  opacity: 0.9;
+}
+.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:has(+ .film-poster.morphing-poster + .film-poster.morphing-poster:hover) {
+  transform: translateX(-10px);
+  filter: blur(0.75px);
+  opacity: 0.95;
+}
+@media (max-width: 768px) {
+  .collaborations-section .collaborations-section {
+    padding: 60px 0;
+  }
+  .collaborations-section .collaborations-container h2 {
+    font-size: 2rem;
+    margin-bottom: 40px;
+  }
+  .collaborations-section .collaborations-container .films-grid.morphing-grid {
+    overflow-x: auto;
+    gap: 12px;
+    padding: 20px;
+  }
+  .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster {
+    width: 180px;
+  }
+  .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster .poster-inner {
+    width: 180px;
+    height: 266px;
+  }
+  .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster .film-info {
+    padding: 8px 0;
+  }
+  .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster .film-info h3 {
+    font-size: 0.9rem;
+  }
+  .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster .film-info p {
+    font-size: 0.8rem;
+  }
+  .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover {
+    transform: translateY(-8px);
+  }
+  .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover .poster-inner {
+    transform: scale(1.25);
+  }
+}
+
+.morphing-poster {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}/*# sourceMappingURL=collaborations.css.map */

@@ -1,0 +1,22 @@
+ADKcasting v1.0.0
+Créé le: Tue Aug 19 11:38:55 UTC 2025
+Fichiers: 42
+Taille totale: 129.4 KB
+
+Contenu:
+- Application Next.js complète avec TypeScript
+- 9000+ comédiens en base de données
+- Système d'auth avec rôles (public/comédien/admin)
+- Filtres avancés et recherche
+- Export PDF pour les admins
+- Interface responsive avec SCSS
+- Base de données sécurisée avec RLS
+- Documentation complète
+
+Technologies:
+- Next.js 14
+- Supabase (PostgreSQL + Auth)
+- TypeScript
+- SCSS
+- jsPDF
+- Hébergement: Vercel

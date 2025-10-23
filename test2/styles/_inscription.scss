@@ -1,0 +1,659 @@
+// Styles pour la page d'inscription - Aligné avec le design des autres pages
+.inscription {
+  min-height: 100vh;
+  background-color: #ffffff;
+  padding: 16px;
+
+  &__container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  &__info-section {
+    background: transparent;
+    border-radius: 0;
+    padding: 40px var(--padding-horizontal);
+    margin-bottom: 0;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    box-shadow: none;
+    border-bottom: none;
+
+    .hero-content {
+      max-width: 800px;
+      width: 100%;
+      text-align: left;
+
+      h2 {
+        font-family: Inter, sans-serif;
+        font-size: 36px;
+        font-weight: 400;
+        color: #393939;
+        margin-bottom: 1.5rem;
+        line-height: 48px;
+        letter-spacing: 0%;
+      }
+
+      p {
+        font-size: clamp(1rem, 2vw, 18px);
+        color: #666;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        max-width: 627px;
+      }
+
+      .download-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: transparent;
+        color: #333;
+        padding: 0;
+        border-radius: 0;
+        text-decoration: underline;
+        font-weight: 400;
+        border: none;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        font-size: 16px;
+
+        &:hover {
+          background: transparent;
+          border-color: transparent;
+          transform: none;
+          box-shadow: none;
+          color: #000;
+        }
+
+        .download-icon {
+          width: 16px;
+          height: 16px;
+          fill: currentColor;
+        }
+      }
+    }
+  }
+
+  &__subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 18px;
+    font-weight: 300;
+    padding: 0 var(--padding-horizontal);
+  }
+
+  .text-title {
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    padding: 40px var(--padding-horizontal) 0;
+    
+    h1 {
+      max-width: 800px;
+      width: 100%;
+      text-align: left;
+      margin: 0;
+      color: #393939;
+      font-family: Inter, sans-serif;
+      font-size: 36px;
+      font-weight: 400;
+      line-height: 48px;
+      letter-spacing: 0%;
+    }
+  }
+
+  .alert {
+    padding: 1rem 1.5rem;
+    border-radius: 0;
+    margin: 0 var(--padding-horizontal) 2rem;
+    border: 1px solid;
+    border-left: 3px solid;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: right;
+
+    &-content {
+      max-width: 800px;
+      width: 100%;
+    }
+
+    &.alert--error {
+      background-color: #fef2f2;
+      border-color: #ef4444;
+      color: #991b1b;
+    }
+
+    &.alert--success {
+      background-color: #f0fdf4;
+      border-color: #22c55e;
+      color: #15803d;
+    }
+  }
+}
+
+.inscription-success {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+
+  .success-card {
+    background: white;
+    padding: 3rem;
+    border-radius: 0;
+    box-shadow: none;
+    border: 1px solid #e5e5e5;
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+
+    .text-title {
+      color: #22c55e;
+      margin-bottom: 1.5rem;
+      font-weight: 400;
+    }
+
+    .text-body {
+      margin-bottom: 1rem;
+      line-height: 1.7;
+      color: #666;
+      font-weight: 300;
+
+      &:last-child {
+        margin-bottom: 0;
+        font-style: italic;
+        color: #888;
+      }
+    }
+  }
+}
+
+// Styles pour le formulaire d'inscription - Aligné à droite comme les autres pages
+.inscription-form-complete {
+  background: transparent;
+  padding: 40px var(--padding-horizontal);
+  border-radius: 0;
+  box-shadow: none;
+  margin-bottom: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: right;
+
+  .form-wrapper {
+    max-width: 800px;
+    width: 100%;
+  }
+
+  .form-section {
+    margin-bottom: 3.5rem;
+    padding-bottom: 3rem;
+
+    &:last-of-type {
+      border-bottom: none;
+      margin-bottom: 2rem;
+    }
+
+    h3 {
+      color: #393939;
+      font-family: Inter, sans-serif;
+      font-size: 28px;
+      font-weight: 400;
+      margin-bottom: 2rem;
+      padding-bottom: 0;
+      border-bottom: none;
+      display: block;
+      line-height: 38px;
+      letter-spacing: 0%;
+    }
+
+    h4 {
+      color: #666;
+      font-size: 0.9rem;
+      font-weight: 400;
+      margin: 2rem 0 1.5rem 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+
+    @media (max-width: 600px) {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .form-field {
+    margin-bottom: 1.5rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-weight: 400;
+      color: #666;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+
+      // Cacher visuellement les labels de champs avec htmlFor (pas les checkboxes ni les titres de section)
+      &[for]:not(.checkbox-label) {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+      }
+
+      &:not(.checkbox-label):not([for]) {
+        // Labels de section (sans htmlFor) restent visibles
+        cursor: default;
+      }
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.75rem 0.5rem;
+      border: none;
+      border-bottom: 1px solid #e5e5e5;
+      border-radius: 0;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      background: transparent;
+      box-sizing: border-box;
+      font-weight: 300;
+
+      &:focus {
+        outline: none;
+        border-bottom-color: #1a1a1a;
+        box-shadow: none;
+      }
+
+      &.error {
+        border-bottom-color: #ef4444;
+        box-shadow: none;
+      }
+
+      &:invalid {
+        border-bottom-color: #ef4444;
+      }
+
+      &::placeholder {
+        color: #bbb;
+        font-weight: 300;
+      }
+    }
+
+    select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.5rem center;
+      background-size: 1rem;
+      padding-right: 2rem;
+      appearance: none;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+      font-family: inherit;
+      border: 1px solid #e5e5e5;
+      padding: 0.75rem;
+      border-radius: 0;
+
+      &:focus {
+        border-color: #1a1a1a;
+      }
+    }
+
+    .field-error {
+      display: block;
+      color: #ef4444;
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+      font-weight: 400;
+    }
+  }
+
+  .checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.5rem;
+    margin-top: 1rem;
+
+    @media (max-width: 600px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .checkbox-label {
+    display: flex !important;
+    align-items: center;
+    font-weight: 300 !important;
+    cursor: pointer;
+    padding: 0.5rem 0;
+    border-radius: 0;
+    transition: background-color 0.2s ease;
+    margin-bottom: 0 !important;
+    font-size: 0.9rem;
+
+    &:hover {
+      background-color: transparent;
+    }
+
+    input[type="checkbox"] {
+      width: auto !important;
+      margin-right: 0.75rem;
+      transform: scale(1);
+      cursor: pointer;
+      border: 1px solid #e5e5e5;
+    }
+  }
+
+  .submit-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 162px;
+    height: 52px;
+    border-radius: 8px;
+    padding: 12px 14px;
+    border: 1px solid #D8D8D8;
+    background: transparent;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    margin-top: 2rem;
+
+    &:hover:not(:disabled) {
+      background: #f5f5f5;
+      border-color: #bbb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+  }
+
+  .file-upload {
+    position: relative;
+    display: block;
+    width: 100%;
+
+    &__input {
+      display: none;
+    }
+
+    &__button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 1.5rem;
+      border: 1px solid #e5e5e5;
+      border-radius: 0;
+      background: #fafafa;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+      font-weight: 300;
+
+      &:hover {
+        border-color: #1a1a1a;
+        background: #f5f5f5;
+        color: #1a1a1a;
+      }
+
+      &.has-file {
+        border-color: #22c55e;
+        background: #f0fdf4;
+        color: #15803d;
+        border-style: solid;
+      }
+
+      .upload-icon {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+      }
+    }
+
+    &__info {
+      font-size: 0.8rem;
+      color: #999;
+      margin-top: 0.5rem;
+      text-align: center;
+      font-weight: 300;
+    }
+
+    &__file-name {
+      font-size: 0.85rem;
+      color: #333;
+      margin-top: 0.5rem;
+      font-weight: 400;
+      text-align: center;
+    }
+  }
+
+  .form-field:has(input[required]) label::after,
+  .form-field:has(select[required]) label::after,
+  .form-field:has(textarea[required]) label::after {
+    content: " *";
+    color: #ef4444;
+    font-weight: 400;
+  }
+
+  @media (max-width: 600px) {
+    padding: 0;
+    margin: 0;
+
+    .form-section h3 {
+      font-size: 1rem;
+    }
+
+    .checkbox-group {
+      gap: 0.5rem;
+    }
+  }
+}
+
+.form-progress {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+
+  .progress-step {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e5e5e5;
+    margin: 0 0.5rem;
+    transition: background-color 0.3s ease;
+
+    &.active {
+      background: #1a1a1a;
+    }
+
+    &.completed {
+      background: #22c55e;
+    }
+  }
+}
+
+.photos-upload-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+
+  .photo-upload-slot {
+    border: 1px solid #e5e5e5;
+    border-radius: 0;
+    padding: 0;
+    transition: border-color 0.2s ease;
+
+    &:hover {
+      border-color: #1a1a1a;
+    }
+
+    &:first-child {
+      border-color: #1a1a1a;
+      background: transparent;
+    }
+  }
+}
+
+.section-description {
+  font-size: 0.85rem;
+  color: #999;
+  margin-bottom: 1.5rem;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+// Alerte autorisation parentale
+.parental-auth-alert {
+  background: #fff8e1;
+  border: 1px solid #ffd54f;
+  border-left: 4px solid #ffa000;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+
+  .alert-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .alert-content {
+    flex: 1;
+
+    .alert-title {
+      margin: 0 0 0.5rem 0;
+      color: #f57c00;
+      font-size: 0.95rem;
+
+      strong {
+        font-weight: 500;
+      }
+    }
+
+    .alert-description {
+      margin: 0 0 1rem 0;
+      color: #e65100;
+      font-size: 0.9rem;
+      line-height: 1.5;
+
+      strong {
+        font-weight: 500;
+      }
+    }
+
+    .alert-instructions {
+      margin: 1rem 0 0 0;
+      font-size: 0.85rem;
+      color: #666;
+      line-height: 1.5;
+      font-style: italic;
+    }
+  }
+
+  .download-template-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: #393939;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 400;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #555;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .inscription {
+    &__info-section {
+      padding: 20px;
+      justify-content: center;
+      
+      .hero-content {
+        h2 {
+          font-size: clamp(24px, 6vw, 36px);
+          line-height: clamp(32px, 8vw, 48px);
+        }
+        
+        p {
+          font-size: 1rem;
+        }
+      }
+    }
+    
+    .text-title {
+      padding: 20px;
+      justify-content: center;
+      
+      h1 {
+        font-size: clamp(24px, 6vw, 36px);
+        line-height: clamp(32px, 8vw, 48px);
+        text-align: center;
+      }
+    }
+  }
+  
+  .inscription-form-complete {
+    padding: 20px;
+    justify-content: center;
+    
+    .form-section h3 {
+      font-size: 24px;
+      line-height: 32px;
+    }
+  }
+}
