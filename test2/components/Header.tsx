@@ -1,5 +1,5 @@
 // components/Header.tsx
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useAuth } from '@/components/AuthProvider'
@@ -10,6 +10,7 @@ export const Header: React.FC = () => {
   const router = useRouter()
   const { user, signOut } = useAuth()
   const isHomePage = router.pathname === '/'
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navigation = [
     { name: 'Accueil', href: '/' },
@@ -17,6 +18,23 @@ export const Header: React.FC = () => {
     { name: 'À propos', href: '/about' },
     { name: 'FAQ', href: '/faq' }
   ]
+
+  // Fermer le menu mobile lors du changement de route
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [router.pathname])
+
+  // Bloquer le scroll du body quand le menu est ouvert
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [mobileMenuOpen])
 
   const handleSignOut = async () => {
     try {
@@ -54,6 +72,7 @@ export const Header: React.FC = () => {
     <header className="header">
       <div className="container">
         <div className="header__container">
+          {/* Navigation desktop */}
           <nav className="header__nav">
             {navigation.map((item) => (
               <Link
@@ -68,6 +87,7 @@ export const Header: React.FC = () => {
             ))}
           </nav>
 
+          {/* Boutons utilisateur desktop */}
           <div className="header__user">
             {user ? (
               <>
@@ -100,8 +120,71 @@ export const Header: React.FC = () => {
               </>
             )}
           </div>
+
+          {/* Bouton hamburger mobile */}
+          <button
+            className={`header__hamburger ${mobileMenuOpen ? 'header__hamburger--open' : ''}`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
         </div>
       </div>
+
+      {/* Menu mobile overlay */}
+      {mobileMenuOpen && (
+        <div className="header__mobile-menu">
+          <nav className="header__mobile-nav">
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`header__mobile-link ${
+                  router.pathname === item.href ? 'header__mobile-link--active' : ''
+                }`}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="header__mobile-actions">
+            {user ? (
+              <>
+                {user.role === 'admin' && (
+                  <Link href="/dashboard">
+                    <Button variant="primary" icon={<DashboardIcon />} fullWidth>
+                      Dashboard
+                    </Button>
+                  </Link>
+                )}
+                <Button variant="primary" icon={<PersonIcon />} onClick={handleProfileClick} fullWidth>
+                  Mon Profil
+                </Button>
+                <Button variant="outline" onClick={handleSignOut} fullWidth>
+                  Déconnexion
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/inscription">
+                  <Button variant="primary" fullWidth>
+                    S'inscrire
+                  </Button>
+                </Link>
+                <Link href="/connexion">
+                  <Button variant="outline" icon={<PersonIcon />} fullWidth>
+                    Se connecter
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   )
 }

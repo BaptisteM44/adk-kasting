@@ -1,8 +1,8 @@
 // pages/index.tsx
 import React, { useState, useEffect, useRef } from 'react'
-import Head from 'next/head'
 import Link from 'next/link'
 import { Layout } from '@/components/Layout'
+import { SEOHead } from '@/components/SEOHead'
 import { FilmCarousel } from '@/components/FilmCarousel'
 import { CollaborationsSection } from '@/components/CollaborationsSection'
 import { Button } from '@/components/ui/Button'
@@ -14,14 +14,24 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const loadFilms = () => {
+    const loadFilms = async () => {
       try {
-        // Charger les films depuis le fichier JSON local pour le carousel
-        const activeFilms = filmsData.filter(film => film.is_active)
-        setFilms(activeFilms as Film[])
+        // Charger les films depuis l'API Supabase (show_in_hero = true)
+        const response = await fetch('/api/films?show_in_hero=true')
+        const data = await response.json()
+
+        if (response.ok && data.films) {
+          setFilms(data.films as Film[])
+        } else {
+          // Fallback sur le fichier JSON si l'API échoue
+          const activeFilms = filmsData.filter(film => film.is_active)
+          setFilms(activeFilms as Film[])
+        }
       } catch (error) {
         console.error('Erreur lors du chargement des films:', error)
-        setFilms([])
+        // Fallback sur le fichier JSON si l'API échoue
+        const activeFilms = filmsData.filter(film => film.is_active)
+        setFilms(activeFilms as Film[])
       } finally {
         setLoading(false)
       }
@@ -112,13 +122,12 @@ export default function HomePage() {
 
   return (
     <Layout>
-      <Head>
-        <title>ADK-KASTING</title>
-        <meta 
-          name="description" 
-          content="" 
-        />
-      </Head>
+      <SEOHead
+        title="ADK-KASTING - Agence de casting professionnelle à Bruxelles"
+        description="Découvrez les talents d'ADK-KASTING, agence de casting professionnelle basée à Bruxelles. Trouvez les comédiens parfaits pour vos projets de cinéma, télévision, théâtre et publicité."
+        keywords="casting, comédiens, acteurs, actrices, cinéma, télévision, théâtre, publicité, Bruxelles, Belgique, ADK-KASTING"
+        url="/"
+      />
 
       {/* Hero avec carousel de films */}
       <FilmCarousel films={films} autoplay autoplayDelay={5000} />

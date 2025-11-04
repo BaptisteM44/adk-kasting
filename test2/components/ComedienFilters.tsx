@@ -51,8 +51,8 @@ export const ComedienFilters: React.FC<ComedienFiltersProps> = ({
     { value: '', label: 'Indifférent' },
     { value: 'Blond', label: 'Blond' },
     { value: 'Brun', label: 'Brun' },
-  { value: 'Chatain', label: 'Chatain clair' },        // ✅ Sans accent
-  { value: 'Chatain foncé', label: 'Chatain foncé' },  // ✅ Ajouté
+  { value: 'Chatain clair', label: 'Chatain clair' },       
+  { value: 'Chatain foncé', label: 'Chatain foncé' },  
     { value: 'Roux', label: 'Roux' },
     { value: 'Noir', label: 'Noir' },
     { value: 'Gris', label: 'Gris' },
@@ -64,15 +64,15 @@ export const ComedienFilters: React.FC<ComedienFiltersProps> = ({
     { value: '', label: 'Indifférent' },
     { value: 'Bleu', label: 'Bleu' },
     { value: 'Vert', label: 'Vert' },
-  { value: 'Brun', label: 'Brun' },              // ✅ Changé de Marron    { value: 'Noisette', label: 'Noisette' },
-     { value: 'Bleu-gris', label: 'Bleu-gris' }     // ✅ Changé de Gris
+  { value: 'Brun', label: 'Brun' },           
+     { value: 'Bleu-gris', label: 'Bleu-gris' }    
   ]
 
   const buildOptions = [
     { value: '', label: 'Indifférent' },
     { value: 'Mince', label: 'Mince' },
-    { value: 'Moyenne', label: 'Moyenne' },      // ✅ Changé
-    { value: 'Athlétique', label: 'Athlétique' }, // ✅ Changé
+    { value: 'Moyenne', label: 'Moyenne' }, 
+    { value: 'Athlétique', label: 'Athlétique' },
     { value: 'Forte', label: 'Forte' }
   ]
 
@@ -107,7 +107,7 @@ export const ComedienFilters: React.FC<ComedienFiltersProps> = ({
     { value: 'Belge', label: 'Belge' },
     { value: 'Suisse', label: 'Suisse' },
     { value: 'Canadienne', label: 'Canadienne' },
-    { value: 'Américaine', label: 'Américaine' },
+    { value: 'Americaine', label: 'Américaine' },
     { value: 'Britannique', label: 'Britannique' },
     { value: 'Allemande', label: 'Allemande' },
     { value: 'Italienne', label: 'Italienne' },
@@ -117,7 +117,7 @@ export const ComedienFilters: React.FC<ComedienFiltersProps> = ({
     { value: 'Autre', label: 'Autre' }
   ]
 
-    const wp_skills = [
+  const diverse_skills = [
     { value: '', label: 'Indifférent' },
     { value: 'Chant', label: 'Chant' },
     { value: 'Doublage', label: 'Doublage' },
@@ -148,8 +148,8 @@ export const ComedienFilters: React.FC<ComedienFiltersProps> = ({
 
   return (
     <div className="filters">
-      <div className="filters__header">
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+      <div className="filters__single-row">
+        <div className="filters__title-group">
           <h2>Filtres de recherche</h2>
           {resultCount !== undefined && (
             <span className="filters__live-count">
@@ -157,166 +157,156 @@ export const ComedienFilters: React.FC<ComedienFiltersProps> = ({
             </span>
           )}
         </div>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <button
-            className="filters__toggle"
-            onClick={() => setShowAdvanced(!showAdvanced)}
-          >
-            {showAdvanced ? '− Masquer' : '+ Plus de filtres'}
-          </button>
-        </div>
-      </div>
 
-      {/* Filtres de base - ordre spécifique */}
-      <div className="filters__main-row">
-        <div className="filters__left">
-          <Input
-            value={filters.name || ''}
-            onChange={(e) => handleFilterChange('name', e.target.value)}
-            placeholder="Nom, prénom..."
-          />
-          <Button variant="outline" onClick={onReset}>
-            Réinitialiser
-          </Button>
-        </div>
-        
-        <div className="filters__right">
-          <Select
-            label="Genre"
-            value={filters.gender || ''}
-            onChange={(e) => handleFilterChange('gender', e.target.value)}
-            options={genderOptions}
-          />
-          
-          <div className="filters__age-group">
-            <Input
-              label="Âge min"
-              type="number"
-              min="1"
-              max="99"
-              value={filters.age_min || ''}
-              onChange={(e) => handleFilterChange('age_min', e.target.value ? parseInt(e.target.value) : undefined)}
-              placeholder="18"
-            />
-            <Input
-              label="Âge max"
-              type="number"
-              min="1"
-              max="99"
-              value={filters.age_max || ''}
-              onChange={(e) => handleFilterChange('age_max', e.target.value ? parseInt(e.target.value) : undefined)}
-              placeholder="65"
-            />
-          </div>
+        <Input
+          value={filters.name || ''}
+          onChange={(e) => handleFilterChange('name', e.target.value)}
+          placeholder="Nom, prénom..."
+        />
 
-          <Select
-            label="Langue"
-            value={filters.languages_fluent || ''}
-            onChange={(e) => handleFilterChange('languages_fluent', e.target.value)}
-            options={languageOptions}
-          />
+        <Select
+          value={filters.gender || ''}
+          onChange={(e) => handleFilterChange('gender', e.target.value)}
+          options={genderOptions}
+          placeholder="Genre"
+        />
 
-          <Select
-            label="Type"
-            value={filters.ethnicity || ''}
-            onChange={(e) => handleFilterChange('ethnicity', e.target.value)}
-            options={ethnicityOptions}
-          />
-        </div>
+        <Input
+          className='input_age'
+          type="number"
+          min="1"
+          max="99"
+          value={filters.age_min || ''}
+          onChange={(e) => handleFilterChange('age_min', e.target.value ? parseInt(e.target.value) : undefined)}
+          placeholder="Âge min"
+        />
+        <Input
+          className='input_age'
+          type="number"
+          min="1"
+          max="99"
+          value={filters.age_max || ''}
+          onChange={(e) => handleFilterChange('age_max', e.target.value ? parseInt(e.target.value) : undefined)}
+          placeholder="Âge max"
+        />
+
+        <Select
+          value={filters.languages_fluent || ''}
+          onChange={(e) => handleFilterChange('languages_fluent', e.target.value)}
+          options={languageOptions}
+          placeholder="Langue maternelle"
+        />
+
+        <Select
+          value={filters.ethnicity || ''}
+          onChange={(e) => handleFilterChange('ethnicity', e.target.value)}
+          options={ethnicityOptions}
+          placeholder="Origine ethnique"
+        />
+
+        <Button variant="outline" onClick={onReset}>
+          Réinitialiser
+        </Button>
+
+        <button
+          className="filters__toggle-icon"
+          onClick={() => setShowAdvanced(!showAdvanced)}
+        >
+          {showAdvanced ? '×' : '+'}
+        </button>
       </div>
 
       {/* Filtres avancés */}
       {showAdvanced && (
         <div className="filters__grid" style={{ marginTop: '1.5rem' }}>
           <Select
-            label="Corpulence"
             value={filters.build || ''}
             onChange={(e) => handleFilterChange('build', e.target.value)}
             options={buildOptions}
+            placeholder="Morphologie"
           />
 
           <Select
-            label="Langue maternelle"
             value={filters.languages || ''}
             onChange={(e) => handleFilterChange('languages', e.target.value)}
             options={languageOptions}
+            placeholder="Autre langue"
           />
 
           <div style={{ display: 'flex', gap: '1rem' }}>
             <Input
-              label="Taille min (cm)"
+              className='input_taille'
               type="number"
               min="140"
               max="220"
               value={filters.height_min || ''}
               onChange={(e) => handleFilterChange('height_min', e.target.value ? parseInt(e.target.value) : undefined)}
-              placeholder="140"
+              placeholder="Taille min"
             />
             <Input
-              label="Taille max (cm)"
+              className='input_taille'
               type="number"
               min="140"
               max="220"
               value={filters.height_max || ''}
               onChange={(e) => handleFilterChange('height_max', e.target.value ? parseInt(e.target.value) : undefined)}
-              placeholder="220"
+              placeholder="Taille max"
             />
           </div>
 
           <Select
-            label="Couleur des cheveux"
             value={filters.hair_color || ''}
             onChange={(e) => handleFilterChange('hair_color', e.target.value)}
             options={hairColorOptions}
+            placeholder="Couleur de cheveux"
           />
 
           <Select
-            label="Couleur des yeux"
             value={filters.eye_color || ''}
             onChange={(e) => handleFilterChange('eye_color', e.target.value)}
             options={eyeColorOptions}
+            placeholder="Couleur des yeux"
           />
 
           <Input
-            label="Ville"
             value={filters.city || ''}
             onChange={(e) => handleFilterChange('city', e.target.value)}
-            placeholder="ex: Bruxelles, Paris"
+            placeholder="Ville"
           />
 
           <Select
-            label="Nationalité"
             value={filters.nationality || ''}
             onChange={(e) => handleFilterChange('nationality', e.target.value)}
             options={nationalityOptions}
+            placeholder="Nationalité"
           />
 
           <Select
-            label="Niveau d'expérience"
             value={filters.experience_level || ''}
             onChange={(e) => handleFilterChange('experience_level', e.target.value)}
             options={experienceLevelOptions}
+            placeholder="Niveau d'expérience"
           />
 
           <Select
-              label="Compétences (wp)"
             value={filters.wp_skills || ''}
             onChange={(e) => handleFilterChange('wp_skills', e.target.value)}
-            options={wp_skills}
+            options={diverse_skills}
+            placeholder="Compétences"
           />
 
           <Select
-            label="Permis de conduire"
             value={filters.driving_licenses || ''}
             onChange={(e) => handleFilterChange('driving_licenses', e.target.value)}
             options={drivingLicenseOptions}
+            placeholder="Permis de conduire"
           />
 
           <Select
-            label="Activités désirées"
             value={filters.desired_activities || ''}
             onChange={(e) => handleFilterChange('desired_activities', e.target.value)}
             options={desiredActivitiesOptions}
+            placeholder="Activités souhaitées"
           />
         </div>
       )}

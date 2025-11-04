@@ -76,7 +76,7 @@ export default function AboutPage() {
         {/* Section 3 - Google Maps */}
         <div className="map-section">
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2519.1234567890123!2d4.3517!3d50.8503!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c3c47fb7f4d2f1%3A0x1234567890abcdef!2sBrussels%2C%20Belgium!5e0!3m2!1sen!2sus!4v1234567890123!5m2!1sen!2sus"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5041.6006978547875!2d4.376618912648913!3d50.8163376608332!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c3c46405a8cde5%3A0x1ab7b983e081e3a7!2sADK-Kasting!5e0!3m2!1sfr!2sbe!4v1762183909561!5m2!1sfr!2sbe"
             width="100%"
             height="100%"
             style={{ border: 0 }}
@@ -85,6 +85,15 @@ export default function AboutPage() {
             referrerPolicy="no-referrer-when-downgrade"
             title="Localisation ADK-KASTING"
           />
+          {/* <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5041.6006978547875!2d4.376618912648913!3d50.8163376608332!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c3c46405a8cde5%3A0x1ab7b983e081e3a7!2sADK-Kasting!5e0!3m2!1sfr!2sbe!4v1762183909561!5m2!1sfr!2sbe" 
+          width="600" 
+          height="450" 
+          style="border:0;" 
+          allowfullscreen="" 
+          loading="lazy" 
+          referrerpolicy="no-referrer-when-downgrade">
+
+          </iframe> */}
         </div>
 
         {/* Section 4 - Les moyens de transport (sans bouton) */}

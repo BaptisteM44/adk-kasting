@@ -53,49 +53,74 @@ export function unserializePHP(serialized: string): any {
  */
 export function normalizeLanguages(data: any, field: string): string[] {
   const value = data[field]
-  
+
   console.log(`🔍 normalizeLanguages(${field}):`, { value, type: typeof value, isArray: Array.isArray(value) })
-  
+
   if (!value) return []
-  
-  // Si c'est déjà un tableau (PostgreSQL text[])
-  if (Array.isArray(value)) {
-    // Reconstituer la chaîne PHP sérialisée à partir des fragments
-    const serializedString = value.join('')
-    console.log('🔍 Reconstituted serialized string:', serializedString)
-    
-    // Si ça ressemble à une chaîne sérialisée PHP, la désérialiser
-    if (serializedString.includes(':{')) {
-      const unserialized = unserializePHP(serializedString)
-      console.log('🔍 After unserialization:', unserialized)
-      return unserialized.filter((v: any) => v && typeof v === 'string' && v.trim() !== '')
-    }
-    
-    // Sinon, filtrer directement les valeurs invalides
-    return value
-      .filter(v => v && typeof v === 'string')
-      .filter(v => !v.match(/^[AaSsIiBb]:\d+:/i)) // Exclure les fragments de sérialisation (a:, s:, i:, I:, b:)
-      .filter(v => !v.match(/^[IiBb]:\d+$/i)) // Exclure les index seuls comme "I:1", "I:2"
-      .filter(v => !v.match(/^[{}]$/)) // Exclure les accolades isolées
-      .filter(v => v.trim() !== '')
-  }
-  
-  // Si c'est une chaîne sérialisée PHP
-  if (typeof value === 'string' && value.includes(':{')) {
-    const unserialized = unserializePHP(value)
-    if (Array.isArray(unserialized)) {
-      return unserialized.filter(v => v && v.trim() !== '')
-    }
-    if (unserialized) {
-      return [unserialized]
-    }
-  }
-  
-  // Si c'est une chaîne simple
+
+  // Si c'est une string qui ressemble à un JSON array, parser d'abord
   if (typeof value === 'string') {
+    // Cas 1: JSON array comme '["Français", "Allemand"]'
+    if (value.startsWith('[') && value.endsWith(']')) {
+      try {
+        const parsed = JSON.parse(value)
+        if (Array.isArray(parsed)) {
+          console.log('🔍 Parsed JSON array:', parsed)
+          return parsed.filter(v => v && typeof v === 'string' && v.trim() !== '')
+        }
+      } catch (e) {
+        console.warn('🔍 Failed to parse JSON array:', e)
+      }
+    }
+
+    // Cas 2: Chaîne sérialisée PHP
+    if (value.includes(':{')) {
+      const unserialized = unserializePHP(value)
+      if (Array.isArray(unserialized)) {
+        return unserialized.filter(v => v && v.trim() !== '')
+      }
+      if (unserialized) {
+        return [unserialized]
+      }
+    }
+
+    // Cas 3: Chaîne simple avec virgules
     return value.split(',').map(v => v.trim()).filter(v => v !== '')
   }
-  
+
+  // Si c'est déjà un tableau (PostgreSQL text[])
+  if (Array.isArray(value)) {
+    // Détecter si c'est un array natif (nouvelles données) ou des fragments de sérialisation (anciennes données)
+    const firstElement = value[0]
+
+    // Si le premier élément contient des patterns de sérialisation PHP, c'est l'ancien format
+    if (firstElement && typeof firstElement === 'string' &&
+        (firstElement.match(/^[AaSsIiBb]:\d+:/i) || firstElement.includes(':{'))) {
+      // Anciennes données : reconstituer la chaîne PHP sérialisée à partir des fragments
+      const serializedString = value.join('')
+      console.log('🔍 Reconstituted serialized string:', serializedString)
+
+      // Si ça ressemble à une chaîne sérialisée PHP, la désérialiser
+      if (serializedString.includes(':{')) {
+        const unserialized = unserializePHP(serializedString)
+        console.log('🔍 After unserialization:', unserialized)
+        return unserialized.filter((v: any) => v && typeof v === 'string' && v.trim() !== '')
+      }
+
+      // Sinon, filtrer directement les valeurs invalides
+      return value
+        .filter(v => v && typeof v === 'string')
+        .filter(v => !v.match(/^[AaSsIiBb]:\d+:/i)) // Exclure les fragments de sérialisation (a:, s:, i:, I:, b:)
+        .filter(v => !v.match(/^[IiBb]:\d+$/i)) // Exclure les index seuls comme "I:1", "I:2"
+        .filter(v => !v.match(/^[{}]$/)) // Exclure les accolades isolées
+        .filter(v => v.trim() !== '')
+    }
+
+    // Nouvelles données : c'est un array natif PostgreSQL, retourner tel quel
+    console.log('🔍 Native PostgreSQL array detected, returning as-is')
+    return value.filter(v => v && typeof v === 'string' && v.trim() !== '')
+  }
+
   return []
 }
 
@@ -108,62 +133,28 @@ export function normalizeComedienData(comedien: any) {
   return {
     ...comedien,
     
-    // Normaliser les langues
-    native_language_normalized: normalizeLanguages(comedien, 'native_language')[0] || 
-                                 normalizeLanguages(comedien, 'actor_languages_native')[0] || 
+    // Normaliser les langues (3 niveaux WordPress)
+    // 1. Langue maternelle
+    native_language_normalized: normalizeLanguages(comedien, 'native_language')[0] ||
+                                 normalizeLanguages(comedien, 'actor_languages_native')[0] ||
                                  comedien.native_language,
-    
-    languages_fluent_normalized: normalizeLanguages(comedien, 'languages').length > 0
-      ? normalizeLanguages(comedien, 'languages')
-      : normalizeLanguages(comedien, 'languages_fluent'),
-    
-    languages_notions_normalized: normalizeLanguages(comedien, 'languages_notions').length > 0
-      ? normalizeLanguages(comedien, 'languages_notions')
-      : normalizeLanguages(comedien, 'actor_languages_notions'),
-    
+
+    // 2. Parlées couramment - lire depuis actor_languages_native (sans la langue maternelle)
+    languages_fluent_normalized: normalizeLanguages(comedien, 'actor_languages_native').filter(
+      lang => lang !== comedien.native_language
+    ),
+
+    // 3. Notions
+    languages_notions_normalized: normalizeLanguages(comedien, 'actor_languages_notions'),
+
     // Normaliser les compétences
-    driving_licenses_normalized: normalizeLanguages(comedien, 'driving_licenses').length > 0
-      ? normalizeLanguages(comedien, 'driving_licenses')
-      : normalizeLanguages(comedien, 'actor_driving_license'),
+    driving_licenses_normalized: normalizeLanguages(comedien, 'actor_driving_license'),
     
-    dance_skills_normalized: normalizeLanguages(comedien, 'dance_skills').length > 0
-      ? normalizeLanguages(comedien, 'dance_skills')
-      : normalizeLanguages(comedien, 'actor_dance_skills'),
-    
-    music_skills_normalized: normalizeLanguages(comedien, 'music_skills').length > 0
-      ? normalizeLanguages(comedien, 'music_skills')
-      : normalizeLanguages(comedien, 'actor_music_skills'),
-    
-    diverse_skills_normalized: normalizeLanguages(comedien, 'diverse_skills').length > 0
-      ? normalizeLanguages(comedien, 'diverse_skills')
-      : normalizeLanguages(comedien, 'wp_skills'),
-    
-    desired_activities_normalized: normalizeLanguages(comedien, 'desired_activities').length > 0
-      ? normalizeLanguages(comedien, 'desired_activities')
-      : normalizeLanguages(comedien, 'wp_activity_domain'),
-    
-    // Normaliser les photos - COMBINER photos[] ET actor_photo1-5
-    photos_normalized: (() => {
-      const newPhotos = comedien.photos && Array.isArray(comedien.photos) ? comedien.photos : []
-      const wpPhotos = [
-        comedien.actor_photo1,
-        comedien.actor_photo2,
-        comedien.actor_photo3,
-        comedien.actor_photo4,
-        comedien.actor_photo5
-      ].filter(p => p && p.trim() !== '')
-      
-      // Combiner et dédupliquer
-      const allPhotos = [...newPhotos, ...wpPhotos]
-      const uniquePhotos: string[] = []
-      allPhotos.forEach(photo => {
-        if (!uniquePhotos.includes(photo)) {
-          uniquePhotos.push(photo)
-        }
-      })
-      return uniquePhotos
-    })(),
-    
+    dance_skills_normalized: normalizeLanguages(comedien, 'actor_dance_skills'),
+    music_skills_normalized: normalizeLanguages(comedien, 'actor_music_skills'),
+    diverse_skills_normalized: normalizeLanguages(comedien, 'wp_skills'),
+    desired_activities_normalized: normalizeLanguages(comedien, 'wp_activity_domain'),
+
     // Normaliser le display name
     display_name_normalized: comedien.display_name && comedien.display_name !== comedien.email
       ? comedien.display_name

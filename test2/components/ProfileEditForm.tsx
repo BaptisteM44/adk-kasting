@@ -386,7 +386,7 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
             >
               <option value="">Sélectionner</option>
               <option value="Blond">Blond</option>
-              <option value="Chatain">Chatain clair</option>
+              <option value="Chatain clair">Chatain clair</option>
               <option value="Chatain foncé">Chatain foncé</option>
               <option value="Brun">Brun</option>
               <option value="Roux">Roux</option>
@@ -527,7 +527,7 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
         <div className="form-field">
           <label>Autres compétences</label>
           <div className="checkbox-group">
-            {['Doublage', 'Chant', 'Acrobatie', 'Arts martial', 'Equitation', 'Sport de combat'].map(skill => (
+            {['Doublage', 'Chant', 'Acrobatie', 'Art martial', 'Equitation', 'Sport de combat'].map(skill => (
               <label key={skill} className="checkbox-label">
                 <input
                   type="checkbox"
@@ -621,23 +621,23 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
 
         <div className="form-row">
           <div className="form-field">
-            <label htmlFor="video_1_url">Vidéo 1</label>
+            <label htmlFor="actor_video1">Vidéo 1</label>
             <input
               type="url"
-              id="video_1_url"
-              value={formData.video_1_url || ''}
-              onChange={(e) => handleChange('video_1_url', e.target.value)}
+              id="actor_video1"
+              value={formData.actor_video1 || ''}
+              onChange={(e) => handleChange('actor_video1', e.target.value)}
               placeholder="https://youtube.com/watch?v=..."
             />
           </div>
-          
+
           <div className="form-field">
-            <label htmlFor="video_2_url">Vidéo 2</label>
+            <label htmlFor="actor_video2">Vidéo 2</label>
             <input
               type="url"
-              id="video_2_url"
-              value={formData.video_2_url || ''}
-              onChange={(e) => handleChange('video_2_url', e.target.value)}
+              id="actor_video2"
+              value={formData.actor_video2 || ''}
+              onChange={(e) => handleChange('actor_video2', e.target.value)}
               placeholder="https://vimeo.com/..."
             />
           </div>
@@ -665,22 +665,22 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
         </div>
 
         <div className="form-field">
-          <label htmlFor="professional_experience">Expérience professionnelle</label>
+          <label htmlFor="experience">Expérience professionnelle</label>
           <textarea
-            id="professional_experience"
-            value={formData.professional_experience || formData.experience || ''}
-            onChange={(e) => handleChange('professional_experience', e.target.value)}
+            id="experience"
+            value={formData.experience || ''}
+            onChange={(e) => handleChange('experience', e.target.value)}
             placeholder="Décrivez vos expériences professionnelles : films, théâtre, publicités, etc."
             rows={6}
           />
         </div>
 
         <div className="form-field">
-          <label htmlFor="training_diplomas">Formation & Diplômes</label>
+          <label htmlFor="certificates">Formation & Diplômes</label>
           <textarea
-            id="training_diplomas"
-            value={formData.training_diplomas || formData.certificates || ''}
-            onChange={(e) => handleChange('training_diplomas', e.target.value)}
+            id="certificates"
+            value={formData.certificates || ''}
+            onChange={(e) => handleChange('certificates', e.target.value)}
             placeholder="Formations en art dramatique, diplômes, stages, workshops, etc."
             rows={4}
           />

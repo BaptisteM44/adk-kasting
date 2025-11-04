@@ -34,7 +34,7 @@
 #### 2. `components/Header.tsx`
 ```tsx
 <div className="header__brand">
-  ADK-CASTING
+  ADK-KASTING
 </div>
 ```
 

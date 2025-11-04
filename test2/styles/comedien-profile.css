@@ -1033,14 +1033,4 @@
   .comedien-profile .profile-info-section .profile-blocks {
     gap: 20px;
   }
-}
-.comedien-profile .profile-info-section .admin-stars {
-  background: rgba(60, 60, 60, 0.9);
-  padding: 6px 10px;
-  border-radius: 6px;
-  width: -moz-fit-content;
-  width: fit-content;
-  height: 36px;
-  display: flex;
-  align-items: center;
 }/*# sourceMappingURL=comedien-profile.css.map */

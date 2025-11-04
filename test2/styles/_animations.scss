@@ -131,7 +131,7 @@
   &:nth-child(3).animate { transition-delay: 0.3s; }
 }
 
-// Animation pour le titre ADK-CASTING du hero
+// Animation pour le titre ADK-KASTING du hero
 .hero-brand-cascade {
   opacity: 0;
   transform: translateY(50px) scale(0.9);
@@ -227,14 +227,14 @@
   &.indicator-animate {
     opacity: 0;
     transform: scale(0.5) translateY(10px);
-    transition: opacity 0.4s ease, 
+    transition: opacity 0.4s ease,
                 transform 0.4s ease;
-    
+
     &.show {
       opacity: 1;
       transform: scale(1) translateY(0);
     }
-    
+
     // Délais en cascade pour chaque indicateur (0.05s entre chaque)
     &:nth-child(1).show { transition-delay: 1.5s; }
     &:nth-child(2).show { transition-delay: 1.55s; }
@@ -249,13 +249,53 @@
     &:nth-child(11).show { transition-delay: 2.0s; }
     &:nth-child(12).show { transition-delay: 2.05s; }
   }
-  
+
   // Responsive pour les indicateurs du carousel
   @media (max-width: 768px) {
     width: 40px;
   }
-  
+
   @media (max-width: 480px) {
     width: 30px;
   }
+}
+
+// Animation cascade pour les cards de comédiens
+.comedien-card-reveal {
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+  transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  &.animate {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  // Délais en cascade pour effet de vague (0.04s entre chaque pour 25 cards)
+  &:nth-child(1).animate { transition-delay: 0.02s; }
+  &:nth-child(2).animate { transition-delay: 0.06s; }
+  &:nth-child(3).animate { transition-delay: 0.10s; }
+  &:nth-child(4).animate { transition-delay: 0.14s; }
+  &:nth-child(5).animate { transition-delay: 0.18s; }
+  &:nth-child(6).animate { transition-delay: 0.22s; }
+  &:nth-child(7).animate { transition-delay: 0.26s; }
+  &:nth-child(8).animate { transition-delay: 0.30s; }
+  &:nth-child(9).animate { transition-delay: 0.34s; }
+  &:nth-child(10).animate { transition-delay: 0.38s; }
+  &:nth-child(11).animate { transition-delay: 0.42s; }
+  &:nth-child(12).animate { transition-delay: 0.46s; }
+  &:nth-child(13).animate { transition-delay: 0.50s; }
+  &:nth-child(14).animate { transition-delay: 0.54s; }
+  &:nth-child(15).animate { transition-delay: 0.58s; }
+  &:nth-child(16).animate { transition-delay: 0.62s; }
+  &:nth-child(17).animate { transition-delay: 0.66s; }
+  &:nth-child(18).animate { transition-delay: 0.70s; }
+  &:nth-child(19).animate { transition-delay: 0.74s; }
+  &:nth-child(20).animate { transition-delay: 0.78s; }
+  &:nth-child(21).animate { transition-delay: 0.82s; }
+  &:nth-child(22).animate { transition-delay: 0.86s; }
+  &:nth-child(23).animate { transition-delay: 0.90s; }
+  &:nth-child(24).animate { transition-delay: 0.94s; }
+  &:nth-child(25).animate { transition-delay: 0.98s; }
 }

@@ -13,7 +13,7 @@ export const PageTitle: React.FC = () => {
     <section className="page-title" id="page-title">
       <div className="container">
         <h1 className="page-title__brand">
-          ADK-CASTING
+          ADK-KASTING
         </h1>
       </div>
     </section>

@@ -71,17 +71,14 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
     
     // Vidéos (WordPress format)
     showreel_url: '',
-    video_1_url: '',
-    video_2_url: '',
-    
+
     // Expérience
     experience_level: '',
     desired_activities: [],
-    professional_experience: '',
-    training_diplomas: '',
+    experience: '',
+    certificates: '',
 
     // Fichiers (WordPress format)
-    cv_pdf_url: '',
     parental_authorization_url: ''
   })
 
@@ -532,16 +529,6 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
             {renderError('phone')}
           </div>
           
-          <div className="form-field">
-            <label htmlFor="phone_fixe">Téléphone fixe</label>
-            <input
-              type="tel"
-              id="phone_fixe"
-              value={formData.phone_fixe || ''}
-              onChange={(e) => handleChange('phone_fixe', e.target.value)}
-              placeholder="Tél fixe (optionnel)"
-            />
-          </div>
         </div>
 
         <div className="form-field">
@@ -801,7 +788,7 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
             >
               <option value="">Sélectionner</option>
               <option value="Blond">Blond</option>
-              <option value="Chatain">Chatain clair</option>
+              <option value="Chatain clair">Chatain clair</option>
               <option value="Chatain foncé">Chatain foncé</option>
               <option value="Brun">Brun</option>
               <option value="Roux">Roux</option>
@@ -2931,23 +2918,13 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
             />
           </div>
           
-          <div className="form-field">
-            <label htmlFor="video_2_url">Vidéo 2</label>
-            <input
-              type="url"
-              id="video_2_url"
-              value={formData.video_2_url || ''}
-              onChange={(e) => handleChange('video_2_url', e.target.value)}
-              placeholder="https://vimeo.com/..."
-            />
-          </div>
         </div>
       </section>
 
       {/* Expérience WordPress enrichie */}
       <section className="form-section">
         <h3>Expérience & Formation</h3>
-        
+
         <div className="form-field">
           <label htmlFor="experience_level">Niveau d'expérience</label>
           <select
@@ -2966,22 +2943,22 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
         </div>
 
         <div className="form-field">
-          <label htmlFor="professional_experience">Expérience professionnelle</label>
+          <label htmlFor="experience">Expérience professionnelle</label>
           <textarea
-            id="professional_experience"
-            value={formData.professional_experience || ''}
-            onChange={(e) => handleChange('professional_experience', e.target.value)}
+            id="experience"
+            value={formData.experience || ''}
+            onChange={(e) => handleChange('experience', e.target.value)}
             placeholder="Décrivez vos expériences professionnelles : films, théâtre, publicités, etc."
             rows={4}
           />
         </div>
 
         <div className="form-field">
-          <label htmlFor="training_diplomas">Formation & Diplômes</label>
+          <label htmlFor="certificates">Formation & Diplômes</label>
           <textarea
-            id="training_diplomas"
-            value={formData.training_diplomas || ''}
-            onChange={(e) => handleChange('training_diplomas', e.target.value)}
+            id="certificates"
+            value={formData.certificates || ''}
+            onChange={(e) => handleChange('certificates', e.target.value)}
             placeholder="Formations en art dramatique, diplômes, stages, workshops, etc."
             rows={3}
           />

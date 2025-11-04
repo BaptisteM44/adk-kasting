@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../../lib/supabase'
 import { normalizeComedienData } from '../../lib/wordpress-compat'
+import { phpSerialize } from '../../lib/php-serialize'
 import { Button } from '../../components/ui/Button'
 import Head from 'next/head'
 import { Layout } from '../../components/Layout'
@@ -22,6 +23,7 @@ export default function ComedienProfile() {
   const [showCommentForm, setShowCommentForm] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editedData, setEditedData] = useState<any>({})
+  const [originalData, setOriginalData] = useState<any>({}) // Données originales de la base
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
 
   // Vérifier si l'utilisateur peut éditer ce profil
@@ -51,18 +53,24 @@ export default function ComedienProfile() {
       if (error) throw error
       
       // Debug: voir ce que contient languages
-      console.log('🔍 DEBUG languages:', {
+      console.log('🔍 DEBUG RAW DATA from DB:', {
         languages: data.languages,
-        languages_fluent: data.languages_fluent,
+        actor_languages_notions: data.actor_languages_notions,
+        birth_date: data.birth_date,
         type_languages: typeof data.languages,
-        type_languages_fluent: typeof data.languages_fluent
+        type_notions: typeof data.actor_languages_notions
       })
-      
-      // Normaliser les données WordPress sérialisées
+
+      // Normaliser les données WordPress sérialisées pour l'affichage
       const normalized = normalizeComedienData(data)
-      console.log('🔍 DEBUG normalized:', normalized.languages_fluent_normalized)
+      console.log('🔍 DEBUG NORMALIZED:', {
+        languages_fluent_normalized: normalized.languages_fluent_normalized,
+        languages_notions_normalized: normalized.languages_notions_normalized,
+        birth_date: normalized.birth_date
+      })
       setComedien(normalized)
-      setEditedData(normalized) // Initialiser les données éditables
+      setEditedData(normalized)
+      setOriginalData(data) // Garder les données brutes pour comparaison
       setAdminComment(data.admin_comment || '')
       
     } catch (error: any) {
@@ -101,84 +109,123 @@ export default function ComedienProfile() {
   }
 
   const handleFieldChange = (field: string, value: any) => {
-    setEditedData((prev: any) => ({
-      ...prev,
-      [field]: value
-    }))
+    setEditedData((prev: any) => {
+      const updated = { ...prev, [field]: value }
+
+      // Synchroniser les champs _normalized pour les arrays et certains champs
+      if (field === 'languages_fluent' || field === 'languages_notions' ||
+          field === 'driving_licenses' || field === 'dance_skills' ||
+          field === 'music_skills' || field === 'diverse_skills' ||
+          field === 'desired_activities') {
+        updated[`${field}_normalized`] = value
+      }
+
+      if (field === 'native_language') {
+        updated['native_language_normalized'] = value
+      }
+
+      return updated
+    })
   }
 
   const handleSaveProfile = async (e?: React.FormEvent) => {
     if (e) e.preventDefault() // Empêcher le scroll
     if (!canEdit) return
-    
+
     try {
       setLoading(true)
-      
+
       const formData = editedData
-      
-      // Préparer TOUTES les données à sauvegarder (tous les champs du formulaire)
-      const dataToSave: any = {
-        // Informations générales
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        birth_date: formData.birth_date,
-        gender: formData.gender,
-        nationality: formData.nationality,
-        
-        // Coordonnées
-        phone: formData.phone,
-        email: formData.email,
-        domiciliation: formData.domiciliation,
-        street: formData.street,
-        zip_code: formData.zip_code,
-        city: formData.city,
-        country: formData.country,
-        
-        // Caractéristiques physiques
-        height: formData.height,
-        build: formData.build,
-        ethnicity: formData.ethnicity,
-        hair_color: formData.hair_color,
-        eye_color: formData.eye_color,
-        
-        // Langues
-        native_language: formData.native_language,
-        languages_fluent: formData.languages_fluent,
-        languages_notions: formData.languages_notions,
-        
-        // Compétences
-        driving_licenses: formData.driving_licenses,
-        dance_skills: formData.dance_skills,
-        music_skills: formData.music_skills,
-        diverse_skills: formData.diverse_skills,
-        
-        // Agent
-        agency_name: formData.agency_name,
-        agent_name: formData.agent_name,
-        agent_email: formData.agent_email,
-        agent_phone: formData.agent_phone,
-        agency_name_2: formData.agency_name_2,
-        agent_name_2: formData.agent_name_2,
-        agent_email_2: formData.agent_email_2,
-        agent_phone_2: formData.agent_phone_2,
-        
-        // Réseaux sociaux
-        website_url: formData.website_url,
-        facebook_url: formData.facebook_url,
-        imdb_url: formData.imdb_url,
-        linkedin_url: formData.linkedin_url,
-        other_profile_url: formData.other_profile_url,
-        
-        // Vidéos
-        showreel_url: formData.showreel_url,
-        video_1_url: formData.video_1_url,
-        video_2_url: formData.video_2_url,
-        
-        // Expérience
-        experience_level: formData.experience_level,
-        desired_activities: formData.desired_activities,
-        professional_experience: formData.professional_experience,
-        training_diplomas: formData.training_diplomas,
+      const dataToSave: any = {}
+
+      // Mapping des champs simples (pas de sérialisation nécessaire)
+      const simpleFields = [
+        'first_name', 'last_name', 'birth_date', 'gender', 'nationality',
+        'phone', 'mobile_phone', 'email', 'domiciliation', 'street', 'zip_code', 'city', 'country',
+        'height', 'build', 'ethnicity', 'hair_color', 'eye_color',
+        'native_language',
+        'agency_name', 'agent_name', 'agent_email', 'agent_phone',
+        'agency_name_2', 'agent_name_2', 'agent_email_2', 'agent_phone_2',
+        'website_url', 'facebook_url', 'imdb_url', 'linkedin_url', 'other_profile_url',
+        'showreel_url', 'actor_video1', 'actor_video2',
+        'experience_level', 'experience', 'certificates'
+      ]
+
+      // Ne sauvegarder que les champs simples qui ont changé
+      simpleFields.forEach(field => {
+        if (formData[field] !== comedien[field]) {
+          dataToSave[field] = formData[field]
+        }
+      })
+
+      // Helper pour comparer deux arrays
+      const arraysEqual = (a: any[], b: any[]) => {
+        if (!a && !b) return true
+        if (!a || !b) return false
+        if (a.length !== b.length) return false
+        return a.every((val, i) => val === b[i])
+      }
+
+      // Détecter les changements dans les arrays et les sauvegarder DIRECTEMENT (pas de sérialisation)
+      // PostgreSQL/Supabase gère les arrays nativement
+      const arrayFields = [
+        {
+          normalized: 'languages_fluent_normalized',
+          dbField: 'actor_languages_native'  // Corrigé : était 'languages', maintenant 'actor_languages_native'
+        },
+        {
+          normalized: 'languages_notions_normalized',
+          dbField: 'actor_languages_notions'
+        },
+        {
+          normalized: 'driving_licenses_normalized',
+          dbField: 'actor_driving_license'
+        },
+        {
+          normalized: 'dance_skills_normalized',
+          dbField: 'actor_dance_skills'
+        },
+        {
+          normalized: 'music_skills_normalized',
+          dbField: 'actor_music_skills'
+        },
+        {
+          normalized: 'diverse_skills_normalized',
+          dbField: 'wp_skills'
+        },
+        {
+          normalized: 'desired_activities_normalized',
+          dbField: 'wp_activity_domain'
+        }
+      ]
+
+      arrayFields.forEach(({ normalized, dbField }) => {
+        if (!arraysEqual(formData[normalized], comedien[normalized])) {
+          // Sauvegarder l'array DIRECTEMENT (pas de sérialisation PHP)
+          const arrayValue = formData[normalized] || []
+          dataToSave[dbField] = arrayValue.length > 0 ? arrayValue : []
+        }
+      })
+
+      // Vérifier native_language séparément
+      if (formData.native_language_normalized !== comedien.native_language_normalized) {
+        dataToSave.native_language = formData.native_language_normalized
+        const nativeArray = formData.native_language_normalized ? [formData.native_language_normalized] : []
+        dataToSave.actor_languages_native = nativeArray
+      }
+
+      // Debug: afficher ce qui va être sauvegardé
+      console.log('🔍 DEBUG dataToSave:', dataToSave)
+      console.log('🔍 DEBUG editedData.languages_fluent:', formData.languages_fluent)
+      console.log('🔍 DEBUG editedData.languages_fluent_normalized:', formData.languages_fluent_normalized)
+      console.log('🔍 DEBUG editedData.birth_date:', formData.birth_date)
+      console.log('🔍 DEBUG comedien.birth_date:', comedien.birth_date)
+
+      // Si aucun champ n'a changé, ne rien faire
+      if (Object.keys(dataToSave).length === 0) {
+        alert('Aucune modification détectée')
+        setLoading(false)
+        return
       }
       
       const { error } = await supabase
@@ -200,11 +247,17 @@ export default function ComedienProfile() {
 
   const handleArrayChange = (field: string, value: string, checked: boolean) => {
     setEditedData((prev: any) => {
-      const currentArray = prev[field] || []
+      const currentArray = prev[field] || prev[`${field}_normalized`] || []
+      let newArray
       if (checked) {
-        return { ...prev, [field]: [...currentArray, value] }
+        newArray = [...currentArray, value]
       } else {
-        return { ...prev, [field]: currentArray.filter((item: string) => item !== value) }
+        newArray = currentArray.filter((item: string) => item !== value)
+      }
+      return {
+        ...prev,
+        [field]: newArray,
+        [`${field}_normalized`]: newArray  // Synchroniser le champ normalized
       }
     })
   }
@@ -252,7 +305,7 @@ export default function ComedienProfile() {
       const { photoUrl } = await response.json()
       
       // Ajouter la photo au tableau de photos
-      const currentPhotos = comedien.photos_normalized || []
+      const currentPhotos = comedien.photos || []
       const updatedPhotos = [...currentPhotos, photoUrl]
       
       // Sauvegarder dans la base de données
@@ -280,7 +333,7 @@ export default function ComedienProfile() {
     
     try {
       // Retirer la photo du tableau
-      const currentPhotos = comedien.photos_normalized || []
+      const currentPhotos = comedien.photos || []
       const updatedPhotos = currentPhotos.filter((p: string) => p !== photoUrl)
       
       // Sauvegarder dans la base de données
@@ -300,12 +353,17 @@ export default function ComedienProfile() {
   }
 
   const calculateAge = (birthDate: string) => {
+    console.log('🔍 calculateAge input:', birthDate, typeof birthDate)
     if (!birthDate) return null
     const today = new Date()
     const birth = new Date(birthDate)
+    console.log('🔍 birth date parsed:', birth, 'isValid:', !isNaN(birth.getTime()))
+    if (isNaN(birth.getTime())) return null // Date invalide
     let age = today.getFullYear() - birth.getFullYear()
     const monthDiff = today.getMonth() - birth.getMonth()
-    return monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate()) ? age - 1 : age
+    const calculatedAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate()) ? age - 1 : age
+    console.log('🔍 calculated age:', calculatedAge)
+    return calculatedAge
   }
 
   const handleBack = () => {
@@ -338,10 +396,10 @@ export default function ComedienProfile() {
 
   const age = calculateAge(comedien.birth_date)
   
-  // Utiliser les photos normalisées et filtrer les URLs invalides + exclure les photos WordPress
-  const photos = (comedien.photos_normalized || []).filter((photo: string) => 
-    photo && 
-    photo.trim() !== '' && 
+  // Utiliser les photos et filtrer les URLs invalides + exclure les photos WordPress
+  const photos = (comedien.photos || []).filter((photo: string) =>
+    photo &&
+    photo.trim() !== '' &&
     !photo.includes('undefined') &&
     !photo.includes('null') &&
     !photo.includes('wp-content') && // Exclure les photos WordPress
@@ -521,9 +579,9 @@ export default function ComedienProfile() {
                       showLabel={false}
                     />
                   )}
-                  {(comedien.cv_pdf_url || comedien.actor_resume) && (
-                    <a 
-                      href={comedien.cv_pdf_url || comedien.actor_resume} 
+                  {comedien.actor_resume && (
+                    <a
+                      href={comedien.actor_resume} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="cv-button"
@@ -532,9 +590,9 @@ export default function ComedienProfile() {
                     </a>
                   )}
                   {isAdmin && (
-                    <button 
+                    <button
                       onClick={async () => {
-                        const { generateComedienPDF } = await import('../../lib/pdf-simple');
+                        const { generateComedienPDF } = await import('../../lib/pdf-generator');
                         await generateComedienPDF(comedien);
                       }}
                       className="pdf-button"
@@ -550,8 +608,19 @@ export default function ComedienProfile() {
                 {/* Colonne gauche : Infos clés */}
                 <div className="profile-key-info">
                   <div className="key-info-item">
-                    <span className="key-info-label">Âge</span>
-                    <span className="key-info-value">{age ? `${age} ans` : 'Non spécifié'}</span>
+                    <span className="key-info-label">{isEditing ? 'Date de naissance' : 'Âge'}</span>
+                    <span className="key-info-value">
+                      {isEditing ? (
+                        <input
+                          type="date"
+                          value={editedData.birth_date || ''}
+                          onChange={(e) => handleFieldChange('birth_date', e.target.value)}
+                          className="edit-input-inline"
+                        />
+                      ) : (
+                        age ? `${age} ans` : 'Non spécifié'
+                      )}
+                    </span>
                   </div>
                 <div className="key-info-item">
                   <span className="key-info-label">Langues</span>
@@ -612,14 +681,29 @@ export default function ComedienProfile() {
                     <span className="key-info-label">Tél</span>
                     <span className="key-info-value">
                       {isEditing ? (
-                        <input 
-                          type="tel" 
-                          value={editedData.phone || ''} 
+                        <input
+                          type="tel"
+                          value={editedData.phone || ''}
                           onChange={(e) => handleFieldChange('phone', e.target.value)}
                           className="edit-input-inline"
                         />
                       ) : (
                         comedien.phone ? <a href={`tel:${comedien.phone}`}>{comedien.phone}</a> : 'Non spécifié'
+                      )}
+                    </span>
+                  </div>
+                  <div className="key-info-item">
+                    <span className="key-info-label">Tél mobile</span>
+                    <span className="key-info-value">
+                      {isEditing ? (
+                        <input
+                          type="tel"
+                          value={editedData.mobile_phone || ''}
+                          onChange={(e) => handleFieldChange('mobile_phone', e.target.value)}
+                          className="edit-input-inline"
+                        />
+                      ) : (
+                        comedien.mobile_phone ? <a href={`tel:${comedien.mobile_phone}`}>{comedien.mobile_phone}</a> : 'Non spécifié'
                       )}
                     </span>
                   </div>
@@ -765,7 +849,7 @@ export default function ComedienProfile() {
                           >
                             <option value="">Sélectionner</option>
                             <option value="Blond">Blond</option>
-                            <option value="Chatain">Chatain clair</option>
+                            <option value="Chatain clair">Chatain clair</option>
                             <option value="Chatain foncé">Chatain foncé</option>
                             <option value="Brun">Brun</option>
                             <option value="Roux">Roux</option>
@@ -853,8 +937,8 @@ export default function ComedienProfile() {
                             <select 
                               value="" 
                               onChange={(e) => {
-                                if (e.target.value && !(editedData.languages_fluent || []).includes(e.target.value)) {
-                                  handleFieldChange('languages_fluent', [...(editedData.languages_fluent || []), e.target.value]);
+                                if (e.target.value && !(editedData.languages_fluent_normalized || []).includes(e.target.value)) {
+                                  handleFieldChange('languages_fluent', [...(editedData.languages_fluent_normalized || []), e.target.value]);
                                 }
                               }}
                               className="edit-input-inline"
@@ -877,28 +961,28 @@ export default function ComedienProfile() {
                               <option value="Turc">Turc</option>
                               <option value="Grec">Grec</option>
                             </select>
-                            {(editedData.languages_fluent || []).length > 0 && (
+                            {(editedData.languages_fluent_normalized || []).length > 0 && (
                               <div className="edit-checkbox-group" style={{ marginTop: '8px' }}>
-                                {(editedData.languages_fluent || []).map((lang: string) => (
-                                  <span key={lang} style={{ 
-                                    display: 'inline-flex', 
-                                    alignItems: 'center', 
-                                    padding: '4px 8px', 
-                                    background: '#E5E7EB', 
+                                {(editedData.languages_fluent_normalized || []).map((lang: string) => (
+                                  <span key={lang} style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    padding: '4px 8px',
+                                    background: '#E5E7EB',
                                     borderRadius: '4px',
                                     marginRight: '6px'
                                   }}>
                                     {lang}
-                                    <button 
+                                    <button
                                       type="button"
                                       onClick={() => {
-                                        const newLangs = (editedData.languages_fluent || []).filter((l: string) => l !== lang);
+                                        const newLangs = (editedData.languages_fluent_normalized || []).filter((l: string) => l !== lang);
                                         handleFieldChange('languages_fluent', newLangs);
                                       }}
-                                      style={{ 
-                                        marginLeft: '6px', 
-                                        background: 'transparent', 
-                                        border: 'none', 
+                                      style={{
+                                        marginLeft: '6px',
+                                        background: 'transparent',
+                                        border: 'none',
                                         cursor: 'pointer',
                                         fontSize: '14px',
                                         color: '#EF4444'
@@ -926,8 +1010,8 @@ export default function ComedienProfile() {
                             <select 
                               value="" 
                               onChange={(e) => {
-                                if (e.target.value && !(editedData.languages_notions || []).includes(e.target.value)) {
-                                  handleFieldChange('languages_notions', [...(editedData.languages_notions || []), e.target.value]);
+                                if (e.target.value && !(editedData.languages_notions_normalized || []).includes(e.target.value)) {
+                                  handleFieldChange('languages_notions', [...(editedData.languages_notions_normalized || []), e.target.value]);
                                 }
                               }}
                               className="edit-input-inline"
@@ -950,28 +1034,28 @@ export default function ComedienProfile() {
                               <option value="Turc">Turc</option>
                               <option value="Grec">Grec</option>
                             </select>
-                            {(editedData.languages_notions || []).length > 0 && (
+                            {(editedData.languages_notions_normalized || []).length > 0 && (
                               <div className="edit-checkbox-group" style={{ marginTop: '8px' }}>
-                                {(editedData.languages_notions || []).map((lang: string) => (
-                                  <span key={lang} style={{ 
-                                    display: 'inline-flex', 
-                                    alignItems: 'center', 
-                                    padding: '4px 8px', 
-                                    background: '#E5E7EB', 
+                                {(editedData.languages_notions_normalized || []).map((lang: string) => (
+                                  <span key={lang} style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    padding: '4px 8px',
+                                    background: '#E5E7EB',
                                     borderRadius: '4px',
                                     marginRight: '6px'
                                   }}>
                                     {lang}
-                                    <button 
+                                    <button
                                       type="button"
                                       onClick={() => {
-                                        const newLangs = (editedData.languages_notions || []).filter((l: string) => l !== lang);
+                                        const newLangs = (editedData.languages_notions_normalized || []).filter((l: string) => l !== lang);
                                         handleFieldChange('languages_notions', newLangs);
                                       }}
-                                      style={{ 
-                                        marginLeft: '6px', 
-                                        background: 'transparent', 
-                                        border: 'none', 
+                                      style={{
+                                        marginLeft: '6px',
+                                        background: 'transparent',
+                                        border: 'none',
                                         cursor: 'pointer',
                                         fontSize: '14px',
                                         color: '#EF4444'
@@ -1370,7 +1454,7 @@ export default function ComedienProfile() {
                         <span className="key-info-value">
                           {isEditing ? (
                             <div className="edit-checkbox-group">
-                              {['Doublage', 'Chant', 'Acrobatie', 'Arts martial', 'Equitation', 'Sport de combat'].map(comp => (
+                              {['Doublage', 'Chant', 'Acrobatie', 'Art martial', 'Equitation', 'Sport de combat'].map(comp => (
                                 <label key={comp}>
                                   <input 
                                     type="checkbox" 
@@ -1520,40 +1604,40 @@ export default function ComedienProfile() {
                         </span>
                       </div>
                     )}
-                    {(comedien.video_1_url || isEditing) && (
+                    {(comedien.actor_video1 || isEditing) && (
                       <div className="key-info-item">
                         <span className="key-info-label">Vidéo 1</span>
                         <span className="key-info-value">
                           {isEditing ? (
-                            <input 
-                              type="url" 
-                              value={editedData.video_1_url || ''} 
-                              onChange={(e) => handleFieldChange('video_1_url', e.target.value)}
+                            <input
+                              type="url"
+                              value={editedData.actor_video1 || ''}
+                              onChange={(e) => handleFieldChange('actor_video1', e.target.value)}
                               className="edit-input-inline"
                               placeholder="https://..."
                               style={{ minWidth: '250px' }}
                             />
                           ) : (
-                            <a href={comedien.video_1_url} target="_blank" rel="noopener noreferrer">Voir la vidéo 1</a>
+                            <a href={comedien.actor_video1} target="_blank" rel="noopener noreferrer">Voir la vidéo 1</a>
                           )}
                         </span>
                       </div>
                     )}
-                    {(comedien.video_2_url || isEditing) && (
+                    {(comedien.actor_video2 || isEditing) && (
                       <div className="key-info-item">
                         <span className="key-info-label">Vidéo 2</span>
                         <span className="key-info-value">
                           {isEditing ? (
-                            <input 
-                              type="url" 
-                              value={editedData.video_2_url || ''} 
-                              onChange={(e) => handleFieldChange('video_2_url', e.target.value)}
+                            <input
+                              type="url"
+                              value={editedData.actor_video2 || ''}
+                              onChange={(e) => handleFieldChange('actor_video2', e.target.value)}
                               className="edit-input-inline"
                               placeholder="https://..."
                               style={{ minWidth: '250px' }}
                             />
                           ) : (
-                            <a href={comedien.video_2_url} target="_blank" rel="noopener noreferrer">Voir la vidéo 2</a>
+                            <a href={comedien.actor_video2} target="_blank" rel="noopener noreferrer">Voir la vidéo 2</a>
                           )}
                         </span>
                       </div>
@@ -1581,11 +1665,11 @@ export default function ComedienProfile() {
                         </span>
                       </div>
                     )}
-                    {comedien.cv_pdf_url && (
+                    {comedien.actor_resume && (
                       <div className="key-info-item">
                         <span className="key-info-label">CV</span>
                         <span className="key-info-value">
-                          <a href={comedien.cv_pdf_url} target="_blank" rel="noopener noreferrer">Télécharger le CV</a>
+                          <a href={comedien.actor_resume} target="_blank" rel="noopener noreferrer">Télécharger le CV</a>
                         </span>
                       </div>
                     )}
@@ -1602,40 +1686,40 @@ export default function ComedienProfile() {
               </div>
 
               {/* === SECTION EXPÉRIENCE (avec fond blanc) === */}
-              {(comedien.professional_experience || comedien.experience || comedien.wp_experience || isEditing) && (
+              {(comedien.experience || comedien.wp_experience || isEditing) && (
                 <div className="profile-section">
                   <h2>Expérience professionnelle</h2>
                   <div className="text-content">
                     {isEditing ? (
-                      <textarea 
-                        value={editedData.professional_experience || ''} 
-                        onChange={(e) => handleFieldChange('professional_experience', e.target.value)}
+                      <textarea
+                        value={editedData.experience || ''}
+                        onChange={(e) => handleFieldChange('experience', e.target.value)}
                         className="edit-textarea"
                         rows={8}
                         placeholder="Décrivez votre expérience professionnelle..."
                       />
                     ) : (
-                      comedien.professional_experience || comedien.experience || comedien.wp_experience
+                      comedien.experience || comedien.wp_experience
                     )}
                   </div>
                 </div>
               )}
 
               {/* === SECTION FORMATIONS (avec fond blanc) === */}
-              {(comedien.training_diplomas || comedien.certificates || isEditing) && (
+              {(comedien.certificates || isEditing) && (
                 <div className="profile-section">
                   <h2>Formations et diplômes</h2>
                   <div className="text-content">
                     {isEditing ? (
-                      <textarea 
-                        value={editedData.training_diplomas || ''} 
-                        onChange={(e) => handleFieldChange('training_diplomas', e.target.value)}
+                      <textarea
+                        value={editedData.certificates || ''}
+                        onChange={(e) => handleFieldChange('certificates', e.target.value)}
                         className="edit-textarea"
                         rows={8}
                         placeholder="Décrivez vos formations et diplômes..."
                       />
                     ) : (
-                      comedien.training_diplomas || comedien.certificates
+                      comedien.certificates
                     )}
                   </div>
                 </div>

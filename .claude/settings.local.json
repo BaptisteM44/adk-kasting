@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node scripts/migrate-wordpress-resumes.js:*)",
+      "Bash(node scripts/compress-images-fast.js:*)",
+      "Bash(node:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(pkill:*)",
+      "Bash(unset:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

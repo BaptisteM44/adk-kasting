@@ -1,0 +1,20 @@
+# robots.txt - ADK-KASTING
+
+# Autoriser tous les robots d'indexation
+User-agent: *
+Allow: /
+
+# Bloquer les pages privées et sensibles
+Disallow: /dashboard
+Disallow: /api/
+Disallow: /inscription
+Disallow: /connexion
+Disallow: /reset-password
+Disallow: /nouveau-mot-de-passe
+
+# Bloquer les fichiers temporaires et logs
+Disallow: /*.json$
+Disallow: /logs/
+
+# Sitemap
+Sitemap: https://www.adk-kasting.com/sitemap.xml

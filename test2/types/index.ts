@@ -16,7 +16,6 @@ export interface Comedien {
   last_name: string
   display_name: string
   phone: string
-  phone_fixe?: string
   domiciliation: string
   profile_picture?: string
 
@@ -42,15 +41,6 @@ export interface Comedien {
   // Compétences
   experience_level: string
   native_language: string
-  languages: string[] // Langues maternelles
-  languages_fluent: string[] // Langues parlées couramment
-  languages_notions: string[] // Notions de langues
-  dance_skills: string[]
-  music_skills: string[]
-  driving_license: boolean
-  driving_licenses: string[] // ['Auto', 'Moto', 'Camion', 'Avion / hélicoptère']
-  // wp_skills?: string // Compétences WordPress (éviter conflit) // Supprimé car doublon
-  desired_activities: string[] // Long métrage, Court métrage, etc.
 
   // Photos et médias (WordPress format)
   photos: string[] // URLs des photos (max 5) - format migré
@@ -62,10 +52,8 @@ export interface Comedien {
   actor_photo_1?: string // Variante photo WordPress
   showreel_url?: string // URL showreel (format migré)
   actor_showreal?: string // Showreel WordPress
-  video_1_url?: string // Vidéo 1 (format migré)
-  video_2_url?: string // Vidéo 2 (format migré)
   actor_video1?: string // Vidéo 1 WordPress
-  actor_video2?: string // Vidéo 2 WordPress  
+  actor_video2?: string // Vidéo 2 WordPress
   actor_video3?: string // Vidéo 3 WordPress
 
   // Agent/Agence (WordPress format détaillé)
@@ -99,9 +87,6 @@ export interface Comedien {
   user_url?: string // URL utilisateur WordPress
 
   // Formations et expérience (WordPress format détaillé)
-  professional_experience?: string // Expériences professionnelles (texte libre)
-  training_diplomas?: string // Formations et diplômes (texte libre)
-  cv_pdf_url?: string // URL du CV PDF (format migré)
   actor_resume?: string // CV WordPress - LE VRAI CV !
   certificates?: string // Certificats WordPress
   experience?: string // Expérience WordPress (différent de experience_level)
@@ -112,11 +97,12 @@ export interface Comedien {
   skills?: string // Compétences générales WordPress
   actor_driving_license?: string // Permis WordPress
   
-  // Langues détaillées (WordPress format)
-  actor_languages_native?: string // Langues maternelles WordPress
+  // Langues détaillées (WordPress format - 3 niveaux)
+  actor_languages_native?: string // 1. Langues maternelles WordPress (PHP serialized)
+  languages?: string // 2. Langues parlées couramment WordPress (PHP serialized)
+  actor_languages_notions?: string // 3. Notions langues WordPress (PHP serialized)
   actor_languages_native_other?: string // Autres langues maternelles WordPress
   actor_languages_native2?: string // Langue maternelle 2 WordPress
-  actor_languages_notions?: string // Notions langues WordPress
   actor_languages_notions_other?: string // Autres notions WordPress
   actor_languages_other?: string // Autres langues WordPress
 
@@ -130,7 +116,6 @@ export interface Comedien {
   actor_size?: string // Taille WordPress (peut différer de height)
   wp_experience?: string // Expérience WordPress (éviter conflit)
   fielddata?: string // Données de champ WordPress
-  activity_domain?: string // Domaine d'activité WordPress
   wp_fielddata?: string // Données de champ WordPress (éviter conflit)
   wp_activity_domain?: string // Domaine d'activité WordPress (éviter conflit)
   wp_skills?: string // Compétences WordPress (éviter conflit)
@@ -184,7 +169,7 @@ export interface InscriptionFormData {
 
   // Coordonnées personnelles
   phone: string // mobile
-  phone_fixe?: string
+  phone_fixe?: string // téléphone fixe
   domiciliation: string
   street?: string
   zip_code: string
@@ -228,20 +213,22 @@ export interface InscriptionFormData {
   // Langues
   native_language: string // Langue(s) maternelle(s)
   languages_fluent?: string[] // Langues parlées couramment
-  languages_notions?: string[] // Notions de langues
+  languages_notions?: string[] // Langues avec notions
 
-  // Compétences
-  driving_licenses?: string[] // Auto, Moto, Camion, Avion / hélicoptère
-  wp_skills?: string[] // Compétences WordPress (éviter conflit)
+  // Compétences (arrays pour le formulaire, sérialisés en PHP pour BDD)
+  wp_skills?: string[] // Compétences diverses
+  diverse_skills?: string[] // Alias pour wp_skills
   dance_skills?: string[] // Classique, Tango, Salsa, Rock, Hip hop, Danse de salon
   music_skills?: string[] // Guitare, Piano, Violon, Batterie, etc.
+  driving_licenses?: string[] // Auto, Moto, Camion, Avion / hélicoptère
 
   // Expérience
   experience_level: string
-  desired_activities: string[] // Long métrage, Court métrage, etc.
-  professional_experience?: string
-  training_diplomas?: string
-  cv_pdf_url?: string
+  desired_activities?: string[] // Long métrage, Court métrage, etc.
+  experience?: string // Expérience professionnelle
+  professional_experience?: string // Alias pour experience
+  certificates?: string // Formations et diplômes
+  training_diplomas?: string // Alias pour certificates
 
   // Fichiers administratifs
   parental_authorization_url?: string // URL de l'autorisation parentale (optionnel)
@@ -252,8 +239,13 @@ export interface Film {
   title: string
   year: number
   image_url: string
-  order_index: number
+  hero_order: number
+  collaboration_order: number
+  show_in_hero: boolean
+  show_in_collaborations: boolean
   is_active: boolean
+  created_at?: string
+  updated_at?: string
 }
 
 export interface ComedienFilters {
@@ -261,8 +253,8 @@ export interface ComedienFilters {
   gender?: string
   age_min?: number
   age_max?: number
-  languages?: string // Langues maternelles
-  languages_fluent?: string // Langues parlées couramment
+  languages?: string // Langues maternelles → colonne BDD: actor_languages_native (PHP serialized)
+  languages_fluent?: string // Langues parlées couramment → colonne BDD: actor_languages_native (PHP serialized)
   ethnicity?: string // Type
 
   // Filtres avancés
@@ -270,16 +262,20 @@ export interface ComedienFilters {
   height_max?: number
   hair_color?: string
   eye_color?: string
-  nationality?: string
-  wp_skills?: string
-  driving_licenses?: string // Supports les types spécifiques ('Auto', 'Moto', 'Camion', etc.)
+  nationality?: string // → colonnes BDD: actor_nationality OU nationality
+  wp_skills?: string // Compétences diverses → colonne BDD: wp_skills (PHP serialized)
+  driving_licenses?: string // Permis → colonne BDD: actor_driving_license (PHP serialized) - Types: 'Auto', 'Moto', 'Camion', 'Avion / hélicoptère'
   city?: string
   experience_level?: string
   build?: string
-  desired_activities?: string // Long métrage, Court métrage, etc.
+  desired_activities?: string // Activités → colonne BDD: wp_activity_domain (PHP serialized) - Long métrage, Court métrage, etc.
 
   // Recherche par nom
-  name?: string // Recherche dans first_name et last_name
+  name?: string // Recherche dans first_name, last_name et display_name
+
+  // NOTE: Les colonnes WordPress stockent les arrays au format PHP sérialisé
+  // Exemple: a:1:{i:0;s:5:"Chant";} = ["Chant"]
+  // Les filtres utilisent ILIKE pour chercher dans ces données sérialisées
 }
 
 export interface PaginatedResponse<T> {
@@ -348,7 +344,6 @@ export interface ComedienData {
   actor_resume: string
   certificates: string
   experience: string
-  cv_pdf_url: string
   admin_rating: number
   user_id: string
 }

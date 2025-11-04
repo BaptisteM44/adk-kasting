@@ -186,25 +186,24 @@ export const generateComedienPDF = async (comedien: Comedien) => {
             </div>
             ` : ''}
 
-            ${(comedien.dance_skills?.length || comedien.music_skills?.length || comedien.driving_licenses?.length || comedien.diverse_skills?.length || comedien.actor_dance_skills || comedien.actor_music_skills || comedien.wp_skills || comedien.actor_driving_license) ? `
+            ${(comedien.actor_dance_skills || comedien.actor_music_skills || comedien.wp_skills || comedien.actor_driving_license) ? `
             <div class="section">
               <h3>🎯 Compétences</h3>
-              ${(comedien.driving_licenses?.length || comedien.actor_driving_license) ? `<div class="compact"><strong>Permis:</strong> ${comedien.driving_licenses?.join(', ') || comedien.actor_driving_license}</div>` : ''}
-              ${(comedien.dance_skills?.length || comedien.actor_dance_skills) ? `<div class="compact"><strong>Danse:</strong> ${comedien.dance_skills?.join(', ') || comedien.actor_dance_skills}</div>` : ''}
-              ${(comedien.music_skills?.length || comedien.actor_music_skills) ? `<div class="compact"><strong>Musique:</strong> ${comedien.music_skills?.join(', ') || comedien.actor_music_skills}</div>` : ''}
-              ${(comedien.diverse_skills?.length) ? `<div class="compact"><strong>Autres:</strong> ${comedien.diverse_skills.join(', ')}</div>` : ''}
-              ${(comedien.wp_skills && !comedien.diverse_skills?.length) ? `<div class="compact"><strong>Compétences:</strong> ${comedien.wp_skills}</div>` : ''}
+              ${comedien.actor_driving_license ? `<div class="compact"><strong>Permis:</strong> ${comedien.actor_driving_license}</div>` : ''}
+              ${comedien.actor_dance_skills ? `<div class="compact"><strong>Danse:</strong> ${comedien.actor_dance_skills}</div>` : ''}
+              ${comedien.actor_music_skills ? `<div class="compact"><strong>Musique:</strong> ${comedien.actor_music_skills}</div>` : ''}
+              ${comedien.wp_skills ? `<div class="compact"><strong>Compétences:</strong> ${comedien.wp_skills}</div>` : ''}
             </div>
             ` : ''}
 
-            ${(comedien.languages?.length || comedien.languages_fluent?.length || comedien.languages_notions?.length || comedien.actor_languages_native || comedien.actor_languages_notions || comedien.actor_languages_other) ? `
+            ${(comedien.native_language || comedien.actor_languages_native || comedien.languages || comedien.actor_languages_notions || comedien.actor_languages_other) ? `
             <div class="section">
               <h3>🌍 Langues</h3>
-              ${(comedien.languages?.length || comedien.actor_languages_native) ? `<div class="compact"><strong>Maternelles:</strong> ${comedien.languages?.join(', ') || comedien.actor_languages_native}</div>` : ''}
+              ${(comedien.native_language || comedien.actor_languages_native) ? `<div class="compact"><strong>Maternelles:</strong> ${comedien.native_language || comedien.actor_languages_native}</div>` : ''}
               ${comedien.actor_languages_native_other ? `<div class="compact"><strong>Maternelles (autres):</strong> ${comedien.actor_languages_native_other}</div>` : ''}
               ${comedien.actor_languages_native2 ? `<div class="compact"><strong>Maternelles (2):</strong> ${comedien.actor_languages_native2}</div>` : ''}
-              ${(comedien.languages_fluent?.length) ? `<div class="compact"><strong>Couramment:</strong> ${comedien.languages_fluent.join(', ')}</div>` : ''}
-              ${(comedien.languages_notions?.length || comedien.actor_languages_notions) ? `<div class="compact"><strong>Notions:</strong> ${comedien.languages_notions?.join(', ') || comedien.actor_languages_notions}</div>` : ''}
+              ${comedien.languages ? `<div class="compact"><strong>Couramment:</strong> ${comedien.languages}</div>` : ''}
+              ${comedien.actor_languages_notions ? `<div class="compact"><strong>Notions:</strong> ${comedien.actor_languages_notions}</div>` : ''}
               ${comedien.actor_languages_notions_other ? `<div class="compact"><strong>Notions (autres):</strong> ${comedien.actor_languages_notions_other}</div>` : ''}
               ${comedien.actor_languages_other ? `<div class="compact"><strong>Autres langues:</strong> ${comedien.actor_languages_other}</div>` : ''}
             </div>
@@ -220,12 +219,12 @@ export const generateComedienPDF = async (comedien: Comedien) => {
             </div>
             ` : ''}
 
-            ${(comedien.professional_experience || comedien.training_diplomas || comedien.wp_experience || comedien.wp_fielddata) ? `
+            ${(comedien.experience || comedien.certificates || comedien.wp_experience || comedien.wp_fielddata) ? `
             <div class="section">
               <h3>🎓 Formation & Expérience</h3>
-              ${comedien.professional_experience ? `<div class="compact"><strong>Expérience:</strong> ${comedien.professional_experience}</div>` : ''}
-              ${comedien.wp_experience && comedien.wp_experience !== comedien.professional_experience ? `<div class="compact"><strong>Expérience WP:</strong> ${comedien.wp_experience}</div>` : ''}
-              ${comedien.training_diplomas ? `<div class="compact"><strong>Formation:</strong> ${comedien.training_diplomas}</div>` : ''}
+              ${comedien.experience ? `<div class="compact"><strong>Expérience:</strong> ${comedien.experience}</div>` : ''}
+              ${comedien.wp_experience && comedien.wp_experience !== comedien.experience ? `<div class="compact"><strong>Expérience WP:</strong> ${comedien.wp_experience}</div>` : ''}
+              ${comedien.certificates ? `<div class="compact"><strong>Formation:</strong> ${comedien.certificates}</div>` : ''}
               ${comedien.wp_fielddata ? `<div class="compact"><strong>Données complémentaires:</strong> ${comedien.wp_fielddata}</div>` : ''}
             </div>
             ` : ''}

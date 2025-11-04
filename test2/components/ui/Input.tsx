@@ -32,12 +32,14 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string
   error?: string
   options: { value: string; label: string }[]
+  placeholder?: string
 }
 
 export const Select: React.FC<SelectProps> = ({
   label,
   error,
   options,
+  placeholder,
   className = '',
   ...props
 }) => {
@@ -47,6 +49,11 @@ export const Select: React.FC<SelectProps> = ({
     <div className="form-group">
       {label && <label>{label}</label>}
       <select className={selectClass} {...props}>
+        {placeholder && (
+          <option value="" disabled hidden>
+            {placeholder}
+          </option>
+        )}
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}

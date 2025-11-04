@@ -1,9 +1,11 @@
-// Footer ADK-Casting
+// Footer ADK-Kasting
 .footer {
   background-color: white; // Fond blanc
   padding: 60px 0 200px 0; // Padding bottom important pour faire de la place au titre
   position: relative;
-  
+      @media (max-width: 768px) {
+  padding: 60px 0 60px 0; // Padding bottom important pour faire de la place au titre
+    }
   .container {
     padding: 0 16px;
     position: relative;
@@ -85,17 +87,17 @@
     gap: 20px 40px;
     margin-bottom: 60px;
     align-items: start;
-    
+
     @media (max-width: 1024px) {
       grid-template-columns: repeat(3, 1fr) auto;
     }
-    
+
     @media (max-width: 768px) {
       grid-template-columns: repeat(2, 1fr);
       gap: 30px;
       margin-bottom: 40px;
     }
-    
+
     @media (max-width: 480px) {
       grid-template-columns: 1fr;
     }
@@ -166,7 +168,7 @@
     }
   }
   
-  // Logo ADK-CASTING - position fixed pour venir se caler dans l'espace réservé
+  // Logo ADK-KASTING - position fixed pour venir se caler dans l'espace réservé
   &__brand {
     // Position fixe pour venir "se poser" dans l'espace du footer
     position: fixed;
@@ -174,25 +176,38 @@
     left: 0;
     right: 0;
     width: 100vw;
-    
+
     background-color: white;
     text-align: center;
     padding: 60px 0 0px 0;
     border-top: 1px solid #D8D8D8;
-    
+
     // Position initiale - hors écran en bas
     transform: translateY(100%);
     opacity: 0;
-    
+
     h2 {
-      font-size: clamp(48px, 13vw, 200px);
+      font-size: clamp(60px, 14vw, 360px);
       font-weight: 200;
       color: #1a1a1a;
-      letter-spacing: 4px;
+      letter-spacing: 2px;
       margin: 0;
       text-transform: uppercase;
       width: 100%;
-      padding: 0 16px;
+      padding: 0 8px;
+      white-space: nowrap;
+      overflow: hidden;
+
+      @media (max-width: 768px) {
+        font-size: clamp(40px, 12vw, 120px);
+        letter-spacing: 1px;
+      }
+
+      @media (max-width: 480px) {
+        font-size: clamp(32px, 14vw, 80px);
+        letter-spacing: 0.5px;
+        padding: 0 4px;
+      }
     }
   }
 }

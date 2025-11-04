@@ -37,9 +37,9 @@ export const Footer: React.FC = () => {
         <div className="footer__content">
           <div className="footer__section">
             <h3>Liens utiles</h3>
-            <Link href="/about">À propos</Link>
             <Link href="/faq">FAQ</Link>
             <Link href="/Conditions-générales">Conditions générales</Link>
+            <Link href="/about">À propos</Link>
           </div>
 
           <div className="footer__section">
@@ -82,9 +82,8 @@ export const Footer: React.FC = () => {
 
       
       </div>
-        {/* Logo ADK-CASTING en bas */}
         <div className="footer__brand">
-          <h2>ADK-CASTING</h2>
+          <h2>ADK-KASTING</h2>
         </div>
     </footer>
   )

@@ -83,6 +83,11 @@
     padding: $spacing-lg $spacing-xl;
     font-size: $font-size-lg;
   }
+
+  // Full width pour mobile
+  &--full-width {
+    width: 100%;
+  }
 }
 
 // Comedien Card
@@ -277,7 +282,6 @@
 
 // Inputs
 .form-group {
-  margin-bottom: $spacing-lg;
 
   label {
     display: block;

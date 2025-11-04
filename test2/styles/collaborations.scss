@@ -24,31 +24,30 @@
     
     .films-grid.morphing-grid {
       display: flex;
-      justify-content: flex-start; // Changé de center à flex-start pour le scroll
+      justify-content: flex-start;
       align-items: flex-start;
       gap: 16px !important;
-      overflow-x: auto; // Permettre le scroll horizontal
+      overflow-x: auto;
       overflow-y: visible;
       width: 100%;
       min-height: 600px;
-      cursor: grab; // Curseur drag
-      user-select: none; // Empêcher la sélection de texte
-      scroll-behavior: smooth; // Smooth scroll
-      scrollbar-width: none; // Firefox
-      -ms-overflow-style: none; // IE/Edge
-      
+      cursor: grab;
+      user-select: none;
+      scroll-behavior: auto; // Pas de smooth pour l'auto-scroll
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+
       // Masquer la scrollbar webkit
       &::-webkit-scrollbar {
         display: none;
       }
-      
+
       // État de drag
       &.dragging {
         cursor: grabbing;
-        scroll-behavior: auto; // Pas de smooth pendant le drag
-        
+
         .film-poster.morphing-poster {
-          pointer-events: none; // Empêcher les hovers pendant le drag
+          pointer-events: none;
         }
       }
       
@@ -56,12 +55,13 @@
         position: relative;
         flex-shrink: 0;
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                    opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         height: 500px;
-        // Toutes les affiches ont la même taille
         width: 261px;
-        opacity: 1; // Opacity initiale explicite
-        
+        opacity: 1;
+        will-change: auto;
+
         .poster-inner {
           width: 261px;
           height: 386px;
@@ -69,26 +69,28 @@
           overflow: hidden;
           border-radius: 0;
           box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-          transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-          transform-origin: 50% 0%; // FORCER le bottom
-          
+          transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                      box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          transform-origin: 50% 0%;
+
           img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            transform-origin: 50% 100%; // FORCER le bottom
-            opacity: 1; // Opacity initiale pour les images
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        filter 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transform-origin: 50% 100%;
+            opacity: 1;
           }
         }
-        
-        // Infos sous l'affiche
+
         .film-info {
           padding: 16px 0px;
-          transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                      opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
           display: flex;
-        align-items: center;
-          
+          align-items: center;
+
           h3 {
             font-size: 1.1rem;
             font-weight: 400;
@@ -96,7 +98,7 @@
             color: #2C2C2C;
             line-height: 1.3;
           }
-          
+
           p {
             font-size: 0.9rem;
             color: #666;
@@ -104,54 +106,45 @@
             margin: 0;
           }
         }
-        
-        // Effet hover - agrandissement UNIQUEMENT vers le bas
+
         &:hover {
           z-index: 100;
-          
+          will-change: transform;
+
           .poster-inner {
             transform: scale(1.25);
-            
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+
             img {
               transform: scale(1.03);
               filter: brightness(1.15) contrast(1.08) saturate(1.1);
-              transform-origin: 50% 100% !important; // Force absolute bottom origin
+              transform-origin: 50% 100% !important;
             }
           }
-          
+
           .film-info {
-            // Calculer le décalage nécessaire pour pousser le texte
-            // L'image fait 386px et grandit à 386 * 1.25 = 482.5px
-            // Donc il faut pousser le texte de 482.5 - 386 = 96.5px vers le bas
             transform: translateY(90px) translateX(-32px);
             opacity: 0.9;
           }
-          
-          // Push effects avec transitions plus fluides
+
           & + .film-poster.morphing-poster {
             transform: translateX(20px);
-            filter: blur(0.7px);
             opacity: 0.95;
           }
-          
+
           & + .film-poster.morphing-poster + .film-poster.morphing-poster {
             transform: translateX(10px);
-            filter: blur(0.5px);
-            opacity: 0.95;
+            opacity: 0.97;
           }
         }
-        
-        // Effet sur l'affiche précédente
+
         &:has(+ .film-poster.morphing-poster:hover) {
           transform: translateX(-20px);
-          filter: blur(0.75px);
           opacity: 0.9;
         }
-        
-        // Effet sur l'affiche d'avant
+
         &:has(+ .film-poster.morphing-poster + .film-poster.morphing-poster:hover) {
           transform: translateX(-10px);
-          filter: blur(0.75px);
           opacity: 0.95;
         }
       }
@@ -210,6 +203,8 @@
 
 // Optimisations performances
 .morphing-poster {
-  will-change: transform, opacity;
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }

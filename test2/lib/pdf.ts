@@ -152,13 +152,13 @@ export const generateComedienPDF = async (comedien: Comedien) => {
         <div class="header">
           <h1>${comedien.display_name}</h1>
           ${age ? `<p style="margin: 5px 0; font-size: 12px;"><strong>Âge:</strong> ${age} ans</p>` : ''}
-          
-          ${comedien.admin_rating > 0 ? `
+
+          ${(comedien.admin_rating ?? 0) > 0 ? `
             <div class="admin-section">
               <strong>Note administrative:</strong>
               <div class="stars">
-                ${Array.from({length: 5}, (_, i) => 
-                  `<span style="color: ${i < comedien.admin_rating ? '#FFD700' : '#ccc'};">★</span>`
+                ${Array.from({length: 5}, (_, i) =>
+                  `<span style="color: ${i < (comedien.admin_rating ?? 0) ? '#FFD700' : '#ccc'};">★</span>`
                 ).join('')}
                 (${comedien.admin_rating}/5)
               </div>
@@ -251,57 +251,6 @@ export const generateComedienPDF = async (comedien: Comedien) => {
             </div>
             ` : ''}
 
-            ${skills.length > 0 ? `
-            <div class="section">
-              <h3>🎯 Compétences</h3>
-              ${['driving', 'diverse', 'dance', 'music'].map(category => {
-                const categorySkills = skills.filter(s => s.skill_category === category)
-                if (categorySkills.length === 0) return ''
-                
-                const categoryNames: Record<string, string> = {
-                  driving: 'Permis',
-                  diverse: 'Diverses', 
-                  dance: 'Danse',
-                  music: 'Musique'
-                }
-                
-                return `
-                  <div class="skills-category">
-                    <h4>${categoryNames[category]}:</h4>
-                    <div>
-                      ${categorySkills.map(skill => `<span class="skill-tag">${skill.skill_name}</span>`).join(' ')}
-                    </div>
-                  </div>
-                `
-              }).join('')}
-            </div>
-            ` : ''}
-
-            ${languages.length > 0 ? `
-            <div class="section">
-              <h3>🌍 Langues</h3>
-              ${['native', 'fluent', 'notions'].map(level => {
-                const levelLanguages = languages.filter(l => l.level === level)
-                if (levelLanguages.length === 0) return ''
-                
-                const levelNames: Record<string, string> = {
-                  native: 'Maternelles',
-                  fluent: 'Couramment',
-                  notions: 'Notions'
-                }
-                
-                return `
-                  <div class="skills-category">
-                    <h4>${levelNames[level]}:</h4>
-                    <div>
-                      ${levelLanguages.map(lang => `<span class="skill-tag">${lang.language}</span>`).join(' ')}
-                    </div>
-                  </div>
-                `
-              }).join('')}
-            </div>
-            ` : ''}
-
             ${(comedien.actor_resume || comedien.experience) ? `
             <div class="section">
               <h3>🎬 Expérience</h3>
@@ -317,7 +266,6 @@ export const generateComedienPDF = async (comedien: Comedien) => {
               <div class="links">
                 ${comedien.imdb_url ? `<div class="compact"><a href="${comedien.imdb_url}">IMDB</a></div>` : ''}
                 ${comedien.showreel_url ? `<div class="compact"><a href="${comedien.showreel_url}">Showreel</a></div>` : ''}
-                ${comedien.cv_pdf_url ? `<div class="compact"><a href="${comedien.cv_pdf_url}">CV PDF</a></div>` : ''}
               </div>
             </div>
             ` : ''}
@@ -511,7 +459,7 @@ export const downloadComedienPDFSimple = async (PDFData: PDFData) => {
     }
 
     // Note admin si présente
-    if (comedien.admin_rating > 0) {
+    if ((comedien.admin_rating ?? 0) > 0) {
       yPosition += 10
       doc.setFontSize(12)
       doc.setFont('helvetica', 'bold')

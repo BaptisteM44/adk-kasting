@@ -90,10 +90,14 @@ select {
 }
 
 .section {
-  padding: $spacing-3xl 0;
+  padding: 24px 0 $spacing-xl 0;
+
+  @media (min-width: $breakpoint-sm) {
+    padding: 32px 0 $spacing-2xl 0;
+  }
 
   @media (min-width: $breakpoint-md) {
-    padding: $spacing-3xl * 1.5 0;
+    padding: 16px 0 $spacing-3xl * 1.5 0;
   }
 }
 
@@ -141,7 +145,7 @@ select {
 .block { display: block; }
 .inline-block { display: inline-block; }
 .flex { display: flex; }
-.grid { display: grid; }
+// .grid { display: grid; }
 
 .justify-center { justify-content: center; }
 .justify-between { justify-content: space-between; }

@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 
 export const useFooterAnimation = () => {
   useEffect(() => {
-    // Animation du titre ADK-CASTING en bas de page
+    // Animation du titre ADK-KASTING en bas de page
     const handleScroll = () => {
       const scrollY = window.scrollY
       const windowHeight = window.innerHeight

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import Head from 'next/head'
+import Link from 'next/link'
 import { Layout } from '@/components/Layout'
 import { useAuth } from '@/components/AuthProvider'
 import { AuthGuard } from '@/components/AuthGuard'
@@ -21,7 +22,7 @@ interface ComedienWithComments extends Comedien {
 
 export default function DashboardPage() {
   return (
-    <Layout>
+    <Layout showPageTitle={false}>
       <AuthGuard requireAuth>
         <DashboardContent />
       </AuthGuard>
@@ -45,16 +46,7 @@ function DashboardContent() {
     try {
       const { data, error } = await supabase
         .from('comediens')
-        .select(`
-          *,
-          admin_comments (
-            id,
-            comedien_id,
-            admin_name,
-            comment,
-            created_at
-          )
-        `)
+        .select('*')
         .eq('is_active', false)
         .order('created_at', { ascending: false })
 
@@ -136,11 +128,25 @@ function DashboardContent() {
         <title>Validation des inscriptions - ADK</title>
       </Head>
       <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-        <h1>Validation des inscriptions</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h1>Dashboard Admin</h1>
+          <Link href="/dashboard/films">
+            <Button style={{
+              backgroundColor: '#393939',
+              color: 'white',
+              border: '1px solid #393939',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontWeight: 500
+            }}>
+              🎬 Gérer les Films
+            </Button>
+          </Link>
+        </div>
 
         {message && <div style={messageStyle}>{message}</div>}
 
-        <div style={{ marginBottom: '40px' }}>
+        <div style={{ marginBottom: '40px', marginTop: '40px' }}>
           <h2>Inscriptions en attente ({pendingComediens.length})</h2>
           {pendingComediens.length === 0 ? (
             <p style={{ color: '#666', fontStyle: 'italic' }}>Aucune inscription en attente</p>
@@ -193,14 +199,30 @@ function DashboardContent() {
                       <Button
                         onClick={() => validateComedien(comedien.id)}
                         disabled={loading}
-                        style={{ backgroundColor: '#28a745', color: 'white', minWidth: '120px' }}
+                        style={{
+                          backgroundColor: '#393939',
+                          color: 'white',
+                          border: '1px solid #393939',
+                          minWidth: '120px',
+                          padding: '10px 16px',
+                          borderRadius: '6px',
+                          fontWeight: 500
+                        }}
                       >
                         ✓ Valider
                       </Button>
                       <Button
                         onClick={() => rejectComedien(comedien.id)}
                         disabled={loading}
-                        style={{ backgroundColor: '#dc3545', color: 'white', minWidth: '120px' }}
+                        style={{
+                          backgroundColor: 'white',
+                          color: '#d32f2f',
+                          border: '1px solid #d32f2f',
+                          minWidth: '120px',
+                          padding: '10px 16px',
+                          borderRadius: '6px',
+                          fontWeight: 500
+                        }}
                       >
                         ✕ Rejeter
                       </Button>

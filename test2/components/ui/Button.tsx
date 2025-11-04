@@ -6,6 +6,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: 'sm' | 'md' | 'lg'
   loading?: boolean
   icon?: React.ReactNode
+  fullWidth?: boolean
   children: React.ReactNode
 }
 
@@ -15,6 +16,7 @@ export const Button: React.FC<ButtonProps> = ({
   loading = false,
   disabled,
   icon,
+  fullWidth = false,
   children,
   className = '',
   ...props
@@ -22,7 +24,8 @@ export const Button: React.FC<ButtonProps> = ({
   const baseClass = 'btn'
   const variantClass = `btn--${variant}`
   const sizeClass = size !== 'md' ? `btn--${size}` : ''
-  const classes = [baseClass, variantClass, sizeClass, className]
+  const fullWidthClass = fullWidth ? 'btn--full-width' : ''
+  const classes = [baseClass, variantClass, sizeClass, fullWidthClass, className]
     .filter(Boolean)
     .join(' ')
 

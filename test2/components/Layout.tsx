@@ -8,7 +8,7 @@ import { useHeaderScroll } from '@/hooks/useHeaderScroll'
 
 interface LayoutProps {
   children: React.ReactNode
-  showPageTitle?: boolean // Option pour masquer le titre ADK-CASTING
+  showPageTitle?: boolean // Option pour masquer le titre ADK-KASTING
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children, showPageTitle = true }) => {

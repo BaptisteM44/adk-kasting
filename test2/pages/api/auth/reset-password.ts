@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { createClient } from '@supabase/supabase-js'
+import { sendPasswordResetEmail } from '@/lib/email'
 import crypto from 'crypto'
 
 const supabase = createClient(
@@ -54,21 +55,31 @@ export default async function handler(
       return res.status(500).json({ message: 'Erreur serveur' })
     }
 
-    // TODO: Envoyer l'email avec le lien de réinitialisation
-    // Pour l'instant, on log le token (à remplacer par un vrai service d'email)
+    // Envoyer l'email de réinitialisation
     const resetLink = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/nouveau-mot-de-passe?token=${resetToken}`
-    
-    console.log('━'.repeat(80))
-    console.log('🔐 LIEN DE RÉINITIALISATION DE MOT DE PASSE')
-    console.log('━'.repeat(80))
-    console.log(`Email: ${email}`)
-    console.log(`Lien: ${resetLink}`)
-    console.log(`Expire: ${resetTokenExpiry.toLocaleString('fr-FR')}`)
-    console.log('━'.repeat(80))
 
-    return res.status(200).json({ 
+    try {
+      await sendPasswordResetEmail(email, resetToken, resetLink)
+      console.log(`✅ Email de réinitialisation envoyé à ${email}`)
+    } catch (emailError) {
+      // Logger l'erreur mais ne pas bloquer (sécurité)
+      console.error('Erreur envoi email réinitialisation:', emailError)
+
+      // En dev, on log le lien pour debug
+      if (process.env.NODE_ENV === 'development') {
+        console.log('━'.repeat(80))
+        console.log('🔐 LIEN DE RÉINITIALISATION (DEV MODE)')
+        console.log('━'.repeat(80))
+        console.log(`Email: ${email}`)
+        console.log(`Lien: ${resetLink}`)
+        console.log(`Expire: ${resetTokenExpiry.toLocaleString('fr-FR')}`)
+        console.log('━'.repeat(80))
+      }
+    }
+
+    return res.status(200).json({
       message: 'Si cet email existe, un lien de réinitialisation a été envoyé.',
-      // En dev, on retourne le lien
+      // En dev, on retourne le lien pour faciliter les tests
       ...(process.env.NODE_ENV === 'development' && { resetLink })
     })
 

@@ -21,24 +21,24 @@ export default async function handler(
 }
 
 async function handleGet(req: NextApiRequest, res: NextApiResponse) {
-  const { 
-    page = '1', 
-    limit = '12', 
-    gender, 
-    ethnicity, 
-    hair_color, 
-    eye_color, 
-    build, 
-    experience_level, 
-    nationality, 
-    city, 
-    languages, 
+  const {
+    page = '1',
+    limit = '12',
+    gender,
+    ethnicity,
+    hair_color,
+    eye_color,
+    build,
+    experience_level,
+    nationality,
+    city,
+    languages,
     languages_fluent, // Nouveau filtre
-    diverse_skills,
-    driving_licenses, // Nouveau nom de champ
-    age_min, 
-    age_max, 
-    height_min, 
+    wp_skills, // Colonne WordPress avec les vraies données
+    driving_licenses, // Permis de conduire
+    age_min,
+    age_max,
+    height_min,
     height_max,
     desired_activities, // Nouveau filtre
     name // Nouveau filtre par nom
@@ -50,28 +50,29 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
       .select('*', { count: 'exact' })
       .eq('is_active', true)
 
-  // Filtrage par permis de conduire - nouveau système avec arrays
+  // Filtrage par permis de conduire - colonne WordPress avec données sérialisées PHP
   if (driving_licenses && driving_licenses !== '') {
     console.log('Recherche permis:', driving_licenses) // Debug
-    query = query.contains('driving_licenses', [driving_licenses])
+    query = query.ilike('actor_driving_license', `%${driving_licenses}%`)
   }
 
-  // Filtrage par compétences diverses - nouveau système avec arrays 
-  if (diverse_skills && diverse_skills !== '') {
-    console.log('Recherche compétence diverse:', diverse_skills) // Debug
-    query = query.contains('diverse_skills', [diverse_skills])
+  // Filtrage par compétences diverses - colonne WordPress avec données sérialisées PHP
+  if (wp_skills && wp_skills !== '') {
+    console.log('Recherche compétence diverse:', wp_skills) // Debug
+    query = query.ilike('wp_skills', `%${wp_skills}%`)
   }
 
-  // Filtrage par activités désirées - nouveau champ
+  // Filtrage par activités désirées - TODO: vérifier quelle colonne WordPress contient ces données
   if (desired_activities && desired_activities !== '') {
     console.log('Recherche activité désirée:', desired_activities) // Debug
-    query = query.contains('desired_activities', [desired_activities])
+    // Colonne à identifier dans WordPress
+    query = query.ilike('wp_activity_domain', `%${desired_activities}%`)
   }
 
-  // Filtrage par langues parlées couramment - nouveau champ
+  // Filtrage par langues parlées couramment - colonne WordPress
   if (languages_fluent && languages_fluent !== '') {
     console.log('Recherche langue courante:', languages_fluent) // Debug
-    query = query.contains('languages_fluent', [languages_fluent])
+    query = query.ilike('actor_languages_native', `%${languages_fluent}%`)
   }
 
   // Recherche par nom - nouveau filtre
@@ -87,9 +88,18 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
   if (eye_color) query = query.eq('eye_color', eye_color)
   if (build) query = query.eq('build', build)
   if (experience_level) query = query.eq('experience_level', experience_level)
-  if (nationality) query = query.ilike('nationality', `%${nationality}%`)
+  // Nationalité - utiliser colonne WordPress si elle existe, sinon colonne normale
+  if (nationality) {
+    query = query.or(`actor_nationality.ilike.%${nationality}%,nationality.ilike.%${nationality}%`)
+  }
+
   if (city) query = query.ilike('city', `%${city}%`)
-  if (languages) query = query.ilike('languages', `%${languages}%`)
+
+  // Langue maternelle - colonne WordPress avec données sérialisées PHP
+  if (languages && languages !== '') {
+    console.log('Recherche langue maternelle:', languages) // Debug
+    query = query.ilike('actor_languages_native', `%${languages}%`)
+  }
   
   // Recherche par nom (nouveau filtre)
   if (name) {
@@ -117,16 +127,34 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
   const limitNum = parseInt(limit as string)
   const startIndex = (pageNum - 1) * limitNum
 
+  // Pour l'ordre aléatoire, on récupère plus de résultats qu'on mélange
+  // puis on pagine côté serveur
   query = query
-    .order('last_name')
+    .order('id', { ascending: false })
     .range(startIndex, startIndex + limitNum - 1)
 
   const { data, error, count } = await query
 
   if (error) throw error
 
+  // Mélanger les résultats de manière vraiment aléatoire (Fisher-Yates shuffle)
+  const shuffleArray = (array: any[]) => {
+    // Filtrer d'abord les valeurs nulles ou invalides
+    const validArray = array.filter(item => item && item.id);
+    const shuffled = [...validArray];
+
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      // Générer un index aléatoire
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  const shuffledData = data ? shuffleArray(data) : [];
+
   return res.status(200).json({
-    data: data || [],
+    data: shuffledData,
     pagination: {
       page: pageNum,
       limit: limitNum,

@@ -116,23 +116,6 @@ const Connexion: React.FC = () => {
                 </Link>
               </p>
             </div>
-
-            <div className="connexion__info">
-              <h3 className="text-body">Informations importantes :</h3>
-              <ul>
-                <li className="text-body">Votre profil doit être validé par notre équipe avant d'être publié</li>
-                <li className="text-body">Les admins peuvent accéder au dashboard de gestion</li>
-                <li className="text-body">Les comédiens peuvent modifier leur profil une fois connectés</li>
-              </ul>
-            </div>
-
-            <div className="connexion__status">
-              <div className="alert alert--warning">
-                <h4 className="text-body">⚠️ Système d'authentification en cours de finalisation</h4>
-                <p className="text-body">La base de données nécessite une mise à jour pour activer l'inscription et la connexion.</p>
-                <p className="text-body">Consultez le fichier <code>setup-database.sh</code> pour les instructions.</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -192,40 +175,6 @@ const Connexion: React.FC = () => {
           text-decoration: none;
         }
 
-        .connexion__info {
-          background: #f8f9fa;
-          padding: 1.5rem;
-          border-radius: 8px;
-          margin-bottom: 1rem;
-        }
-
-        .connexion__info h3 {
-          margin-bottom: 1rem;
-          font-size: 1.1rem;
-        }
-
-        .connexion__info ul {
-          list-style: none;
-          padding: 0;
-        }
-
-        .connexion__info li {
-          padding: 0.25rem 0;
-          padding-left: 1rem;
-          position: relative;
-        }
-
-        .connexion__info li:before {
-          content: "•";
-          color: #0070f3;
-          position: absolute;
-          left: 0;
-        }
-
-        .connexion__status {
-          margin-top: 1rem;
-        }
-
         .alert {
           padding: 1rem;
           border-radius: 8px;
@@ -236,27 +185,6 @@ const Connexion: React.FC = () => {
           background-color: #fee;
           color: #c33;
           border: 1px solid #fcc;
-        }
-
-        .alert--warning {
-          background-color: #fff3cd;
-          color: #856404;
-          border: 1px solid #ffeaa7;
-        }
-
-        .alert h4 {
-          margin: 0 0 0.5rem 0;
-        }
-
-        .alert p {
-          margin: 0.5rem 0;
-        }
-
-        .alert code {
-          background: rgba(0,0,0,0.1);
-          padding: 2px 4px;
-          border-radius: 3px;
-          font-family: monospace;
         }
 
         @media (max-width: 768px) {

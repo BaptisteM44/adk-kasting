@@ -24,9 +24,9 @@
   &__nav {
     display: flex;
     align-items: center;
-    gap: $spacing-lg;
+    gap: $spacing-md;
 
-    @media (max-width: $breakpoint-md) {
+    @media (max-width: 1024px) {
       display: none;
     }
   }
@@ -77,16 +77,163 @@
   &__user {
     display: flex;
     align-items: center;
-    gap: $spacing-sm;
+    gap: 8px;
+
+    @media (max-width: 1024px) {
+      display: none;
+    }
+  }
+
+  // Bouton hamburger
+  &__hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 101;
+    position: relative;
+
+    @media (max-width: 1024px) {
+      display: flex;
+    }
+
+    span {
+      width: 100%;
+      height: 2.5px;
+      background-color: #333;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+      position: absolute;
+      left: 0;
+    }
+
+    span:nth-child(1) {
+      top: 6px;
+    }
+
+    span:nth-child(2) {
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    span:nth-child(3) {
+      bottom: 6px;
+    }
+
+    // Animation du hamburger en X parfaite
+    &--open {
+      span:nth-child(1) {
+        top: 50%;
+        transform: translateY(-50%) rotate(45deg);
+      }
+
+      span:nth-child(2) {
+        opacity: 0;
+      }
+
+      span:nth-child(3) {
+        bottom: 50%;
+        transform: translateY(50%) rotate(-45deg);
+      }
+    }
+  }
+
+  // Menu mobile overlay
+  &__mobile-menu {
+    position: fixed;
+    top: 88px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    z-index: 99;
+    overflow-y: auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    animation: slideDown 0.3s ease;
+
+    @media (min-width: 851px) {
+      display: none;
+    }
+  }
+
+  &__mobile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+  }
+
+  &__mobile-link {
+    font-size: 24px;
+    font-weight: 400;
+    color: #333;
+    text-decoration: none;
+    padding: 1rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+
+    &:active {
+      background-color: rgba(0, 0, 0, 0.05);
+      transform: scale(0.98);
+    }
+
+    &--active {
+      color: #393939;
+      font-weight: 500;
+      background-color: rgba(0, 0, 0, 0.03);
+      border-left-color: #393939;
+    }
+  }
+
+  &__mobile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem;
+    margin: 0 -2rem -2rem -2rem;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    position: sticky;
+    bottom: 0;
+
+    a {
+      width: 100%;
+    }
   }
 }
 
-// Page Title Component - Titre ADK-CASTING géant
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Page Title Component - Titre ADK-KASTING géant
 .page-title {
   background-color: $primary-white;
   padding: 0 var(--padding-horizontal);
-  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+  margin-bottom: $spacing-lg;
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
               opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  @media (max-width: $breakpoint-sm) {
+    margin-bottom: $spacing-md;
+  }
 
   &__brand {
     font-size: clamp(48px, 8vw, 120px);
@@ -97,7 +244,7 @@
     text-transform: uppercase;
     text-align: left;
     line-height: 1.1;
-    
+
     @media (max-width: 768px) {
       font-size: clamp(36px, 10vw, 72px);
       letter-spacing: 2px;
@@ -124,6 +271,10 @@
 
   &__container {
     padding: $spacing-3xl 0 $spacing-lg;
+
+    @media (max-width: $breakpoint-sm) {
+      padding: $spacing-2xl 0 $spacing-md;
+    }
   }
 
   &__content {
@@ -131,6 +282,11 @@
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: $spacing-xl;
     margin-bottom: $spacing-xl;
+
+    @media (max-width: $breakpoint-sm) {
+      gap: $spacing-lg;
+      margin-bottom: $spacing-lg;
+    }
   }
 
   &__section {
@@ -180,25 +336,26 @@
     background-color: transparent;
     z-index: 3;
     line-height: 1;
-    margin-top: -16px;
+    margin-top: -14px;
     @media (max-width: $breakpoint-xl) {
       font-size: 100px;
       letter-spacing: 6px;
     }
     
     @media (max-width: $breakpoint-lg) {
-      font-size: 80px;
       letter-spacing: 5px;
     }
     
     @media (max-width: $breakpoint-md) {
-      font-size: 60px;
+      font-size: 80px;
       letter-spacing: 4px;
+      margin-top: -11px;
     }
     
     @media (max-width: $breakpoint-sm) {
-      font-size: 40px;
+      font-size: 48px;
       letter-spacing: 2px;
+          margin-top: -7px;
     }
   }
 
@@ -330,56 +487,106 @@
     }
   }
 
-  // Grid pour comédiens - 5 colonnes responsive
+  // Grid pour comédiens - CSS Grid avec auto-fill pour remplissage uniforme
   &--comediens {
+    display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 16px;
+    gap: 32px 16px; // 32px vertical, 16px horizontal
     padding: 16px;
-    max-width: 1600px;
-    margin: 0 auto;
-    justify-items: center;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    justify-items: center; // Centre les items dans leurs cellules
 
-    @media (min-width: 1400px) {
-      grid-template-columns: repeat(5, 1fr);
+    @media (max-width: $breakpoint-sm) {
+      padding: 24px 16px;
+      gap: 32px;
     }
-
-    @media (min-width: 1100px) and (max-width: 1399px) {
-      grid-template-columns: repeat(4, 1fr);
-      
+    @media (max-width: 843px) {
+      gap: 24px;
     }
-
-    @media (min-width: 800px) and (max-width: 1099px) {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    @media (min-width: 550px) and (max-width: 799px) {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
     @media (max-width: 549px) {
-      grid-template-columns: 1fr;
-      padding: 8px;
-      gap: 12px;
+      gap: 24px;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     }
   }
 }
 
+// Section comédiens avec fond gris clair
+.comediens-section {
+  background-color: #f5f5f5;
+  padding: 0; // Pas de padding ici, la grid a déjà son padding de 16px
+  border-radius: $border-radius-lg;
+}
+
 // Filters
 .filters {
-  background-color: $light-gray;
-  padding: $spacing-xl;
-  border-radius: $border-radius-lg;
-  margin-bottom: $spacing-xl;
+  background-color: transparent;
+  padding: 0 16px $spacing-xl 16px; // Pas de padding en haut
+  margin-bottom: 0;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 0 16px $spacing-lg 16px;
+  }
 
   &__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
     margin-bottom: $spacing-lg;
+
+    @media (max-width: $breakpoint-sm) {
+      margin-bottom: $spacing-md;
+    }
 
     h2 {
       margin: 0;
+      font-size: 18px;
+      white-space: nowrap;
     }
+
+    @media (max-width: 1400px) {
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: $breakpoint-md) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+    }
+  }
+
+  &__single-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      white-space: nowrap;
+    }
+
+    .input_age {
+      width: 115px;
+      flex-grow: 1;
+    }
+
+    @media (max-width: 1200px) {
+      align-items: stretch;
+      gap: 1rem;
+    }
+  }
+
+  &__title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-right: auto;
+    flex-shrink: 0;
   }
 
   &__main-row {
@@ -424,12 +631,14 @@
     display: flex;
     gap: 0.5rem;
     align-items: flex-end;
-    
-    input {
-      width: 80px;
+
+    .input_age {
+      width: 120px; // Augmenté à 145px pour afficher "Âge min" et "Âge max" en entier (avec spinners)
     }
   }
-
+    .input_taille {
+      width: 120px; // Augmenté à 145px pour afficher "Âge min" et "Âge max" en entier (avec spinners)
+    }
   &__toggle {
     background: none;
     border: 1px solid $accent-blue;
@@ -452,6 +661,39 @@
     }
   }
 
+  // Nouveau bouton + avec icône SVG (sans fond, noir)
+  &__toggle-icon {
+    background: transparent;
+    border: none;
+    color: #000; // Noir
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    font-size: 32px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+
+    &:hover {
+      color: #333; // Gris foncé au hover
+      transform: scale(1.15);
+    }
+
+    &:active {
+      transform: scale(0.9);
+    }
+  }
+
+  &__plus-icon {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &--rotated {
+      transform: rotate(45deg);
+    }
+  }
+
   &__grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -463,7 +705,6 @@
   }
 
   &__actions {
-    margin-top: $spacing-lg;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -475,10 +716,58 @@
   }
 
   &__live-count {
-    color: $accent-blue;
+    color: #000;
     font-weight: 600;
     font-size: $font-size-sm;
     white-space: nowrap;
+  }
+
+  // Compteur stylisé avec fond noir et border-radius 50px
+  &__count-badge {
+    background-color: #000;
+    color: #fff;
+    font-weight: 600;
+    font-size: $font-size-sm;
+    padding: 6px 16px;
+    border-radius: 50px;
+    white-space: nowrap;
+    display: inline-block;
+  }
+
+  // Ligne unique pour tous les filtres de base
+  &__single-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem; // 0.5rem de gap entre les filtres
+    flex-wrap: wrap; // Permet le retour à la ligne si nécessaire
+    justify-content: flex-start;
+    align-items: center;
+    > * {
+      flex-shrink: 0; // Empêche les éléments de rétrécir
+    }
+
+    @media (max-width: $breakpoint-md) {
+      flex-direction: column;
+      align-items: stretch;
+
+      > * {
+        flex-shrink: 1;
+        width: 100%;
+      }
+    }
+  }
+
+  // Container pour les boutons d'action (Réinitialiser + bouton +)
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto; // Pousse les actions vers la droite
+
+    @media (max-width: $breakpoint-md) {
+      margin-left: 0;
+      width: 100%;
+    }
   }
 
   // Checkbox styling
@@ -492,13 +781,24 @@
     user-select: none;
   }
 
-  // Grid for basic filters
+  // Grid pour les filtres avancés - bien organisés en dessous
   &__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: $spacing-md;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
 
-    @media (max-width: $breakpoint-md) {
+    @media (min-width: 800px) and (max-width: 1099px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (min-width: 550px) and (max-width: 799px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 549px) {
       grid-template-columns: 1fr;
     }
   }

@@ -7,13 +7,14 @@ interface CollaborationsSectionProps {
   autoScroll?: boolean
 }
 
-export const CollaborationsSection: React.FC<CollaborationsSectionProps> = ({ 
-  autoScroll = false 
+export const CollaborationsSection: React.FC<CollaborationsSectionProps> = ({
+  autoScroll = false
 }) => {
   const [films, setFilms] = useState<Film[]>([])
   const [loading, setLoading] = useState(true)
   const filmsGridRef = useRef<HTMLDivElement>(null)
   const posterRefs = useRef<HTMLDivElement[]>([])
+  const isDraggingRef = useRef(false) // Flag pour arrêter l'auto-scroll pendant le drag
 
   // Créer une liste infinie de films en les dupliquant
   const infiniteFilms = films.length > 0 ? [
@@ -24,14 +25,24 @@ export const CollaborationsSection: React.FC<CollaborationsSectionProps> = ({
   ] : []
 
   useEffect(() => {
-    const loadFilms = () => {
+    const loadFilms = async () => {
       try {
-        // Charger les films depuis le fichier JSON local
-        const activeFilms = filmsData.filter(film => film.is_active)
-        setFilms(activeFilms as Film[])
+        // Charger les films depuis l'API Supabase (show_in_collaborations = true)
+        const response = await fetch('/api/films?show_in_collaborations=true')
+        const data = await response.json()
+
+        if (response.ok && data.films) {
+          setFilms(data.films as Film[])
+        } else {
+          // Fallback sur le fichier JSON si l'API échoue
+          const activeFilms = filmsData.filter(film => film.is_active)
+          setFilms(activeFilms as Film[])
+        }
       } catch (error) {
         console.error('Erreur lors du chargement des films:', error)
-        setFilms([])
+        // Fallback sur le fichier JSON si l'API échoue
+        const activeFilms = filmsData.filter(film => film.is_active)
+        setFilms(activeFilms as Film[])
       } finally {
         setLoading(false)
       }
@@ -40,7 +51,7 @@ export const CollaborationsSection: React.FC<CollaborationsSectionProps> = ({
     loadFilms()
   }, [])
 
-  // Drag horizontal pour faire défiler les affiches
+  // Drag horizontal - fonctionne toujours, arrête l'auto-scroll pendant le drag
   useEffect(() => {
     const filmsGrid = filmsGridRef.current
     if (!filmsGrid) return
@@ -51,6 +62,7 @@ export const CollaborationsSection: React.FC<CollaborationsSectionProps> = ({
 
     const handleMouseDown = (e: MouseEvent) => {
       isDown = true
+      isDraggingRef.current = true // Arrêter l'auto-scroll
       filmsGrid.classList.add('dragging')
       startX = e.pageX - filmsGrid.offsetLeft
       scrollLeft = filmsGrid.scrollLeft
@@ -59,11 +71,13 @@ export const CollaborationsSection: React.FC<CollaborationsSectionProps> = ({
 
     const handleMouseLeave = () => {
       isDown = false
+      isDraggingRef.current = false // Reprendre l'auto-scroll
       filmsGrid.classList.remove('dragging')
     }
 
     const handleMouseUp = () => {
       isDown = false
+      isDraggingRef.current = false // Reprendre l'auto-scroll
       filmsGrid.classList.remove('dragging')
     }
 
@@ -71,13 +85,14 @@ export const CollaborationsSection: React.FC<CollaborationsSectionProps> = ({
       if (!isDown) return
       e.preventDefault()
       const x = e.pageX - filmsGrid.offsetLeft
-      const walk = (x - startX) * 2 // Vitesse de scroll
+      const walk = (x - startX) * 2
       filmsGrid.scrollLeft = scrollLeft - walk
     }
 
     // Touch events pour mobile
     const handleTouchStart = (e: TouchEvent) => {
       isDown = true
+      isDraggingRef.current = true
       filmsGrid.classList.add('dragging')
       startX = e.touches[0].pageX - filmsGrid.offsetLeft
       scrollLeft = filmsGrid.scrollLeft
@@ -85,6 +100,7 @@ export const CollaborationsSection: React.FC<CollaborationsSectionProps> = ({
 
     const handleTouchEnd = () => {
       isDown = false
+      isDraggingRef.current = false
       filmsGrid.classList.remove('dragging')
     }
 
@@ -95,7 +111,6 @@ export const CollaborationsSection: React.FC<CollaborationsSectionProps> = ({
       filmsGrid.scrollLeft = scrollLeft - walk
     }
 
-    // Ajouter les événements
     filmsGrid.addEventListener('mousedown', handleMouseDown)
     filmsGrid.addEventListener('mouseleave', handleMouseLeave)
     filmsGrid.addEventListener('mouseup', handleMouseUp)
@@ -104,7 +119,6 @@ export const CollaborationsSection: React.FC<CollaborationsSectionProps> = ({
     filmsGrid.addEventListener('touchend', handleTouchEnd)
     filmsGrid.addEventListener('touchmove', handleTouchMove)
 
-    // Cleanup
     return () => {
       filmsGrid.removeEventListener('mousedown', handleMouseDown)
       filmsGrid.removeEventListener('mouseleave', handleMouseLeave)
@@ -116,23 +130,24 @@ export const CollaborationsSection: React.FC<CollaborationsSectionProps> = ({
     }
   }, [films])
 
-  // Auto-scroll simple et efficace (seulement pour la page d'accueil)
+  // Auto-scroll simplifié - s'arrête pendant le drag
   useEffect(() => {
     if (!autoScroll) return
-    
+
     const filmsGrid = filmsGridRef.current
     if (!filmsGrid || infiniteFilms.length === 0) return
 
     let animationId: number
-    let isUserInteracting = false
-    const scrollSpeed = 1.2
+    const scrollSpeed = 0.8
 
     const smoothScroll = () => {
-      if (filmsGrid && !isUserInteracting) {
+      // Ne pas scroller si l'utilisateur est en train de drag
+      if (filmsGrid && !isDraggingRef.current) {
         const currentScroll = filmsGrid.scrollLeft
         const maxScroll = filmsGrid.scrollWidth - filmsGrid.clientWidth
-        
-        if (currentScroll >= maxScroll * 0.75) {
+
+        // Reset quand on arrive aux 3/4 pour créer une boucle infinie
+        if (currentScroll >= maxScroll * 0.66) {
           filmsGrid.scrollLeft = 0
         } else {
           filmsGrid.scrollLeft = currentScroll + scrollSpeed
@@ -141,31 +156,11 @@ export const CollaborationsSection: React.FC<CollaborationsSectionProps> = ({
       animationId = requestAnimationFrame(smoothScroll)
     }
 
-    // Pause sur interaction utilisateur
-    const pauseScroll = () => { 
-      isUserInteracting = true 
-    }
-    const resumeScroll = () => { 
-      setTimeout(() => { 
-        isUserInteracting = false 
-      }, 1500) 
-    }
-
-    // Events pour pauser/reprendre
-    filmsGrid.addEventListener('mouseenter', pauseScroll)
-    filmsGrid.addEventListener('mouseleave', resumeScroll)
-    filmsGrid.addEventListener('mousedown', pauseScroll)
-    filmsGrid.addEventListener('touchstart', pauseScroll)
-
     // Démarrage de l'auto-scroll
     animationId = requestAnimationFrame(smoothScroll)
 
     return () => {
       if (animationId) cancelAnimationFrame(animationId)
-      filmsGrid.removeEventListener('mouseenter', pauseScroll)
-      filmsGrid.removeEventListener('mouseleave', resumeScroll)
-      filmsGrid.removeEventListener('mousedown', pauseScroll)
-      filmsGrid.removeEventListener('touchstart', pauseScroll)
     }
   }, [infiniteFilms, autoScroll])
 
