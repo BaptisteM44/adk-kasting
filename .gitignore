@@ -41,12 +41,13 @@ next-env.d.ts
 *.swp
 *.swo
 
-# Project specific
+# Claude Code
+.claude/
+
+# Logs
 logs/
 *.log
+
+# Project specific
 compression-progress.json
 .env.bak
-
-# Images (si vous ne voulez pas versionner les images compressées)
-# public/images/
-# images/
