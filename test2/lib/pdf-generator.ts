@@ -558,7 +558,7 @@ export const generateComedienPDF = async (comedien: any) => {
     const options = {
       margin: 0.2,
       filename: `${displayName.replace(/[^a-zA-Z0-9]/g, '_')}_profil_ADK.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
+      image: { type: 'jpeg' as const, quality: 0.98 },
       html2canvas: {
         scale: 2,
         useCORS: true,
@@ -566,11 +566,11 @@ export const generateComedienPDF = async (comedien: any) => {
         logging: false
       },
       jsPDF: {
-        unit: 'in',
-        format: 'a4',
-        orientation: 'portrait'
+        unit: 'in' as const,
+        format: 'a4' as const,
+        orientation: 'portrait' as const
       },
-      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] as const }
     }
 
     // Créer un élément temporaire pour le rendu

@@ -23,7 +23,7 @@ export default async function handler(
 
     // Vérifier si le token existe et n'est pas expiré
     const { data: user, error } = await supabase
-      .from('users')
+      .from('comediens')
       .select('id, reset_token_expiry')
       .eq('reset_token', token)
       .single()

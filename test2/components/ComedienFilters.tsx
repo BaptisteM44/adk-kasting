@@ -124,7 +124,7 @@ export const ComedienFilters: React.FC<ComedienFiltersProps> = ({
     { value: 'Acrobatie', label: 'Acrobatie' },
     { value: 'Art martial', label: 'Art martial' },
     { value: 'Sport de combat', label: 'Sport de combat' },
-    { value: 'Équitation', label: 'Équitation' }
+    { value: 'Equitation', label: 'Équitation' }
   ]
 
   const drivingLicenseOptions = [

@@ -25,15 +25,15 @@ export default async function handler(
 
     // Vérifier si l'utilisateur existe
     const { data: existingUser, error: userError } = await supabase
-      .from('users')
+      .from('comediens')
       .select('id, email')
       .eq('email', email.toLowerCase())
       .single()
 
     if (userError || !existingUser) {
       // Pour des raisons de sécurité, on retourne toujours success même si l'email n'existe pas
-      return res.status(200).json({ 
-        message: 'Si cet email existe, un lien de réinitialisation a été envoyé.' 
+      return res.status(200).json({
+        message: 'Si cet email existe, un lien de réinitialisation a été envoyé.'
       })
     }
 
@@ -43,7 +43,7 @@ export default async function handler(
 
     // Sauvegarder le token dans la base
     const { error: updateError } = await supabase
-      .from('users')
+      .from('comediens')
       .update({
         reset_token: resetToken,
         reset_token_expiry: resetTokenExpiry.toISOString()

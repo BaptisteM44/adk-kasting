@@ -2,6 +2,12 @@
 import { jsPDF } from 'jspdf'
 import type { Comedien } from '../types'
 
+interface PDFData {
+  comedien: Comedien
+  skills?: Array<{ skill_category: string; skill_name: string }>
+  languages?: Array<{ level: string; language: string }>
+}
+
 export const generateComedienPDF = async (comedien: Comedien) => {
   const age = comedien.birth_date ? calculateAge(comedien.birth_date) : null
   
@@ -294,7 +300,7 @@ const calculateAge = (birthDate: string) => {
   return monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate()) ? age - 1 : age
 }
 
-export const downloadComedienPDF = async (PDFData: PDFData) => {
+export const downloadComedienPDF = async (comedien: Comedien) => {
   try {
     // Import dynamique côté client seulement
     if (typeof window === 'undefined') {
@@ -302,26 +308,26 @@ export const downloadComedienPDF = async (PDFData: PDFData) => {
     }
 
     const html2pdf = (await import('html2pdf.js')).default
-    const htmlContent = await generateComedienPDF(PDFData)
-    
+    const htmlContent = await generateComedienPDF(comedien)
+
     const opt = {
-      margin: [0.3, 0.3, 0.3, 0.3],
-      filename: `${PDFData.comedien.display_name.replace(/[^a-zA-Z0-9]/g, '_')}_profil.pdf`,
-      image: { type: 'jpeg', quality: 0.95 },
-      html2canvas: { 
-        scale: 1.5, 
+      margin: [0.3, 0.3, 0.3, 0.3] as [number, number, number, number],
+      filename: `${comedien.display_name.replace(/[^a-zA-Z0-9]/g, '_')}_profil.pdf`,
+      image: { type: 'jpeg' as const, quality: 0.95 },
+      html2canvas: {
+        scale: 1.5,
         useCORS: true,
         allowTaint: true,
         foreignObjectRendering: true
       },
-      jsPDF: { 
-        unit: 'in', 
-        format: 'a4', 
-        orientation: 'portrait',
+      jsPDF: {
+        unit: 'in' as const,
+        format: 'a4' as const,
+        orientation: 'portrait' as const,
         putOnlyUsedFonts: true,
         floatPrecision: 16
       },
-      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] as const }
     }
     
     const element = document.createElement('div')
@@ -389,7 +395,7 @@ export const downloadComedienPDFSimple = async (PDFData: PDFData) => {
     yPosition += 10
 
     // Compétences
-    if (skills.length > 0) {
+    if (skills && skills.length > 0) {
       doc.setFontSize(14)
       doc.setFont('helvetica', 'bold')
       doc.text('COMPÉTENCES', margin, yPosition)
@@ -425,7 +431,7 @@ export const downloadComedienPDFSimple = async (PDFData: PDFData) => {
     }
 
     // Langues
-    if (languages.length > 0) {
+    if (languages && languages.length > 0) {
       yPosition += 5
       doc.setFontSize(14)
       doc.setFont('helvetica', 'bold')

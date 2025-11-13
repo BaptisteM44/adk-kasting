@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Layout } from '../components/Layout'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
+import Link from 'next/link'
 
 export default function NewPassword() {
   const router = useRouter()
@@ -96,9 +97,9 @@ export default function NewPassword() {
         <div style={{ maxWidth: '500px', margin: '80px auto', padding: '0 20px', textAlign: 'center' }}>
           <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>Lien invalide</h1>
           <p style={{ color: '#c00', marginBottom: '30px' }}>{error}</p>
-          <a href="/reset-password" style={{ color: '#000', textDecoration: 'underline' }}>
+          <Link href="/reset-password" style={{ color: '#000', textDecoration: 'underline' }}>
             Demander un nouveau lien
-          </a>
+          </Link>
         </div>
       </Layout>
     )

@@ -671,7 +671,7 @@
   background-color: transparent;
   z-index: 3;
   line-height: 1;
-  margin-top: -14px;
+  margin-top: -16px;
 }
 @media (max-width: 1280px) {
   .hero__brand {
@@ -1650,8 +1650,14 @@
 }
 .comedien-profile .profile-main {
   display: grid;
-  grid-template-columns: 600px 1fr;
-  gap: 40px;
+  grid-template-columns: 420px 1fr;
+  gap: 60px;
+  max-width: 100%;
+}
+@media (max-width: 1650px) {
+  .comedien-profile .profile-main {
+    gap: 40px;
+  }
 }
 @media (max-width: 1024px) {
   .comedien-profile .profile-main {
@@ -1661,7 +1667,8 @@
 .comedien-profile .profile-photo-section {
   background: transparent;
   padding-top: 0;
-  width: 540px;
+  width: 420px;
+  max-width: 100%;
 }
 @media (max-width: 1024px) {
   .comedien-profile .profile-photo-section {
@@ -1673,7 +1680,8 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: 540px;
+  width: 420px;
+  max-width: 100%;
 }
 @media (max-width: 1024px) {
   .comedien-profile .profile-photo-section .photos-layout {
@@ -1681,18 +1689,19 @@
   }
 }
 .comedien-profile .profile-photo-section .photos-layout .main-photo {
-  width: 540px;
-  height: 742px;
+  width: 420px;
+  height: 577px;
   overflow: hidden;
   background: #F5F5F5;
   border-radius: 10px;
   opacity: 1;
+  max-width: 100%;
 }
 @media (max-width: 1024px) {
   .comedien-profile .profile-photo-section .photos-layout .main-photo {
     width: 100%;
     height: auto;
-    aspect-ratio: 540/742;
+    aspect-ratio: 420/577;
   }
 }
 .comedien-profile .profile-photo-section .photos-layout .main-photo img {
@@ -1795,8 +1804,8 @@
   color: #4F46E5;
 }
 .comedien-profile .profile-photo-section .no-photo .placeholder-photo {
-  width: 540px;
-  height: 742px;
+  width: 420px;
+  height: 577px;
   background: #F5F5F5;
   border-radius: 10px;
   display: flex;
@@ -1804,12 +1813,13 @@
   align-items: center;
   justify-content: center;
   color: #999;
+  max-width: 100%;
 }
 @media (max-width: 1024px) {
   .comedien-profile .profile-photo-section .no-photo .placeholder-photo {
     width: 100%;
     height: auto;
-    aspect-ratio: 540/742;
+    aspect-ratio: 420/577;
   }
 }
 .comedien-profile .profile-photo-section .no-photo .placeholder-photo span {
@@ -1824,6 +1834,8 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 .comedien-profile .profile-info-section .profile-header-row {
   display: flex;
@@ -1919,10 +1931,15 @@
   line-height: 32px;
   color: #393939;
   letter-spacing: 0%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  -webkit-hyphens: auto;
+          hyphens: auto;
 }
 .comedien-profile .profile-info-section .profile-key-info .key-info-item .key-info-value a {
   color: #393939;
   text-decoration: none;
+  word-break: break-all;
 }
 .comedien-profile .profile-info-section .profile-key-info .key-info-item .key-info-value a:hover {
   text-decoration: underline;
@@ -1978,10 +1995,15 @@
   line-height: 32px;
   color: #393939;
   letter-spacing: 0%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  -webkit-hyphens: auto;
+          hyphens: auto;
 }
 .comedien-profile .profile-info-section .profile-two-columns .profile-column .column-items .key-info-item .key-info-value a {
   color: #393939;
   text-decoration: none;
+  word-break: break-all;
 }
 .comedien-profile .profile-info-section .profile-two-columns .profile-column .column-items .key-info-item .key-info-value a:hover {
   text-decoration: underline;

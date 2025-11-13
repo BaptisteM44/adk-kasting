@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Layout } from '../components/Layout'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
+import Link from 'next/link'
 
 export default function ResetPassword() {
   const router = useRouter()
@@ -127,16 +128,16 @@ export default function ResetPassword() {
             </button>
 
             <div style={{ textAlign: 'center' }}>
-              <a 
-                href="/connexion" 
-                style={{ 
-                  color: '#666', 
+              <Link
+                href="/connexion"
+                style={{
+                  color: '#666',
                   textDecoration: 'none',
                   fontSize: '14px'
                 }}
               >
                 ← Retour à la connexion
-              </a>
+              </Link>
             </div>
           </form>
         </div>

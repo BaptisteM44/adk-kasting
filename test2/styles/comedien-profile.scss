@@ -393,21 +393,37 @@
   // Layout principal : Photo + Infos - 2 colonnes
   .profile-main {
     display: grid;
-    grid-template-columns: 600px 1fr;
-    gap: 40px;
+    grid-template-columns: 420px 1fr;
+    gap: 60px;
+    max-width: 100%;
 
-    @media (max-width: 1024px) {
+    @media (max-width: 1650px) {
+      gap: 40px;
+    }
+
+    @media (max-width: 1024px) and (min-width: 769px) {
+      grid-template-columns: 300px 1fr;
+      gap: 30px;
+    }
+
+    @media (max-width: 768px) {
       grid-template-columns: 1fr;
     }
   }
 
-  // Section Photo (gauche) - DIMENSIONS EXACTES FIGMA
+  // Section Photo (gauche) - Taille réduite pour meilleur responsive
   .profile-photo-section {
     background: transparent;
     padding-top: 0;
-    width: 540px;
+    width: 420px;
+    max-width: 100%;
 
-    @media (max-width: 1024px) {
+    @media (max-width: 1024px) and (min-width: 769px) {
+      width: 300px;
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 768px) {
       width: 100%;
       margin-bottom: 40px;
     }
@@ -416,24 +432,35 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      width: 540px;
+      width: 420px;
+      max-width: 100%;
 
-      @media (max-width: 1024px) {
+      @media (max-width: 1024px) and (min-width: 769px) {
+        width: 300px;
+      }
+
+      @media (max-width: 768px) {
         width: 100%;
       }
 
       .main-photo {
-        width: 540px;
-        height: 742px;
+        width: 420px;
+        height: 577px;
         overflow: hidden;
         background: #F5F5F5;
         border-radius: 10px;
         opacity: 1;
+        max-width: 100%;
 
-        @media (max-width: 1024px) {
+        @media (max-width: 1024px) and (min-width: 769px) {
+          width: 300px;
+          height: 412px;
+        }
+
+        @media (max-width: 768px) {
           width: 100%;
           height: auto;
-          aspect-ratio: 540 / 742;
+          aspect-ratio: 420 / 577;
         }
 
         img {
@@ -553,8 +580,8 @@
 
     .no-photo {
       .placeholder-photo {
-        width: 540px;
-        height: 742px;
+        width: 420px;
+        height: 577px;
         background: #F5F5F5;
         border-radius: 10px;
         display: flex;
@@ -562,11 +589,17 @@
         align-items: center;
         justify-content: center;
         color: #999;
+        max-width: 100%;
 
-        @media (max-width: 1024px) {
+        @media (max-width: 1024px) and (min-width: 769px) {
+          width: 300px;
+          height: 412px;
+        }
+
+        @media (max-width: 768px) {
           width: 100%;
           height: auto;
-          aspect-ratio: 540 / 742;
+          aspect-ratio: 420 / 577;
         }
 
         span {
@@ -587,6 +620,8 @@
     display: flex;
     flex-direction: column;
     gap: 32px;
+    min-width: 0; // Permet au contenu de se réduire si nécessaire
+    overflow-wrap: break-word;
     // Header avec titre + étoiles + PDF
     .profile-header-row {
       display: flex;
@@ -687,11 +722,15 @@
         line-height: 32px;
         color: #393939;
         letter-spacing: 0%;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
 
         a {
           color: #393939;
           text-decoration: none;
-          
+          word-break: break-all;
+
           &:hover {
             text-decoration: underline;
           }
@@ -753,11 +792,15 @@
             line-height: 32px;
             color: #393939;
             letter-spacing: 0%;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
 
             a {
               color: #393939;
               text-decoration: none;
-              
+              word-break: break-all;
+
               &:hover {
                 text-decoration: underline;
               }

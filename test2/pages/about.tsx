@@ -50,9 +50,9 @@ export default function AboutPage() {
             <p className="text-reveal text-reveal--delay-1">
               Depuis 2004, ADK-KASTING œuvre principalement dans le casting de fiction cinématographique, courts et longs métrages. ADK-KASTING offre, aux comédiens domiciliés en Belgique et au Luxembourg, la possibilité de mettre en lumière leur profil. Mais ADK-KASTING NE SE VEUT PAS, pour autant, agence de comédiens. Le but n’est pas ici de VENDRE qui que ce soit plutôt qu’un(e) autre. Elle NE SE VEUT PAS NON PLUS, simple vitrine de comédiens. Il s’agit bien d’une structure désirée par un directeur de casting dans le but d’optimaliser son travail. Sa seule philosophie est de se mettre au service de votre envie, de votre vision, de votre projet. Depuis 2007, la société est, en outre, chargée de la supervision des films de 3ème année à l’IAD (exercice dirigé par Benoît Mariage).
             </p>
-            <button className="hero-button button-reveal">
+            <a href="mailto:info@adk-kasting.com" className="hero-button button-reveal">
               Contactez-nous
-            </button>
+            </a>
           </div>
         </div>
 

@@ -58,11 +58,13 @@ export const ComedienCard: React.FC<ComedienCardProps> = ({ comedien }) => {
         <div className="comedien-card__header">
           <div className="comedien-card__image">
             {(() => {
-              // Priorité : profile_picture, puis photos WordPress (actor_photo1, actor_photo2, actor_photo3)
+              // Priorité : profile_picture, puis photos array, puis photos WordPress (actor_photo1, actor_photo2, actor_photo3)
               let photoUrl = null;
 
               if (comedien.profile_picture) {
                 photoUrl = comedien.profile_picture;
+              } else if (comedien.photos && Array.isArray(comedien.photos) && comedien.photos.length > 0) {
+                photoUrl = comedien.photos[0];
               } else if (comedien.actor_photo1) {
                 photoUrl = comedien.actor_photo1;
               } else if (comedien.actor_photo2) {
@@ -85,7 +87,7 @@ export const ComedienCard: React.FC<ComedienCardProps> = ({ comedien }) => {
               ) : null;
             })()}
             <div className={`comedien-card__placeholder ${(() => {
-              const hasPhoto = comedien.profile_picture || comedien.actor_photo1 || comedien.actor_photo2 || comedien.actor_photo3;
+              const hasPhoto = comedien.profile_picture || (comedien.photos && comedien.photos.length > 0) || comedien.actor_photo1 || comedien.actor_photo2 || comedien.actor_photo3;
               return hasPhoto ? 'hidden' : '';
             })()}`}>
               <span>Photo non disponible</span>

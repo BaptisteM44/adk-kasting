@@ -8,12 +8,12 @@ export const Footer: React.FC = () => {
       <div className="container">
         {/* Section des 3 gros boutons */}
         <div className="footer__cta-buttons">
-          <button className="footer__cta-btn footer-cta-cascade">
+          <a href="mailto:info@adk-kasting.com" className="footer__cta-btn footer-cta-cascade">
             <span>Contactez-nous</span>
             <svg className="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-          </button>
+          </a>
           
           <a href="https://www.facebook.com/adkkasting/" target="_blank" rel="noopener noreferrer" className="footer__cta-btn footer-cta-cascade">
             <span>Facebook</span>
@@ -38,7 +38,7 @@ export const Footer: React.FC = () => {
           <div className="footer__section">
             <h3>Liens utiles</h3>
             <Link href="/faq">FAQ</Link>
-            <Link href="/Conditions-générales">Conditions générales</Link>
+            <Link href="/conditions-generales">Conditions générales</Link>
             <Link href="/about">À propos</Link>
           </div>
 

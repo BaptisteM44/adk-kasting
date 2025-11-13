@@ -28,7 +28,7 @@ export default async function handler(
 
     // Vérifier le token
     const { data: user, error: userError } = await supabase
-      .from('users')
+      .from('comediens')
       .select('id, reset_token_expiry')
       .eq('reset_token', token)
       .single()
@@ -51,9 +51,9 @@ export default async function handler(
 
     // Mettre à jour le mot de passe et supprimer le token
     const { error: updateError } = await supabase
-      .from('users')
+      .from('comediens')
       .update({
-        password: hashedPassword,
+        user_pass: hashedPassword,
         reset_token: null,
         reset_token_expiry: null,
         updated_at: new Date().toISOString()

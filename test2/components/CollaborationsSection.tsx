@@ -194,8 +194,8 @@ export const CollaborationsSection: React.FC<CollaborationsSectionProps> = ({
                   />
                 </div>
                 <div className="film-info">
-                  <h3>{film.title},{film.year}</h3>
-                  <p></p>
+                  <h3>{film.title}</h3>
+                  <p>{film.year}</p>
                 </div>
               </div>
             ))
