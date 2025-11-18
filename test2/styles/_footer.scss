@@ -176,6 +176,7 @@
     left: 0;
     right: 0;
     width: 100vw;
+    z-index: 1; // En dessous du contenu principal
 
     background-color: white;
     text-align: center;

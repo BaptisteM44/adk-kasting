@@ -316,13 +316,15 @@
 // Hero section
 .hero {
   position: relative;
-  height: 88vh;
-  min-height: 500px;
+  height: 88vh !important; // Force la hauteur immédiatement
+  min-height: 500px !important; // Hauteur minimale garantie
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 16px;
+  visibility: visible !important; // Toujours visible
+  opacity: 1 !important; // Force l'opacité à 1
   // Texte ADK-KASTING comme dans l'image
   &__brand {
     position: absolute;
@@ -365,6 +367,30 @@
     left: 0;
     right: 0;
     bottom: 0;
+    z-index: 1;
+    background-color: #1a1a1a; // Fond noir pendant le chargement
+    visibility: visible !important; // Toujours visible
+    opacity: 1 !important; // Force l'opacité
+
+    img {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 1;
+    }
+  }
+
+  &__skeleton {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
     z-index: 1;
   }
 
@@ -409,12 +435,14 @@
   &__film-info {
     position: absolute;
     bottom: 32px;
-    left: 16px; 
+    left: 16px;
     z-index: 3;
     color: $primary-white;
     display: flex;
     align-items: center;
     gap: 16px;
+    opacity: 1;
+    transform: translateX(0);
 
     &::before {
       content: '→';

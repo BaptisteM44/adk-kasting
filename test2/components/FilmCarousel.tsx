@@ -14,49 +14,93 @@ export const FilmCarousel: React.FC<FilmCarouselProps> = ({
   autoplayDelay = 5000
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const [imagesPreloaded, setImagesPreloaded] = useState<Set<number>>(new Set())
+  const intervalRef = React.useRef<NodeJS.Timeout | null>(null)
 
+  // Précharger l'image courante
   useEffect(() => {
-    if (!autoplay || films.length <= 1) return
+    if (!films[currentIndex]?.image_url) return
 
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => 
-        prevIndex === films.length - 1 ? 0 : prevIndex + 1
-      )
-    }, autoplayDelay)
+    setImageLoaded(false)
+    const img = new Image()
+    img.src = films[currentIndex].image_url
+    img.onload = () => {
+      setImageLoaded(true)
+      setImagesPreloaded(prev => new Set(prev).add(currentIndex))
+    }
+  }, [currentIndex, films])
 
-    return () => clearInterval(interval)
+  // Précharger les images suivantes en arrière-plan
+  useEffect(() => {
+    films.forEach((film, index) => {
+      if (!imagesPreloaded.has(index) && film.image_url) {
+        const img = new Image()
+        img.src = film.image_url
+        img.onload = () => {
+          setImagesPreloaded(prev => new Set(prev).add(index))
+        }
+      }
+    })
+  }, [films, imagesPreloaded])
+
+  // Autoplay avec ref pour pouvoir reset le timer
+  const startAutoplay = React.useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+    }
+
+    if (autoplay && films.length > 1) {
+      intervalRef.current = setInterval(() => {
+        setCurrentIndex((prevIndex) =>
+          prevIndex === films.length - 1 ? 0 : prevIndex + 1
+        )
+      }, autoplayDelay)
+    }
   }, [autoplay, autoplayDelay, films.length])
 
-  if (!films || films.length === 0) {
-    return null // Ne rien afficher si pas de films
+  useEffect(() => {
+    startAutoplay()
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [startAutoplay])
+
+  // Image par défaut pour chargement instantané
+  const defaultFilm = {
+    id: 'default',
+    title: "l'art d'être heureux",
+    year: 2013,
+    image_url: "/images/films/l'artd'êtreheureux.webp"
   }
 
-  const currentFilm = films[currentIndex]
+  const currentFilm = films.length > 0 ? films[currentIndex] : defaultFilm
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index)
+    startAutoplay() // Reset le timer
   }
 
   const goToPrevious = () => {
     setCurrentIndex(currentIndex === 0 ? films.length - 1 : currentIndex - 1)
+    startAutoplay() // Reset le timer
   }
 
   const goToNext = () => {
     setCurrentIndex(currentIndex === films.length - 1 ? 0 : currentIndex + 1)
+    startAutoplay() // Reset le timer
   }
 
   return (
     <div className="hero film-hero-animate">
       <div className="hero__background film-background-animate">
         <img
+          key={currentFilm.id}
           src={currentFilm.image_url}
           alt={currentFilm.title}
           className="film-image-animate"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover'
-          }}
         />
       </div>
 

@@ -81,7 +81,7 @@ export default function HomePage() {
           console.log(`Cleaned animation classes from indicator ${index}`)
         }, 3000) // Après que toutes les animations soient finies
       })
-    }, 300)
+    }, 50) // Réduit de 300ms à 50ms pour apparition plus rapide
     
     const observerOptions = {
       threshold: 0.1,

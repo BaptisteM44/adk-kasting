@@ -77,6 +77,9 @@ select {
 
 .container {
   margin: 0 auto;
+  position: relative;
+  z-index: 10; // Au-dessus du footer__brand (z-index: 1)
+  background-color: white; // Fond blanc pour masquer le texte en dessous
   // Padding retiré car il est maintenant global au niveau du body
 }
 

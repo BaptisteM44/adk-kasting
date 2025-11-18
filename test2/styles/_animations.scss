@@ -1,5 +1,15 @@
 // Animations réutilisables pour le site
 
+// Animation shimmer pour le skeleton loader
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 // Animation Reveal Text - Apparition fluide du texte
 @keyframes revealText {
   0% {
@@ -201,24 +211,24 @@
 }
 
 .film-image-animate {
-  opacity: 0;
-  transform: scale(1.1);
-  transition: opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-              transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  
+  opacity: 1; // Visible dès le début
+  transform: scale(1.02); // Zoom très subtil
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); // Réduit de 0.6s à 0.4s
+
   &.animate {
     opacity: 1;
     transform: scale(1);
-    transition-delay: 0.2s;
+    transition-delay: 0s; // Pas de délai pour apparition immédiate
   }
 }
 
 .film-hero-animate {
-  opacity: 0;
-  
+  opacity: 1 !important; // FORCE toujours visible - supprime toute animation d'opacité
+  visibility: visible !important; // FORCE la visibilité
+
   &.animate {
-    opacity: 1;
-    transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 }
 
