@@ -20,12 +20,12 @@ export default async function handler(
 
     // Filtrer et trier selon la section demandée
     if (show_in_hero === 'true') {
-      query = query.eq('show_in_hero', true).order('hero_order', { ascending: true })
+      query = query.eq('show_in_hero', true).order('year', { ascending: false })
     } else if (show_in_collaborations === 'true') {
-      query = query.eq('show_in_collaborations', true).order('collaboration_order', { ascending: true })
+      query = query.eq('show_in_collaborations', true).order('year', { ascending: false })
     } else {
-      // Par défaut, trier par hero_order
-      query = query.order('hero_order', { ascending: true })
+      // Par défaut, trier par année décroissante (plus récent en premier)
+      query = query.order('year', { ascending: false })
     }
 
     const { data: films, error } = await query

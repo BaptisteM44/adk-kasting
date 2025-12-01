@@ -21,7 +21,7 @@ export default async function handler(
       const { data: films, error } = await supabase
         .from('films')
         .select('*')
-        .order('hero_order', { ascending: true })
+        .order('year', { ascending: false })
 
       if (error) {
         console.error('Erreur récupération films:', error)
