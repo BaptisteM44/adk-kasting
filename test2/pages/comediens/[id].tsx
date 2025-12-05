@@ -26,6 +26,18 @@ export default function ComedienProfile() {
   const [originalData, setOriginalData] = useState<any>({}) // Données originales de la base
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
 
+  // États pour gérer l'affichage des champs "Autre"
+  const [showOtherDance, setShowOtherDance] = useState(false)
+  const [showOtherMusic, setShowOtherMusic] = useState(false)
+  const [showOtherDiverse, setShowOtherDiverse] = useState(false)
+  const [showOtherActivities, setShowOtherActivities] = useState(false)
+
+  // États pour l'input temporaire de chaque catégorie
+  const [tempDance, setTempDance] = useState('')
+  const [tempMusic, setTempMusic] = useState('')
+  const [tempDiverse, setTempDiverse] = useState('')
+  const [tempActivities, setTempActivities] = useState('')
+
   // Vérifier si l'utilisateur peut éditer ce profil
   const canEdit = user && (user.role === 'admin' || user.id === id)
   const isAdmin = user?.role === 'admin'
@@ -68,11 +80,60 @@ export default function ComedienProfile() {
         languages_notions_normalized: normalized.languages_notions_normalized,
         birth_date: normalized.birth_date
       })
-      setComedien(normalized)
-      setEditedData(normalized)
+      // Fonction helper pour copier un objet en profondeur avec arrays indépendants
+      const deepCopyWithArrays = (obj: any) => {
+        const copy: any = {}
+        for (const key in obj) {
+          if (Array.isArray(obj[key])) {
+            copy[key] = [...obj[key]] // Copie indépendante des arrays
+          } else if (obj[key] && typeof obj[key] === 'object' && !(obj[key] instanceof Date)) {
+            copy[key] = deepCopyWithArrays(obj[key]) // Récursif pour objets imbriqués
+          } else {
+            copy[key] = obj[key]
+          }
+        }
+        return copy
+      }
+
+      // Ajouter les custom skills aux données normalisées
+      const comedienWithCustomSkills = {
+        ...normalized,
+        dance_skills_other: data.dance_skills_other || [],
+        music_skills_other: data.music_skills_other || [],
+        diverse_skills_other: data.diverse_skills_other || [],
+        desired_activities_other: data.desired_activities_other || []
+      }
+
+      // Créer une copie vraiment indépendante pour comedien
+      const comedienCopy = deepCopyWithArrays(comedienWithCustomSkills)
+      setComedien(comedienCopy)
+
+      // Créer une copie indépendante pour editedData avec les champs pour les checkboxes
+      const editedCopy = deepCopyWithArrays(comedienWithCustomSkills)
+      editedCopy.dance_skills = [...(editedCopy.dance_skills_normalized || [])]
+      editedCopy.music_skills = [...(editedCopy.music_skills_normalized || [])]
+      editedCopy.diverse_skills = [...(editedCopy.diverse_skills_normalized || [])]
+      editedCopy.desired_activities = [...(editedCopy.desired_activities_normalized || [])]
+      editedCopy.driving_licenses = [...(editedCopy.driving_licenses_normalized || [])]
+      editedCopy.languages_fluent = [...(editedCopy.languages_fluent_normalized || [])]
+      editedCopy.languages_notions = [...(editedCopy.languages_notions_normalized || [])]
+
+      setEditedData(editedCopy)
+
+      // Vérifier que les copies sont vraiment indépendantes
+      console.log('🔍 INIT - comedienCopy === editedCopy?', comedienCopy === editedCopy)
+      console.log('🔍 INIT - comedienCopy.dance_skills_normalized === editedCopy.dance_skills_normalized?',
+        comedienCopy.dance_skills_normalized === editedCopy.dance_skills_normalized)
+
       setOriginalData(data) // Garder les données brutes pour comparaison
       setAdminComment(data.admin_comment || '')
-      
+
+      // Initialiser les états des champs "Autre"
+      setShowOtherDance(Array.isArray(data.dance_skills_other) && data.dance_skills_other.length > 0)
+      setShowOtherMusic(Array.isArray(data.music_skills_other) && data.music_skills_other.length > 0)
+      setShowOtherDiverse(Array.isArray(data.diverse_skills_other) && data.diverse_skills_other.length > 0)
+      setShowOtherActivities(Array.isArray(data.desired_activities_other) && data.desired_activities_other.length > 0)
+
     } catch (error: any) {
       setError(error.message)
     } finally {
@@ -82,15 +143,26 @@ export default function ComedienProfile() {
 
   const handleSaveComment = async () => {
     if (!isAdmin) return
-    
+
     try {
       setIsSavingComment(true)
-      const { error } = await supabase
-        .from('comediens')
-        .update({ admin_comment: adminComment })
-        .eq('id', id)
-      
-      if (error) throw error
+
+      const response = await fetch(`/api/comediens/${id}/comment`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          comment: adminComment,
+          isAdmin: true
+        })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.message || 'Erreur lors de la sauvegarde')
+      }
+
       alert('Commentaire sauvegardé !')
     } catch (error: any) {
       alert('Erreur lors de la sauvegarde : ' + error.message)
@@ -214,12 +286,24 @@ export default function ComedienProfile() {
         dataToSave.actor_languages_native = nativeArray
       }
 
+      // Sauvegarder les compétences personnalisées (custom skills)
+      const customSkillFields = ['dance_skills_other', 'music_skills_other', 'diverse_skills_other', 'desired_activities_other']
+      customSkillFields.forEach(field => {
+        if (!arraysEqual(formData[field], comedien[field])) {
+          dataToSave[field] = formData[field] || []
+        }
+      })
+
       // Debug: afficher ce qui va être sauvegardé
       console.log('🔍 DEBUG dataToSave:', dataToSave)
-      console.log('🔍 DEBUG editedData.languages_fluent:', formData.languages_fluent)
-      console.log('🔍 DEBUG editedData.languages_fluent_normalized:', formData.languages_fluent_normalized)
-      console.log('🔍 DEBUG editedData.birth_date:', formData.birth_date)
-      console.log('🔍 DEBUG comedien.birth_date:', comedien.birth_date)
+      console.log('🔍 DEBUG formData:', formData)
+      console.log('🔍 DEBUG comedien:', comedien)
+      console.log('🔍 DEBUG dance_skills_normalized changed?', !arraysEqual(formData.dance_skills_normalized, comedien.dance_skills_normalized))
+      console.log('🔍 DEBUG dance_skills_normalized formData:', formData.dance_skills_normalized)
+      console.log('🔍 DEBUG dance_skills_normalized comedien:', comedien.dance_skills_normalized)
+      console.log('🔍 DEBUG dance_skills_other changed?', !arraysEqual(formData.dance_skills_other, comedien.dance_skills_other))
+      console.log('🔍 DEBUG dance_skills_other formData:', formData.dance_skills_other)
+      console.log('🔍 DEBUG dance_skills_other comedien:', comedien.dance_skills_other)
 
       // Si aucun champ n'a changé, ne rien faire
       if (Object.keys(dataToSave).length === 0) {
@@ -227,14 +311,26 @@ export default function ComedienProfile() {
         setLoading(false)
         return
       }
-      
-      const { error } = await supabase
-        .from('comediens')
-        .update(dataToSave)
-        .eq('id', id)
-      
-      if (error) throw error
-      
+
+      console.log('💾 SAVE - Envoi à l\'API:', dataToSave)
+
+      // Utiliser l'API route qui a les permissions admin
+      const response = await fetch(`/api/comediens?id=${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dataToSave)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Erreur lors de la sauvegarde')
+      }
+
+      const result = await response.json()
+      console.log('💾 SAVE - Résultat:', result)
+
       alert('Profil mis à jour avec succès !')
       setIsEditing(false)
       fetchComedien() // Recharger les données
@@ -246,20 +342,47 @@ export default function ComedienProfile() {
   }
 
   const handleArrayChange = (field: string, value: string, checked: boolean) => {
+    console.log('🔍 handleArrayChange called:', { field, value, checked })
     setEditedData((prev: any) => {
       const currentArray = prev[field] || prev[`${field}_normalized`] || []
+      console.log('🔍 handleArrayChange - currentArray:', currentArray)
       let newArray
       if (checked) {
         newArray = [...currentArray, value]
       } else {
         newArray = currentArray.filter((item: string) => item !== value)
       }
-      return {
+      console.log('🔍 handleArrayChange - newArray:', newArray)
+      const updated = {
         ...prev,
-        [field]: newArray,
-        [`${field}_normalized`]: newArray  // Synchroniser le champ normalized
+        [field]: [...newArray],  // Copie indépendante
+        [`${field}_normalized`]: [...newArray]  // Copie indépendante pour le champ normalized
       }
+      console.log('🔍 handleArrayChange - updated[dance_skills_normalized]:', updated.dance_skills_normalized)
+      return updated
     })
+  }
+
+  // Fonction pour ajouter une compétence personnalisée
+  const addCustomSkill = (field: string, value: string, setTemp: (v: string) => void) => {
+    if (!value.trim()) return
+    const current = editedData[field] || []
+    if (!current.includes(value.trim())) {
+      setEditedData((prev: any) => ({
+        ...prev,
+        [field]: [...current, value.trim()]
+      }))
+    }
+    setTemp('')
+  }
+
+  // Fonction pour supprimer une compétence personnalisée
+  const removeCustomSkill = (field: string, value: string) => {
+    const current = editedData[field] || []
+    setEditedData((prev: any) => ({
+      ...prev,
+      [field]: current.filter((item: string) => item !== value)
+    }))
   }
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -642,23 +765,86 @@ export default function ComedienProfile() {
                     {isEditing ? (
                       <div className="edit-checkbox-group">
                         {[
-                          'Long métrage', 'Court métrage', 'Film d\'étudiant', 
+                          'Long métrage', 'Court métrage', 'Film d\'étudiant',
                           'Publicité', 'Doublage', 'Films d\'entreprise', 'Films institutionnels'
                         ].map(activite => (
                           <label key={activite}>
-                            <input 
-                              type="checkbox" 
+                            <input
+                              type="checkbox"
                               checked={(editedData.desired_activities || []).includes(activite)}
                               onChange={(e) => handleArrayChange('desired_activities', activite, e.target.checked)}
                             />
                             {activite}
                           </label>
                         ))}
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={showOtherActivities}
+                            onChange={(e) => {
+                              setShowOtherActivities(e.target.checked)
+                              if (!e.target.checked) {
+                                setEditedData((prev: any) => ({ ...prev, desired_activities_other: [] }))
+                                setTempActivities('')
+                              }
+                            }}
+                          />
+                          Autre
+                        </label>
                       </div>
                     ) : (
-                      comedien.desired_activities_normalized && comedien.desired_activities_normalized.length > 0
-                        ? comedien.desired_activities_normalized.join(', ')
-                        : 'Non spécifié'
+                      <>
+                        {comedien.desired_activities_normalized && comedien.desired_activities_normalized.length > 0
+                          ? comedien.desired_activities_normalized.join(', ')
+                          : 'Non spécifié'}
+                        {(editedData.desired_activities_other || []).length > 0 && (
+                          <div style={{ marginTop: '5px', fontStyle: 'italic' }}>
+                            Autres: {(editedData.desired_activities_other || []).join(', ')}
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {showOtherActivities && isEditing && (
+                      <div style={{ marginTop: '10px' }}>
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                          <input
+                            type="text"
+                            placeholder="Ajouter une activité souhaitée"
+                            value={tempActivities}
+                            onChange={(e) => setTempActivities(e.target.value)}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault()
+                                addCustomSkill('desired_activities_other', tempActivities, setTempActivities)
+                              }
+                            }}
+                            style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => addCustomSkill('desired_activities_other', tempActivities, setTempActivities)}
+                            style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #393939', backgroundColor: '#393939', color: 'white', cursor: 'pointer' }}
+                          >
+                            Ajouter
+                          </button>
+                        </div>
+                        {(editedData.desired_activities_other || []).length > 0 && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                            {(editedData.desired_activities_other || []).map((activity: string) => (
+                              <span key={activity} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#f0f0f0', borderRadius: '20px', fontSize: '14px' }}>
+                                {activity}
+                                <button
+                                  type="button"
+                                  onClick={() => removeCustomSkill('desired_activities_other', activity)}
+                                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', lineHeight: '1' }}
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     )}
                   </span>
                 </div>
@@ -1410,17 +1596,80 @@ export default function ComedienProfile() {
                             <div className="edit-checkbox-group">
                               {['Classique', 'Salsa', 'Tango', 'Rock', 'Danse de salon', 'Hip hop'].map(danse => (
                                 <label key={danse}>
-                                  <input 
-                                    type="checkbox" 
+                                  <input
+                                    type="checkbox"
                                     checked={(editedData.dance_skills || []).includes(danse)}
                                     onChange={(e) => handleArrayChange('dance_skills', danse, e.target.checked)}
                                   />
                                   {danse}
                                 </label>
                               ))}
+                              <label>
+                                <input
+                                  type="checkbox"
+                                  checked={showOtherDance}
+                                  onChange={(e) => {
+                                    setShowOtherDance(e.target.checked)
+                                    if (!e.target.checked) {
+                                      setEditedData((prev: any) => ({ ...prev, dance_skills_other: [] }))
+                                      setTempDance('')
+                                    }
+                                  }}
+                                />
+                                Autre
+                              </label>
                             </div>
                           ) : (
-                            comedien.dance_skills_normalized.join(', ')
+                            <>
+                              {comedien.dance_skills_normalized.join(', ')}
+                              {(editedData.dance_skills_other || []).length > 0 && (
+                                <div style={{ marginTop: '5px', fontStyle: 'italic' }}>
+                                  Autres: {(editedData.dance_skills_other || []).join(', ')}
+                                </div>
+                              )}
+                            </>
+                          )}
+                          {showOtherDance && isEditing && (
+                            <div style={{ marginTop: '10px' }}>
+                              <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                                <input
+                                  type="text"
+                                  placeholder="Ajouter une compétence de danse"
+                                  value={tempDance}
+                                  onChange={(e) => setTempDance(e.target.value)}
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault()
+                                      addCustomSkill('dance_skills_other', tempDance, setTempDance)
+                                    }
+                                  }}
+                                  style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => addCustomSkill('dance_skills_other', tempDance, setTempDance)}
+                                  style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #393939', backgroundColor: '#393939', color: 'white', cursor: 'pointer' }}
+                                >
+                                  Ajouter
+                                </button>
+                              </div>
+                              {(editedData.dance_skills_other || []).length > 0 && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                  {(editedData.dance_skills_other || []).map((skill: string) => (
+                                    <span key={skill} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#f0f0f0', borderRadius: '20px', fontSize: '14px' }}>
+                                      {skill}
+                                      <button
+                                        type="button"
+                                        onClick={() => removeCustomSkill('dance_skills_other', skill)}
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', lineHeight: '1' }}
+                                      >
+                                        ×
+                                      </button>
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           )}
                         </span>
                       </div>
@@ -1433,17 +1682,80 @@ export default function ComedienProfile() {
                             <div className="edit-checkbox-group">
                               {['Piano', 'Guitare', 'Violon', 'Batterie', 'Saxophone / Trompette', 'Flûte', 'Autre (à vent)', 'Autre (à cordes)'].map(musique => (
                                 <label key={musique}>
-                                  <input 
-                                    type="checkbox" 
+                                  <input
+                                    type="checkbox"
                                     checked={(editedData.music_skills || []).includes(musique)}
                                     onChange={(e) => handleArrayChange('music_skills', musique, e.target.checked)}
                                   />
                                   {musique}
                                 </label>
                               ))}
+                              <label>
+                                <input
+                                  type="checkbox"
+                                  checked={showOtherMusic}
+                                  onChange={(e) => {
+                                    setShowOtherMusic(e.target.checked)
+                                    if (!e.target.checked) {
+                                      setEditedData((prev: any) => ({ ...prev, music_skills_other: [] }))
+                                      setTempMusic('')
+                                    }
+                                  }}
+                                />
+                                Autre
+                              </label>
                             </div>
                           ) : (
-                            comedien.music_skills_normalized.join(', ')
+                            <>
+                              {comedien.music_skills_normalized.join(', ')}
+                              {(editedData.music_skills_other || []).length > 0 && (
+                                <div style={{ marginTop: '5px', fontStyle: 'italic' }}>
+                                  Autres: {(editedData.music_skills_other || []).join(', ')}
+                                </div>
+                              )}
+                            </>
+                          )}
+                          {showOtherMusic && isEditing && (
+                            <div style={{ marginTop: '10px' }}>
+                              <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                                <input
+                                  type="text"
+                                  placeholder="Ajouter une compétence musicale"
+                                  value={tempMusic}
+                                  onChange={(e) => setTempMusic(e.target.value)}
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault()
+                                      addCustomSkill('music_skills_other', tempMusic, setTempMusic)
+                                    }
+                                  }}
+                                  style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => addCustomSkill('music_skills_other', tempMusic, setTempMusic)}
+                                  style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #393939', backgroundColor: '#393939', color: 'white', cursor: 'pointer' }}
+                                >
+                                  Ajouter
+                                </button>
+                              </div>
+                              {(editedData.music_skills_other || []).length > 0 && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                  {(editedData.music_skills_other || []).map((skill: string) => (
+                                    <span key={skill} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#f0f0f0', borderRadius: '20px', fontSize: '14px' }}>
+                                      {skill}
+                                      <button
+                                        type="button"
+                                        onClick={() => removeCustomSkill('music_skills_other', skill)}
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', lineHeight: '1' }}
+                                      >
+                                        ×
+                                      </button>
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           )}
                         </span>
                       </div>
@@ -1456,17 +1768,80 @@ export default function ComedienProfile() {
                             <div className="edit-checkbox-group">
                               {['Doublage', 'Chant', 'Acrobatie', 'Art martial', 'Equitation', 'Sport de combat'].map(comp => (
                                 <label key={comp}>
-                                  <input 
-                                    type="checkbox" 
+                                  <input
+                                    type="checkbox"
                                     checked={(editedData.diverse_skills || []).includes(comp)}
                                     onChange={(e) => handleArrayChange('diverse_skills', comp, e.target.checked)}
                                   />
                                   {comp}
                                 </label>
                               ))}
+                              <label>
+                                <input
+                                  type="checkbox"
+                                  checked={showOtherDiverse}
+                                  onChange={(e) => {
+                                    setShowOtherDiverse(e.target.checked)
+                                    if (!e.target.checked) {
+                                      setEditedData((prev: any) => ({ ...prev, diverse_skills_other: [] }))
+                                      setTempDiverse('')
+                                    }
+                                  }}
+                                />
+                                Autre
+                              </label>
                             </div>
                           ) : (
-                            comedien.diverse_skills_normalized.join(', ')
+                            <>
+                              {comedien.diverse_skills_normalized.join(', ')}
+                              {(editedData.diverse_skills_other || []).length > 0 && (
+                                <div style={{ marginTop: '5px', fontStyle: 'italic' }}>
+                                  Autres: {(editedData.diverse_skills_other || []).join(', ')}
+                                </div>
+                              )}
+                            </>
+                          )}
+                          {showOtherDiverse && isEditing && (
+                            <div style={{ marginTop: '10px' }}>
+                              <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                                <input
+                                  type="text"
+                                  placeholder="Ajouter une compétence"
+                                  value={tempDiverse}
+                                  onChange={(e) => setTempDiverse(e.target.value)}
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault()
+                                      addCustomSkill('diverse_skills_other', tempDiverse, setTempDiverse)
+                                    }
+                                  }}
+                                  style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => addCustomSkill('diverse_skills_other', tempDiverse, setTempDiverse)}
+                                  style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #393939', backgroundColor: '#393939', color: 'white', cursor: 'pointer' }}
+                                >
+                                  Ajouter
+                                </button>
+                              </div>
+                              {(editedData.diverse_skills_other || []).length > 0 && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                  {(editedData.diverse_skills_other || []).map((skill: string) => (
+                                    <span key={skill} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#f0f0f0', borderRadius: '20px', fontSize: '14px' }}>
+                                      {skill}
+                                      <button
+                                        type="button"
+                                        onClick={() => removeCustomSkill('diverse_skills_other', skill)}
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', lineHeight: '1' }}
+                                      >
+                                        ×
+                                      </button>
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           )}
                         </span>
                       </div>

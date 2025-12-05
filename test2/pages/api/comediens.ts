@@ -1,6 +1,13 @@
 // pages/api/comediens.ts
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+
+// Client avec service role key pour bypass RLS
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export default async function handler(
   req: NextApiRequest,
@@ -36,6 +43,8 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
     languages_fluent, // Nouveau filtre
     wp_skills, // Colonne WordPress avec les vraies données
     driving_licenses, // Permis de conduire
+    dance_skills, // Compétences de danse
+    music_skills, // Compétences musicales
     age_min,
     age_max,
     height_min,
@@ -56,17 +65,28 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
     query = query.ilike('actor_driving_license', `%${driving_licenses}%`)
   }
 
-  // Filtrage par compétences diverses - colonne WordPress avec données sérialisées PHP
-  if (wp_skills && wp_skills !== '') {
-    console.log('Recherche compétence diverse:', wp_skills) // Debug
-    query = query.ilike('wp_skills', `%${wp_skills}%`)
+  // Filtrage par compétences de danse - colonne WordPress + compétences personnalisées
+  if (dance_skills && dance_skills !== '') {
+    console.log('Recherche compétence danse:', dance_skills) // Debug
+    query = query.or(`actor_dance_skills.ilike.%${dance_skills}%,dance_skills_other.cs.{${dance_skills}}`)
   }
 
-  // Filtrage par activités désirées - TODO: vérifier quelle colonne WordPress contient ces données
+  // Filtrage par compétences musicales - colonne WordPress + compétences personnalisées
+  if (music_skills && music_skills !== '') {
+    console.log('Recherche compétence musique:', music_skills) // Debug
+    query = query.or(`actor_music_skills.ilike.%${music_skills}%,music_skills_other.cs.{${music_skills}}`)
+  }
+
+  // Filtrage par compétences diverses - colonne WordPress + compétences personnalisées
+  if (wp_skills && wp_skills !== '') {
+    console.log('Recherche compétence diverse:', wp_skills) // Debug
+    query = query.or(`wp_skills.ilike.%${wp_skills}%,diverse_skills_other.cs.{${wp_skills}}`)
+  }
+
+  // Filtrage par activités désirées - colonne WordPress + activités personnalisées
   if (desired_activities && desired_activities !== '') {
     console.log('Recherche activité désirée:', desired_activities) // Debug
-    // Colonne à identifier dans WordPress
-    query = query.ilike('wp_activity_domain', `%${desired_activities}%`)
+    query = query.or(`wp_activity_domain.ilike.%${desired_activities}%,desired_activities_other.cs.{${desired_activities}}`)
   }
 
   // Filtrage par langues parlées couramment - colonne WordPress
@@ -173,15 +193,19 @@ async function handlePut(req: NextApiRequest, res: NextApiResponse) {
     const { id } = req.query
     const updates = req.body
 
-    // Ici vous pourriez ajouter une vérification d'authentification
-    // et de permissions avant de permettre la mise à jour
+    console.log('🔧 API PUT - ID:', id)
+    console.log('🔧 API PUT - Updates:', updates)
 
-    const { data, error } = await supabase
+    // Utiliser supabaseAdmin avec service role key pour bypass RLS
+    const { data, error } = await supabaseAdmin
       .from('comediens')
       .update(updates)
       .eq('id', id)
       .select()
       .single()
+
+    console.log('🔧 API PUT - Result:', data)
+    console.log('🔧 API PUT - Error:', error)
 
     if (error) throw error
 

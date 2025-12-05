@@ -96,7 +96,13 @@ export interface Comedien {
   actor_music_skills?: string // Compétences musique WordPress
   skills?: string // Compétences générales WordPress
   actor_driving_license?: string // Permis WordPress
-  
+
+  // Compétences personnalisées (champs "Autre") - arrays pour multiples valeurs
+  dance_skills_other?: string[] // Compétences de danse personnalisées
+  music_skills_other?: string[] // Compétences musicales personnalisées
+  diverse_skills_other?: string[] // Autres compétences personnalisées
+  desired_activities_other?: string[] // Activités souhaitées personnalisées
+
   // Langues détaillées (WordPress format - 3 niveaux)
   actor_languages_native?: string // 1. Langues maternelles WordPress (PHP serialized)
   languages?: string // 2. Langues parlées couramment WordPress (PHP serialized)
@@ -222,6 +228,12 @@ export interface InscriptionFormData {
   music_skills?: string[] // Guitare, Piano, Violon, Batterie, etc.
   driving_licenses?: string[] // Auto, Moto, Camion, Avion / hélicoptère
 
+  // Compétences personnalisées (champs "Autre") - arrays pour multiples valeurs
+  dance_skills_other?: string[] // Compétences de danse personnalisées
+  music_skills_other?: string[] // Compétences musicales personnalisées
+  diverse_skills_other?: string[] // Autres compétences personnalisées
+  desired_activities_other?: string[] // Activités souhaitées personnalisées
+
   // Expérience
   experience_level: string
   desired_activities?: string[] // Long métrage, Court métrage, etc.
@@ -263,6 +275,8 @@ export interface ComedienFilters {
   hair_color?: string
   eye_color?: string
   nationality?: string // → colonnes BDD: actor_nationality OU nationality
+  dance_skills?: string // Compétences de danse → colonne BDD: actor_dance_skills + dance_skills_other
+  music_skills?: string // Compétences musicales → colonne BDD: actor_music_skills + music_skills_other
   wp_skills?: string // Compétences diverses → colonne BDD: wp_skills (PHP serialized)
   driving_licenses?: string // Permis → colonne BDD: actor_driving_license (PHP serialized) - Types: 'Auto', 'Moto', 'Camion', 'Avion / hélicoptère'
   city?: string

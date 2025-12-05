@@ -70,6 +70,8 @@ export default function ComediensPage() {
       if (currentFilters.height_min) params.append('height_min', currentFilters.height_min.toString())
       if (currentFilters.height_max) params.append('height_max', currentFilters.height_max.toString())
       if (currentFilters.driving_licenses) params.append('driving_licenses', currentFilters.driving_licenses)
+      if (currentFilters.dance_skills) params.append('dance_skills', currentFilters.dance_skills)
+      if (currentFilters.music_skills) params.append('music_skills', currentFilters.music_skills)
       if (currentFilters.experience_level) params.append('experience_level', currentFilters.experience_level)
       if (currentFilters.build) params.append('build', currentFilters.build)
       if (currentFilters.wp_skills) params.append('wp_skills', currentFilters.wp_skills)

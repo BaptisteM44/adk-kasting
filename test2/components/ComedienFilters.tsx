@@ -1,5 +1,5 @@
 // components/ComedienFilters.tsx
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Input, Select } from './ui/Input'
 import { Button } from './ui/Button'
 import type { ComedienFilters as ComedienFiltersType } from '@/types'
@@ -20,6 +20,32 @@ export const ComedienFilters: React.FC<ComedienFiltersProps> = ({
   loading = false
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [customSkills, setCustomSkills] = useState<{
+    dance_skills: string[]
+    music_skills: string[]
+    diverse_skills: string[]
+    desired_activities: string[]
+  }>({
+    dance_skills: [],
+    music_skills: [],
+    diverse_skills: [],
+    desired_activities: []
+  })
+
+  // Charger les compétences personnalisées depuis l'API
+  useEffect(() => {
+    fetch('/api/skills/custom')
+      .then(res => res.json())
+      .then(data => {
+        setCustomSkills({
+          dance_skills: data.dance_skills || [],
+          music_skills: data.music_skills || [],
+          diverse_skills: data.diverse_skills || [],
+          desired_activities: data.desired_activities || []
+        })
+      })
+      .catch(err => console.error('Erreur chargement compétences:', err))
+  }, [])
 
   const handleFilterChange = (key: keyof ComedienFiltersType, value: any) => {
     onFiltersChange({ ...filters, [key]: value })
@@ -117,14 +143,28 @@ export const ComedienFilters: React.FC<ComedienFiltersProps> = ({
     { value: 'Autre', label: 'Autre' }
   ]
 
+  // Compétences de danse - fusionner prédéfinies + personnalisées
+  const predefinedDanceSkills = ['Classique', 'Salsa', 'Tango', 'Rock', 'Danse de salon', 'Hip hop']
+  const allDanceSkills = Array.from(new Set([...predefinedDanceSkills, ...customSkills.dance_skills])).sort()
+  const danceSkillsOptions = [
+    { value: '', label: 'Indifférent' },
+    ...allDanceSkills.map(skill => ({ value: skill, label: skill }))
+  ]
+
+  // Compétences musicales - fusionner prédéfinies + personnalisées
+  const predefinedMusicSkills = ['Piano', 'Guitare', 'Violon', 'Batterie', 'Saxophone / Trompette', 'Flûte', 'Autre (à vent)', 'Autre (à cordes)']
+  const allMusicSkills = Array.from(new Set([...predefinedMusicSkills, ...customSkills.music_skills])).sort()
+  const musicSkillsOptions = [
+    { value: '', label: 'Indifférent' },
+    ...allMusicSkills.map(skill => ({ value: skill, label: skill }))
+  ]
+
+  // Compétences diverses - fusionner prédéfinies + personnalisées
+  const predefinedDiverseSkills = ['Chant', 'Doublage', 'Acrobatie', 'Art martial', 'Sport de combat', 'Equitation']
+  const allDiverseSkills = Array.from(new Set([...predefinedDiverseSkills, ...customSkills.diverse_skills])).sort()
   const diverse_skills = [
     { value: '', label: 'Indifférent' },
-    { value: 'Chant', label: 'Chant' },
-    { value: 'Doublage', label: 'Doublage' },
-    { value: 'Acrobatie', label: 'Acrobatie' },
-    { value: 'Art martial', label: 'Art martial' },
-    { value: 'Sport de combat', label: 'Sport de combat' },
-    { value: 'Equitation', label: 'Équitation' }
+    ...allDiverseSkills.map(skill => ({ value: skill, label: skill }))
   ]
 
   const drivingLicenseOptions = [
@@ -135,15 +175,12 @@ export const ComedienFilters: React.FC<ComedienFiltersProps> = ({
     { value: 'Avion / hélicoptère', label: 'Avion / hélicoptère' }
   ]
 
+  // Activités souhaitées - fusionner prédéfinies + personnalisées
+  const predefinedActivities = ['Long métrage', 'Court métrage', 'Film d\'étudiant', 'Publicité', 'Doublage', 'Films d\'entreprise', 'Films institutionnels']
+  const allActivities = Array.from(new Set([...predefinedActivities, ...customSkills.desired_activities])).sort()
   const desiredActivitiesOptions = [
     { value: '', label: 'Indifférent' },
-    { value: 'Long métrage', label: 'Long métrage' },
-    { value: 'Court métrage', label: 'Court métrage' },
-    { value: 'Film d\'étudiant', label: 'Film d\'étudiant' },
-    { value: 'Publicité', label: 'Publicité' },
-    { value: 'Doublage', label: 'Doublage' },
-    { value: 'Films d\'entreprise', label: 'Films d\'entreprise' },
-    { value: 'Films institutionnels', label: 'Films institutionnels' }
+    ...allActivities.map(activity => ({ value: activity, label: activity }))
   ]
 
   return (
@@ -286,6 +323,20 @@ export const ComedienFilters: React.FC<ComedienFiltersProps> = ({
             onChange={(e) => handleFilterChange('experience_level', e.target.value)}
             options={experienceLevelOptions}
             placeholder="Niveau d'expérience"
+          />
+
+          <Select
+            value={filters.dance_skills || ''}
+            onChange={(e) => handleFilterChange('dance_skills', e.target.value)}
+            options={danceSkillsOptions}
+            placeholder="Compétences de danse"
+          />
+
+          <Select
+            value={filters.music_skills || ''}
+            onChange={(e) => handleFilterChange('music_skills', e.target.value)}
+            options={musicSkillsOptions}
+            placeholder="Compétences musicales"
           />
 
           <Select
