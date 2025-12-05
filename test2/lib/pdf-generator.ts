@@ -640,7 +640,7 @@ export const generateComedienPDF = async (comedien: any) => {
       }
 
       body {
-        padding: 10px;
+        padding: 20px;
       }
 
       .page {
@@ -654,10 +654,10 @@ export const generateComedienPDF = async (comedien: any) => {
       .header {
         display: grid;
         grid-template-columns: 30% 1fr;
-        gap: 10px;
-        border-bottom: 2.5px solid #1a1a1a;
-        padding-bottom: 8px;
-        margin-bottom: 6px;
+        gap: 16px;
+        border-bottom: 3px solid #1a1a1a;
+        padding-bottom: 16px;
+        margin-bottom: 16px;
       }
 
       .photo-wrapper {
@@ -687,68 +687,70 @@ export const generateComedienPDF = async (comedien: any) => {
       .header-right {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 8px;
         justify-content: flex-start;
       }
 
       .header-top {
         display: flex;
         align-items: baseline;
-        gap: 10px;
-        padding-top: 8px;
+        gap: 12px;
+        padding-top: 4px;
       }
 
       h1 {
-        font-size: 20px;
+        font-size: 28px;
         font-weight: 700;
         color: #1a1a1a;
-        line-height: 1;
+        line-height: 1.2;
+        letter-spacing: -0.5px;
       }
 
       .rating {
         display: inline-flex;
         align-items: center;
-        gap: 3px;
-        background: #f0f0f0;
-        padding: 2px 6px;
-        border-radius: 2px;
-        font-size: 9px;
-        border: 1px solid #ddd;
+        gap: 4px;
+        background: #f8f8f8;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 10px;
+        border: 1px solid #e0e0e0;
         flex-shrink: 0;
       }
 
       .rating .stars {
         color: #ffc107;
-        font-size: 11px;
-        letter-spacing: 0.8px;
+        font-size: 13px;
+        letter-spacing: 1px;
       }
 
       /* Grille infos header 4x2 */
       .header-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 6px 10px;
-        font-size: 9px;
+        gap: 12px 16px;
+        font-size: 10px;
         padding-bottom: 8px;
       }
 
       .header-item {
         display: flex;
         flex-direction: column;
-        gap: 1px;
+        gap: 3px;
       }
 
       .header-item-label {
         font-weight: 700;
-        color: #333;
+        color: #555;
         text-transform: uppercase;
-        font-size: 7.5px;
-        letter-spacing: 0.3px;
+        font-size: 8.5px;
+        letter-spacing: 0.5px;
       }
 
       .header-item-value {
         color: #1a1a1a;
-        font-size: 9px;
+        font-size: 11px;
+        font-weight: 500;
         word-break: break-word;
       }
 
@@ -788,90 +790,91 @@ export const generateComedienPDF = async (comedien: any) => {
       .content {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 6px;
+        gap: 12px;
         flex: 1;
-        margin-bottom: 4px;
+        margin-bottom: 8px;
       }
 
       .section {
         background: #fafafa;
-        border-left: 2.5px solid #1a1a1a;
-        padding: 7px;
-        border-radius: 1px;
+        border-left: 3px solid #1a1a1a;
+        padding: 12px;
+        border-radius: 2px;
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 8px;
         min-height: fit-content;
       }
 
       .section h3 {
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 700;
         color: #1a1a1a;
         text-transform: uppercase;
-        letter-spacing: 0.3px;
+        letter-spacing: 0.5px;
         margin: 0;
-        padding-bottom: 2px;
-        border-bottom: 1px solid #ddd;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #ddd;
       }
 
       .section-content {
         display: flex;
         flex-direction: column;
-        gap: 3px;
-        font-size: 9px;
+        gap: 8px;
+        font-size: 10px;
       }
 
       .info-row {
         display: flex;
         flex-direction: column;
-        gap: 1px;
-        font-size: 9px;
-        line-height: 1.3;
+        gap: 3px;
+        font-size: 10px;
+        line-height: 1.4;
       }
 
       .info-label {
         font-weight: 700;
         color: #555;
-        font-size: 8px;
+        font-size: 9px;
         text-transform: uppercase;
-        letter-spacing: 0.2px;
+        letter-spacing: 0.5px;
       }
 
       .info-value {
         color: #1a1a1a;
-        font-size: 9px;
+        font-size: 10px;
+        font-weight: 500;
         word-break: break-word;
       }
 
       .tags {
         display: flex;
         flex-wrap: wrap;
-        gap: 3px;
-        margin-top: 2px;
+        gap: 5px;
+        margin-top: 4px;
       }
 
       .tag {
         background: #333;
         color: white;
-        padding: 2px 6px;
-        border-radius: 10px;
-        font-size: 8px;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 9px;
         font-weight: 500;
         white-space: nowrap;
       }
 
       .tag.light {
-        background: #e8e8e8;
+        background: #f0f0f0;
         color: #333;
-        border: 0.5px solid #ccc;
+        border: 1px solid #ddd;
       }
 
       .text-content {
-        font-size: 9px;
-        line-height: 1.4;
+        font-size: 10px;
+        line-height: 1.5;
         color: #1a1a1a;
-        max-height: 60px;
+        max-height: 70px;
         overflow: hidden;
         display: -webkit-box;
         -webkit-line-clamp: 4;
@@ -880,7 +883,7 @@ export const generateComedienPDF = async (comedien: any) => {
       }
 
       .link-item {
-        font-size: 9px;
+        font-size: 10px;
         color: #0066cc;
         text-decoration: none;
         word-break: break-all;
