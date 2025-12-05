@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { Stars } from '../components/ui/Stars'
-import { supabase } from '@/lib/supabase'
 
 interface AdminStarsProps {
   comedienId: string
@@ -27,11 +26,23 @@ export const AdminStars: React.FC<AdminStarsProps> = ({
     try {
       setSaving(true)
       setError('')
-      const { error } = await supabase
-        .from('comediens')
-        .update({ admin_rating: newRating })
-        .eq('id', comedienId)
-      if (error) throw error
+
+      const response = await fetch(`/api/comediens/${comedienId}/rating`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rating: newRating,
+          isAdmin: true
+        })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.message || 'Erreur lors de la sauvegarde')
+      }
+
       if (onRatingUpdate) onRatingUpdate(newRating)
     } catch (err: any) {
       setError(err.message)
