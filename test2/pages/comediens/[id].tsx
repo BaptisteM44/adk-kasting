@@ -746,20 +746,6 @@ export default function ComedienProfile() {
                     </span>
                   </div>
                 <div className="key-info-item">
-                  <span className="key-info-label">Langues</span>
-                  <span className="key-info-value">
-                    {(() => {
-                      const allLangs: string[] = [];
-                      if (comedien.native_language_normalized) allLangs.push(comedien.native_language_normalized);
-                      if (comedien.languages_fluent_normalized?.length > 0) allLangs.push(...comedien.languages_fluent_normalized);
-                      if (comedien.languages_notions_normalized?.length > 0) allLangs.push(...comedien.languages_notions_normalized);
-                      // Déduplication manuelle
-                      const uniqueLangs = allLangs.filter((lang, index) => allLangs.indexOf(lang) === index);
-                      return uniqueLangs.length > 0 ? uniqueLangs.join(', ') : 'Non spécifié';
-                    })()}
-                  </span>
-                </div>
-                <div className="key-info-item">
                   <span className="key-info-label">Domaine</span>
                   <span className="key-info-value">
                     {isEditing ? (
