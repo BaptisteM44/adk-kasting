@@ -98,15 +98,28 @@ function DashboardContent() {
       // Charger les commentaires pour chaque comédien
       const comediensWithComments = await Promise.all(
         (json.data || []).map(async (comedien: Comedien) => {
-          const { data: comments } = await supabase
-            .from('admin_comments')
-            .select('*')
-            .eq('comedien_id', comedien.id)
-            .order('created_at', { ascending: false })
+          // Essayer d'abord la table admin_comments
+          let comments = []
+          let adminComment = comedien.admin_comment // Le champ direct de la table comediens
+
+          if (!adminComment) {
+            // Si pas de commentaire direct, chercher dans la table admin_comments
+            const { data: adminComments, error: commentsError } = await supabase
+              .from('admin_comments')
+              .select('*')
+              .eq('comedien_id', comedien.id)
+              .order('created_at', { ascending: false })
+
+            if (commentsError) {
+              console.error(`Erreur chargement commentaires pour ${comedien.id}:`, commentsError)
+            }
+            comments = adminComments || []
+          }
 
           return {
             ...comedien,
-            admin_comments: comments || []
+            admin_comment: adminComment,
+            admin_comments: comments
           }
         })
       )
@@ -293,7 +306,8 @@ function DashboardContent() {
                       <p><strong>Yeux:</strong> {comedien.eye_color || 'N/A'}</p>
                       <p><strong>Inscription:</strong> {new Date(comedien.created_at).toLocaleDateString()}</p>
                       
-                      {comedien.admin_comments && comedien.admin_comments.length > 0 && (
+                      {/* Afficher le commentaire admin s'il existe */}
+                      {(comedien.admin_comment || (comedien.admin_comments && comedien.admin_comments.length > 0)) && (
                         <div style={{ 
                           marginTop: '15px', 
                           padding: '10px', 
@@ -301,17 +315,26 @@ function DashboardContent() {
                           border: '1px solid #ffc107',
                           borderRadius: '4px'
                         }}>
-                          <strong>Notes admin:</strong>
-                          {comedien.admin_comments.map((comment) => (
-                            <div key={comment.id} style={{ marginTop: '5px', fontSize: '14px' }}>
-                              <span style={{ color: '#856404' }}>
-                                {comment.comment}
-                              </span>
-                              <span style={{ fontSize: '12px', color: '#666', marginLeft: '10px' }}>
-                                - {comment.admin_name} ({new Date(comment.created_at).toLocaleDateString()})
-                              </span>
+                          <strong>📝 Notes admin:</strong>
+                          {comedien.admin_comment && (
+                            <div style={{ marginTop: '5px', fontSize: '14px', color: '#856404' }}>
+                              {comedien.admin_comment}
                             </div>
-                          ))}
+                          )}
+                          {comedien.admin_comments && comedien.admin_comments.length > 0 && (
+                            <div style={{ marginTop: '10px' }}>
+                              {comedien.admin_comments.map((comment: any) => (
+                                <div key={comment.id} style={{ marginTop: '5px', fontSize: '14px' }}>
+                                  <span style={{ color: '#856404' }}>
+                                    {comment.comment}
+                                  </span>
+                                  <span style={{ fontSize: '12px', color: '#666', marginLeft: '10px' }}>
+                                    - {comment.admin_name} ({new Date(comment.created_at).toLocaleDateString()})
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
