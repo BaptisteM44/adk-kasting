@@ -56,7 +56,11 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
   } = req.query
 
   try {
-    // DEBUG
+    // DEBUG - write to file so we can see in production
+    const fs = require('fs')
+    const debugLog = `${new Date().toISOString()} | include_all_statuses=${include_all_statuses} (${typeof include_all_statuses}) | status=${status}\n`
+    fs.appendFileSync('/tmp/adk_debug.log', debugLog)
+    
     console.log('=== API Comediens Debug ===')
     console.log('include_all_statuses:', include_all_statuses, 'type:', typeof include_all_statuses)
     console.log('status:', status)
@@ -185,6 +189,11 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
   console.log('Executing query with:', {include_all_statuses, status, pageNum, limitNum})
   const { data, error, count } = await query
   console.log('Query result count:', count, 'data rows:', data?.length, 'first status:', data?.[0]?.status)
+  
+  // Debug log to file
+  const fs = require('fs')
+  const resultLog = `${new Date().toISOString()} | RESULT count=${count} rows=${data?.length} first_status=${data?.[0]?.status}\n`
+  fs.appendFileSync('/tmp/adk_debug.log', resultLog)
 
   if (error) throw error
 
