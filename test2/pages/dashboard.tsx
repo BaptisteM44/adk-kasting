@@ -95,11 +95,27 @@ function DashboardContent() {
 
       if (json.message) throw new Error(json.message)
 
+      // Charger les commentaires pour chaque comédien
+      const comediensWithComments = await Promise.all(
+        (json.data || []).map(async (comedien: Comedien) => {
+          const { data: comments } = await supabase
+            .from('admin_comments')
+            .select('*')
+            .eq('comedien_id', comedien.id)
+            .order('created_at', { ascending: false })
+
+          return {
+            ...comedien,
+            admin_comments: comments || []
+          }
+        })
+      )
+
       // Ajouter les nouveaux profils à la liste existante
       if (pageNum === 1) {
-        setPendingComediens(json.data || [])
+        setPendingComediens(comediensWithComments)
       } else {
-        setPendingComediens(prev => [...prev, ...(json.data || [])])
+        setPendingComediens(prev => [...prev, ...comediensWithComments])
       }
 
       setTotalCount(json.pagination?.total || 0)
@@ -242,7 +258,28 @@ function DashboardContent() {
                     backgroundColor: '#fff'
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '15px' }}>
+                    {/* Photo */}
+                    {(comedien.profile_picture || (comedien.photos && comedien.photos[0])) && (
+                      <div style={{ flexShrink: 0 }}>
+                        <img
+                          src={comedien.profile_picture || comedien.photos[0]}
+                          alt={`${comedien.first_name} ${comedien.last_name}`}
+                          style={{
+                            width: '120px',
+                            height: '160px',
+                            objectFit: 'cover',
+                            borderRadius: '6px',
+                            border: '1px solid #ddd'
+                          }}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none'
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Infos */}
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <h3 style={{ margin: 0 }}>{comedien.first_name} {comedien.last_name}</h3>
