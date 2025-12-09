@@ -56,8 +56,14 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
   } = req.query
 
   try {
+    // DEBUG
+    console.log('=== API Comediens Debug ===')
+    console.log('include_all_statuses:', include_all_statuses, 'type:', typeof include_all_statuses)
+    console.log('status:', status)
+    
     // Utiliser supabaseAdmin si include_all_statuses est true (bypass RLS pour admins)
     const client = include_all_statuses ? supabaseAdmin : supabase
+    console.log('Using client:', include_all_statuses ? 'supabaseAdmin' : 'supabase')
     let query = client
       .from('comediens')
       .select('*', { count: 'exact' })
