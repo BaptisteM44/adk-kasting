@@ -67,29 +67,52 @@ function DashboardContent() {
   const [message, setMessage] = useState('')
   const [pendingComediens, setPendingComediens] = useState<ComedienWithComments[]>([])
   const [statusFilter, setStatusFilter] = useState<string>('pending')
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const [totalCount, setTotalCount] = useState(0)
+  const LIMIT = 50 // Charger 50 profils à la fois
 
   useEffect(() => {
     if (user?.role === 'admin') {
-      fetchPendingComediens()
+      // Réinitialiser la pagination quand on change de filtre
+      setPage(1)
+      setPendingComediens([])
+      fetchPendingComediens(1)
     }
   }, [user, statusFilter])
 
-  const fetchPendingComediens = async () => {
+  const fetchPendingComediens = async (pageNum: number = page) => {
     try {
       // Utilise l'API qui contourne RLS avec service_role key
       const params = new URLSearchParams({
         include_all_statuses: 'true',
         status: statusFilter || 'pending',
-        limit: '1000' // Charger tous les profils avec ce statut
+        page: pageNum.toString(),
+        limit: LIMIT.toString()
       })
       const response = await fetch(`/api/comediens?${params}`)
       const json = await response.json()
 
       if (json.message) throw new Error(json.message)
-      setPendingComediens(json.data || [])
+
+      // Ajouter les nouveaux profils à la liste existante
+      if (pageNum === 1) {
+        setPendingComediens(json.data || [])
+      } else {
+        setPendingComediens(prev => [...prev, ...(json.data || [])])
+      }
+
+      setTotalCount(json.pagination?.total || 0)
+      setHasMore(json.data?.length === LIMIT && pendingComediens.length + json.data.length < json.pagination?.total)
     } catch (error: any) {
       console.error('Erreur chargement profils:', error)
     }
+  }
+
+  const loadMore = () => {
+    const nextPage = page + 1
+    setPage(nextPage)
+    fetchPendingComediens(nextPage)
   }
 
   const handleStatusChange = async (comedienId: string, newStatus: string) => {
@@ -178,10 +201,10 @@ function DashboardContent() {
         <div style={{ marginBottom: '40px', marginTop: '40px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <h2>
-              {statusFilter === 'pending' && `Inscriptions en attente (${pendingComediens.length})`}
-              {statusFilter === 'approved' && `Profils validés non payés (${pendingComediens.length})`}
-              {statusFilter === 'published' && `Profils publiés (${pendingComediens.length})`}
-              {statusFilter === 'trash' && `Profils supprimés (${pendingComediens.length})`}
+              {statusFilter === 'pending' && `Inscriptions en attente (${pendingComediens.length}${totalCount > pendingComediens.length ? ` / ${totalCount}` : ''})`}
+              {statusFilter === 'approved' && `Profils validés non payés (${pendingComediens.length}${totalCount > pendingComediens.length ? ` / ${totalCount}` : ''})`}
+              {statusFilter === 'published' && `Profils publiés (${pendingComediens.length}${totalCount > pendingComediens.length ? ` / ${totalCount}` : ''})`}
+              {statusFilter === 'trash' && `Profils supprimés (${pendingComediens.length}${totalCount > pendingComediens.length ? ` / ${totalCount}` : ''})`}
             </h2>
             <select
               value={statusFilter}
@@ -324,6 +347,29 @@ function DashboardContent() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Bouton Charger plus */}
+          {hasMore && pendingComediens.length > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
+              <Button
+                onClick={loadMore}
+                disabled={loading}
+                style={{
+                  padding: '12px 32px',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  backgroundColor: '#393939',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {loading ? 'Chargement...' : `Charger plus (${pendingComediens.length} / ${totalCount})`}
+              </Button>
             </div>
           )}
         </div>
