@@ -50,14 +50,26 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
     height_min,
     height_max,
     desired_activities, // Nouveau filtre
-    name // Nouveau filtre par nom
+    name, // Nouveau filtre par nom
+    status, // Filtre par statut (pour admin)
+    include_all_statuses // Pour dashboard admin (voir tous les statuts)
   } = req.query
 
   try {
-    let query = supabase
+    // Utiliser supabaseAdmin si include_all_statuses est true (bypass RLS pour admins)
+    const client = include_all_statuses ? supabaseAdmin : supabase
+    let query = client
       .from('comediens')
       .select('*', { count: 'exact' })
-      .eq('is_active', true)
+
+    // Filtrage par status (seulement si pas admin qui veut tout voir)
+    if (!include_all_statuses) {
+      const statusFilter = (status as string) || 'published'
+      query = query.eq('status', statusFilter)
+    } else if (status) {
+      // Si admin veut voir un statut spécifique
+      query = query.eq('status', status as string)
+    }
 
   // Filtrage par permis de conduire - colonne WordPress avec données sérialisées PHP
   if (driving_licenses && driving_licenses !== '') {
@@ -74,7 +86,8 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
   // Filtrage par compétences musicales - colonne WordPress + compétences personnalisées
   if (music_skills && music_skills !== '') {
     console.log('Recherche compétence musique:', music_skills) // Debug
-    query = query.or(`actor_music_skills.ilike.%${music_skills}%,music_skills_other.cs.{${music_skills}}`)
+    // Utiliser ILIKE simple sur la colonne WordPress (contient les données réelles)
+    query = query.ilike('actor_music_skills', `%${music_skills}%`)
   }
 
   // Filtrage par compétences diverses - colonne WordPress + compétences personnalisées
@@ -89,9 +102,9 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
     query = query.or(`wp_activity_domain.ilike.%${desired_activities}%,desired_activities_other.cs.{${desired_activities}}`)
   }
 
-  // Filtrage par langues parlées couramment - colonne WordPress
+  // Filtrage par langue maternelle - colonne WordPress avec données sérialisées PHP
   if (languages_fluent && languages_fluent !== '') {
-    console.log('Recherche langue courante:', languages_fluent) // Debug
+    console.log('Recherche langue maternelle:', languages_fluent) // Debug
     query = query.ilike('actor_languages_native', `%${languages_fluent}%`)
   }
 
@@ -115,10 +128,10 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
 
   if (city) query = query.ilike('city', `%${city}%`)
 
-  // Langue maternelle - colonne WordPress avec données sérialisées PHP
+  // Autre langue (notions) - colonne WordPress avec données sérialisées PHP
   if (languages && languages !== '') {
-    console.log('Recherche langue maternelle:', languages) // Debug
-    query = query.ilike('actor_languages_native', `%${languages}%`)
+    console.log('Recherche autre langue (notions):', languages) // Debug
+    query = query.ilike('actor_languages_notions', `%${languages}%`)
   }
   
   // Recherche par nom (nouveau filtre)
@@ -147,31 +160,50 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
   const limitNum = parseInt(limit as string)
   const startIndex = (pageNum - 1) * limitNum
 
-  // Pour l'ordre aléatoire, on récupère plus de résultats qu'on mélange
-  // puis on pagine côté serveur
+  // Créer une seed basée sur la date (change chaque jour)
+  // Cela donne un ordre différent chaque jour mais stable pendant la journée
+  const today = new Date()
+  const dateSeed = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`
+
+  // Utiliser un tri pseudo-aléatoire basé sur un hash de l'ID + seed du jour
+  // Note: Pour une vraie randomisation à chaque requête, on pourrait ajouter l'heure
+  // mais cela casserait la pagination. La seed quotidienne est un bon compromis.
   query = query
-    .order('id', { ascending: false })
+    .order('id', { ascending: true }) // Ordre de base pour la stabilité
     .range(startIndex, startIndex + limitNum - 1)
 
   const { data, error, count } = await query
 
   if (error) throw error
 
-  // Mélanger les résultats de manière vraiment aléatoire (Fisher-Yates shuffle)
-  const shuffleArray = (array: any[]) => {
+  // Mélanger les résultats avec une seed quotidienne (Fisher-Yates shuffle avec seed)
+  const shuffleArray = (array: any[], seed: string) => {
     // Filtrer d'abord les valeurs nulles ou invalides
     const validArray = array.filter(item => item && item.id);
-    const shuffled = [...validArray];
 
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      // Générer un index aléatoire
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
+    // Créer un générateur pseudo-aléatoire basé sur la seed
+    const seededRandom = (id: string) => {
+      const str = seed + id;
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+      }
+      return Math.abs(hash);
+    };
+
+    // Trier en fonction du hash de chaque ID avec la seed
+    const shuffled = validArray.sort((a, b) => {
+      const hashA = seededRandom(a.id);
+      const hashB = seededRandom(b.id);
+      return hashA - hashB;
+    });
+
     return shuffled;
   };
 
-  const shuffledData = data ? shuffleArray(data) : [];
+  const shuffledData = data ? shuffleArray(data, dateSeed) : [];
 
   return res.status(200).json({
     data: shuffledData,

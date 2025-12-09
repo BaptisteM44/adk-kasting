@@ -20,7 +20,21 @@ export default async function handler(
 
     // Filtrer et trier selon la section demandée
     if (show_in_hero === 'true') {
-      query = query.eq('show_in_hero', true).order('year', { ascending: false })
+      // Ordre aléatoire pour le carousel hero
+      const { data: allFilms, error: fetchError } = await supabase
+        .from('films')
+        .select('*')
+        .eq('is_active', true)
+        .eq('show_in_hero', true)
+
+      if (fetchError) {
+        console.error('Erreur récupération films:', fetchError)
+        return res.status(500).json({ message: 'Erreur serveur' })
+      }
+
+      // Mélanger aléatoirement les films
+      const shuffledFilms = allFilms?.sort(() => Math.random() - 0.5) || []
+      return res.status(200).json({ films: shuffledFilms })
     } else if (show_in_collaborations === 'true') {
       query = query.eq('show_in_collaborations', true).order('year', { ascending: false })
     } else {

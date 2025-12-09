@@ -133,16 +133,17 @@ export function normalizeComedienData(comedien: any) {
   return {
     ...comedien,
     
-    // Normaliser les langues (3 niveaux WordPress)
-    // 1. Langue maternelle
-    native_language_normalized: normalizeLanguages(comedien, 'native_language')[0] ||
-                                 normalizeLanguages(comedien, 'actor_languages_native')[0] ||
+    // Normaliser les langues (3 niveaux)
+    // 1. Langues maternelles (array)
+    languages_native_normalized: normalizeLanguages(comedien, 'actor_languages_native'),
+
+    // Compatibilité : garder native_language_normalized pour l'ancien code (première langue seulement)
+    native_language_normalized: normalizeLanguages(comedien, 'actor_languages_native')[0] ||
+                                 normalizeLanguages(comedien, 'native_language')[0] ||
                                  comedien.native_language,
 
-    // 2. Parlées couramment - lire depuis actor_languages_native (sans la langue maternelle)
-    languages_fluent_normalized: normalizeLanguages(comedien, 'actor_languages_native').filter(
-      lang => lang !== comedien.native_language
-    ),
+    // 2. Parlées couramment (stockées dans la colonne 'languages')
+    languages_fluent_normalized: normalizeLanguages(comedien, 'languages'),
 
     // 3. Notions
     languages_notions_normalized: normalizeLanguages(comedien, 'actor_languages_notions'),

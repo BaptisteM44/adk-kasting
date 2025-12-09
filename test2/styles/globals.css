@@ -1659,7 +1659,13 @@
     gap: 40px;
   }
 }
-@media (max-width: 1024px) {
+@media (max-width: 1024px) and (min-width: 769px) {
+  .comedien-profile .profile-main {
+    grid-template-columns: 300px 1fr;
+    gap: 30px;
+  }
+}
+@media (max-width: 768px) {
   .comedien-profile .profile-main {
     grid-template-columns: 1fr;
   }
@@ -1670,7 +1676,13 @@
   width: 420px;
   max-width: 100%;
 }
-@media (max-width: 1024px) {
+@media (max-width: 1024px) and (min-width: 769px) {
+  .comedien-profile .profile-photo-section {
+    width: 300px;
+    margin-bottom: 0;
+  }
+}
+@media (max-width: 768px) {
   .comedien-profile .profile-photo-section {
     width: 100%;
     margin-bottom: 40px;
@@ -1683,7 +1695,12 @@
   width: 420px;
   max-width: 100%;
 }
-@media (max-width: 1024px) {
+@media (max-width: 1024px) and (min-width: 769px) {
+  .comedien-profile .profile-photo-section .photos-layout {
+    width: 300px;
+  }
+}
+@media (max-width: 768px) {
   .comedien-profile .profile-photo-section .photos-layout {
     width: 100%;
   }
@@ -1697,7 +1714,13 @@
   opacity: 1;
   max-width: 100%;
 }
-@media (max-width: 1024px) {
+@media (max-width: 1024px) and (min-width: 769px) {
+  .comedien-profile .profile-photo-section .photos-layout .main-photo {
+    width: 300px;
+    height: 412px;
+  }
+}
+@media (max-width: 768px) {
   .comedien-profile .profile-photo-section .photos-layout .main-photo {
     width: 100%;
     height: auto;
@@ -1815,7 +1838,13 @@
   color: #999;
   max-width: 100%;
 }
-@media (max-width: 1024px) {
+@media (max-width: 1024px) and (min-width: 769px) {
+  .comedien-profile .profile-photo-section .no-photo .placeholder-photo {
+    width: 300px;
+    height: 412px;
+  }
+}
+@media (max-width: 768px) {
   .comedien-profile .profile-photo-section .no-photo .placeholder-photo {
     width: 100%;
     height: auto;
@@ -2455,7 +2484,8 @@
   padding: 16px 0px;
   transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: flex;
-  align-items: center;
+  align-items: left;
+  flex-direction: column;
 }
 .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster .film-info h3 {
   font-size: 1.1rem;
@@ -2470,38 +2500,40 @@
   font-weight: 400;
   margin: 0;
 }
-.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover {
-  z-index: 100;
-  will-change: transform;
-}
-.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover .poster-inner {
-  transform: scale(1.25);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
-}
-.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover .poster-inner img {
-  transform: scale(1.03);
-  filter: brightness(1.15) contrast(1.08) saturate(1.1);
-  transform-origin: 50% 100% !important;
-}
-.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover .film-info {
-  transform: translateY(90px) translateX(-32px);
-  opacity: 0.9;
-}
-.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover + .film-poster.morphing-poster {
-  transform: translateX(20px);
-  opacity: 0.95;
-}
-.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover + .film-poster.morphing-poster + .film-poster.morphing-poster {
-  transform: translateX(10px);
-  opacity: 0.97;
-}
-.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:has(+ .film-poster.morphing-poster:hover) {
-  transform: translateX(-20px);
-  opacity: 0.9;
-}
-.collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:has(+ .film-poster.morphing-poster + .film-poster.morphing-poster:hover) {
-  transform: translateX(-10px);
-  opacity: 0.95;
+@media (hover: hover) and (pointer: fine) {
+  .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover {
+    z-index: 100;
+    will-change: transform;
+  }
+  .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover .poster-inner {
+    transform: scale(1.25);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+  }
+  .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover .poster-inner img {
+    transform: scale(1.03);
+    filter: brightness(1.15) contrast(1.08) saturate(1.1);
+    transform-origin: 50% 100% !important;
+  }
+  .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover .film-info {
+    transform: translateY(90px) translateX(-32px);
+    opacity: 0.9;
+  }
+  .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover + .film-poster.morphing-poster {
+    transform: translateX(20px);
+    opacity: 0.95;
+  }
+  .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover + .film-poster.morphing-poster + .film-poster.morphing-poster {
+    transform: translateX(10px);
+    opacity: 0.97;
+  }
+  .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:has(+ .film-poster.morphing-poster:hover) {
+    transform: translateX(-20px);
+    opacity: 0.9;
+  }
+  .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:has(+ .film-poster.morphing-poster + .film-poster.morphing-poster:hover) {
+    transform: translateX(-10px);
+    opacity: 0.95;
+  }
 }
 @media (max-width: 768px) {
   .collaborations-section .collaborations-section {
@@ -2532,12 +2564,6 @@
   .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster .film-info p {
     font-size: 0.8rem;
   }
-  .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover {
-    transform: translateY(-8px);
-  }
-  .collaborations-section .collaborations-container .films-grid.morphing-grid .film-poster.morphing-poster:hover .poster-inner {
-    transform: scale(1.25);
-  }
 }
 
 .morphing-poster {
@@ -2546,6 +2572,14 @@
   transform: translateZ(0);
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
 @keyframes revealText {
   0% {
     opacity: 0;

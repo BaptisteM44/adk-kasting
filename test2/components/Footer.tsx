@@ -8,14 +8,14 @@ export const Footer: React.FC = () => {
       <div className="container">
         {/* Section des 3 gros boutons */}
         <div className="footer__cta-buttons">
-          <a href="mailto:info@adk-kasting.com" className="footer__cta-btn footer-cta-cascade">
+          <a href="#footer-contact" className="footer__cta-btn footer-cta-cascade">
             <span>Contactez-nous</span>
             <svg className="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </a>
           
-          <a href="https://www.facebook.com/adkkasting/" target="_blank" rel="noopener noreferrer" className="footer__cta-btn footer-cta-cascade">
+          <a href="https://www.facebook.com/groups/98387237901" target="_blank" rel="noopener noreferrer" className="footer__cta-btn footer-cta-cascade">
             <span>Facebook</span>
             <svg className="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -42,26 +42,24 @@ export const Footer: React.FC = () => {
             <Link href="/about">À propos</Link>
           </div>
 
-          <div className="footer__section">
+          <div className="footer__section" id="footer-contact">
             <h3>Contact</h3>
-            <p>+32 2 544 09 05</p>
-            <p>info@adk-kasting.com</p>
-            <p>TVA: BE0820 300 591</p>
+            <a href="tel:+3225440905">+32 2 544 09 05</a>
+            <a href="mailto:info@adk-kasting.com">info@adk-kasting.com</a>
           </div>
 
           <div className="footer__section">
-            <h3>Adresse</h3>
-            <p>Av. Maurice 1</p>
-            <p>1050 Ixelles</p>
-            <p>Belgique</p>
-          </div>
-{/* 
-          <div className="footer__section">
             <h3>Siège d'exploitation</h3>
-            <p>Avenue Louise 456</p>
-            <p>1050 Ixelles</p>
-            <p>Belgique</p>
-          </div> */}
+            <p>1 avenue Maurice</p>
+            <p>1050 Bruxelles</p>
+          </div>
+
+          <div className="footer__section">
+            <h3>Siège social</h3>
+            <p>34 rue Jean Van Volsem</p>
+            <p>1050 Bruxelles</p>
+            <p>TVA: 0820 300 591</p>
+          </div>
 
           <div className="footer__section">
             <h3>Suivez-nous</h3>

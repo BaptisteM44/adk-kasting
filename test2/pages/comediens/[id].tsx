@@ -8,6 +8,7 @@ import Head from 'next/head'
 import { Layout } from '../../components/Layout'
 import { useAuth } from '../../components/AuthProvider'
 import { AdminStars } from '../../components/AdminStars'
+import { LANGUAGE_SELECT_OPTIONS } from '../../lib/languages'
 
 export default function ComedienProfile() {
   const router = useRouter()
@@ -26,6 +27,9 @@ export default function ComedienProfile() {
   const [originalData, setOriginalData] = useState<any>({}) // Données originales de la base
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
 
+  // État pour les notifications de copie
+  const [copiedText, setCopiedText] = useState('')
+
   // États pour gérer l'affichage des champs "Autre"
   const [showOtherDance, setShowOtherDance] = useState(false)
   const [showOtherMusic, setShowOtherMusic] = useState(false)
@@ -37,6 +41,7 @@ export default function ComedienProfile() {
   const [tempMusic, setTempMusic] = useState('')
   const [tempDiverse, setTempDiverse] = useState('')
   const [tempActivities, setTempActivities] = useState('')
+  const [tempVideo, setTempVideo] = useState('')
 
   // Vérifier si l'utilisateur peut éditer ce profil
   const canEdit = user && (user.role === 'admin' || user.id === id)
@@ -176,6 +181,9 @@ export default function ComedienProfile() {
     if (isEditing) {
       // Si on annule, restaurer les données originales
       setEditedData(comedien)
+    } else {
+      // Entrer en mode édition : initialiser editedData avec les données actuelles
+      setEditedData(comedien)
     }
     setIsEditing(!isEditing)
   }
@@ -192,8 +200,8 @@ export default function ComedienProfile() {
         updated[`${field}_normalized`] = value
       }
 
-      if (field === 'native_language') {
-        updated['native_language_normalized'] = value
+      if (field === 'languages_native') {
+        updated['languages_native_normalized'] = value
       }
 
       return updated
@@ -218,8 +226,8 @@ export default function ComedienProfile() {
         'native_language',
         'agency_name', 'agent_name', 'agent_email', 'agent_phone',
         'agency_name_2', 'agent_name_2', 'agent_email_2', 'agent_phone_2',
-        'website_url', 'facebook_url', 'imdb_url', 'linkedin_url', 'other_profile_url',
-        'showreel_url', 'actor_video1', 'actor_video2',
+        'website_url', 'facebook_url', 'instagram_url', 'tiktok_url', 'imdb_url', 'linkedin_url', 'other_profile_url',
+        'showreel_url', 'actor_video1', 'actor_video2', 'additional_videos',
         'experience_level', 'experience', 'certificates'
       ]
 
@@ -242,8 +250,12 @@ export default function ComedienProfile() {
       // PostgreSQL/Supabase gère les arrays nativement
       const arrayFields = [
         {
+          normalized: 'languages_native_normalized',
+          dbField: 'actor_languages_native'
+        },
+        {
           normalized: 'languages_fluent_normalized',
-          dbField: 'actor_languages_native'  // Corrigé : était 'languages', maintenant 'actor_languages_native'
+          dbField: 'languages'  // Langues couramment stockées dans la colonne 'languages'
         },
         {
           normalized: 'languages_notions_normalized',
@@ -279,12 +291,7 @@ export default function ComedienProfile() {
         }
       })
 
-      // Vérifier native_language séparément
-      if (formData.native_language_normalized !== comedien.native_language_normalized) {
-        dataToSave.native_language = formData.native_language_normalized
-        const nativeArray = formData.native_language_normalized ? [formData.native_language_normalized] : []
-        dataToSave.actor_languages_native = nativeArray
-      }
+      // native_language est maintenant géré comme un array dans arrayFields, plus besoin de code séparé
 
       // Sauvegarder les compétences personnalisées (custom skills)
       const customSkillFields = ['dance_skills_other', 'music_skills_other', 'diverse_skills_other', 'desired_activities_other']
@@ -383,6 +390,81 @@ export default function ComedienProfile() {
       ...prev,
       [field]: current.filter((item: string) => item !== value)
     }))
+  }
+
+  // Fonction pour ajouter une vidéo supplémentaire
+  const addVideo = () => {
+    if (!tempVideo.trim()) return
+    const currentVideos = editedData.additional_videos || []
+    if (!currentVideos.includes(tempVideo.trim())) {
+      setEditedData((prev: any) => ({
+        ...prev,
+        additional_videos: [...currentVideos, tempVideo.trim()]
+      }))
+    }
+    setTempVideo('')
+  }
+
+  // Fonction pour supprimer une vidéo supplémentaire
+  const removeVideo = (index: number) => {
+    const currentVideos = editedData.additional_videos || []
+    setEditedData((prev: any) => ({
+      ...prev,
+      additional_videos: currentVideos.filter((_: string, i: number) => i !== index)
+    }))
+  }
+
+  // Fonction pour copier dans le presse-papiers
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedText(label)
+      setTimeout(() => setCopiedText(''), 2000) // Réinitialiser après 2 secondes
+    } catch (err) {
+      console.error('Erreur lors de la copie:', err)
+    }
+  }
+
+  // Composant pour afficher email/téléphone cliquable pour copier
+  const CopyableContact = ({ value, type, href }: { value: string, type: 'email' | 'phone', href: string }) => {
+    const isCopied = copiedText === value
+
+    return (
+      <span
+        onClick={(e) => {
+          e.preventDefault()
+          copyToClipboard(value, value)
+        }}
+        style={{
+          cursor: 'pointer',
+          color: isCopied ? '#22c55e' : '#0066cc',
+          textDecoration: 'underline',
+          transition: 'all 0.2s',
+          position: 'relative',
+          display: 'inline-block'
+        }}
+        title={isCopied ? '✓ Copié !' : `Cliquer pour copier ${type === 'email' ? "l'email" : 'le téléphone'}`}
+        onMouseEnter={(e) => {
+          if (!isCopied) {
+            e.currentTarget.style.opacity = '0.7'
+          }
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.opacity = '1'
+        }}
+      >
+        {value}
+        {isCopied && (
+          <span style={{
+            marginLeft: '6px',
+            fontSize: '14px',
+            color: '#22c55e'
+          }}>
+            ✓
+          </span>
+        )}
+      </span>
+    )
   }
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -845,7 +927,7 @@ export default function ComedienProfile() {
                         className="edit-input-inline"
                       />
                     ) : (
-                      <a href={`mailto:${comedien.email}`}>{comedien.email}</a>
+                      <CopyableContact value={comedien.email} type="email" href={`mailto:${comedien.email}`} />
                     )}
                   </span>
                 </div>
@@ -860,7 +942,7 @@ export default function ComedienProfile() {
                           className="edit-input-inline"
                         />
                       ) : (
-                        comedien.phone ? <a href={`tel:${comedien.phone}`}>{comedien.phone}</a> : 'Non spécifié'
+                        comedien.phone ? <CopyableContact value={comedien.phone} type="phone" href={`tel:${comedien.phone}`} /> : 'Non spécifié'
                       )}
                     </span>
                   </div>
@@ -875,7 +957,7 @@ export default function ComedienProfile() {
                           className="edit-input-inline"
                         />
                       ) : (
-                        comedien.mobile_phone ? <a href={`tel:${comedien.mobile_phone}`}>{comedien.mobile_phone}</a> : 'Non spécifié'
+                        comedien.mobile_phone ? <CopyableContact value={comedien.mobile_phone} type="phone" href={`tel:${comedien.mobile_phone}`} /> : 'Non spécifié'
                       )}
                     </span>
                   </div>
@@ -1067,37 +1149,67 @@ export default function ComedienProfile() {
                       <span className="key-info-label">Maternelle</span>
                       <span className="key-info-value">
                         {isEditing ? (
-                          <select 
-                            value={editedData.native_language || ''} 
-                            onChange={(e) => handleFieldChange('native_language', e.target.value)}
-                            className="edit-input-inline"
-                            style={{ minWidth: '200px' }}
-                          >
-                            <option value="">Sélectionner votre langue maternelle</option>
-                            <option value="Anglais">Anglais</option>
-                            <option value="Français">Français</option>
-                            <option value="Néerlandais">Néerlandais</option>
-                            <option value="Allemand">Allemand</option>
-                            <option value="Espagnol">Espagnol</option>
-                            <option value="Italien">Italien</option>
-                            <option value="Portugais">Portugais</option>
-                            <option value="Arabe">Arabe</option>
-                            <option value="Chinois">Chinois</option>
-                            <option value="Russe">Russe</option>
-                            <option value="Japonais">Japonais</option>
-                            <option value="Polonais">Polonais</option>
-                            <option value="Roumain">Roumain</option>
-                            <option value="Turc">Turc</option>
-                            <option value="Grec">Grec</option>
-                            <option value="Hindi">Hindi</option>
-                            <option value="Coréen">Coréen</option>
-                            <option value="Suédois">Suédois</option>
-                            <option value="Norvégien">Norvégien</option>
-                            <option value="Danois">Danois</option>
-                            <option value="Finnois">Finnois</option>
-                          </select>
+                          <div>
+                            <select
+                              value=""
+                              onChange={(e) => {
+                                if (e.target.value && !(editedData.languages_native_normalized || []).includes(e.target.value)) {
+                                  handleFieldChange('languages_native', [...(editedData.languages_native_normalized || []), e.target.value]);
+                                }
+                              }}
+                              className="edit-input-inline"
+                              style={{ width: '180px', marginBottom: '8px' }}
+                            >
+                              <option value="">Ajouter une langue maternelle</option>
+                              <optgroup label="Langues courantes">
+                                {LANGUAGE_SELECT_OPTIONS.common.map(lang => (
+                                  <option key={lang} value={lang}>{lang}</option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="Autres langues">
+                                {LANGUAGE_SELECT_OPTIONS.other.map(lang => (
+                                  <option key={lang} value={lang}>{lang}</option>
+                                ))}
+                              </optgroup>
+                            </select>
+                            {(editedData.languages_native_normalized || []).length > 0 && (
+                              <div className="edit-checkbox-group" style={{ marginTop: '8px' }}>
+                                {(editedData.languages_native_normalized || []).map((lang: string) => (
+                                  <span key={lang} style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    padding: '4px 8px',
+                                    background: '#E5E7EB',
+                                    borderRadius: '4px',
+                                    marginRight: '6px'
+                                  }}>
+                                    {lang}
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const newLangs = (editedData.languages_native_normalized || []).filter((l: string) => l !== lang);
+                                        handleFieldChange('languages_native', newLangs);
+                                      }}
+                                      style={{
+                                        marginLeft: '6px',
+                                        background: 'transparent',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        fontSize: '14px',
+                                        color: '#EF4444'
+                                      }}
+                                    >
+                                      ✕
+                                    </button>
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         ) : (
-                          comedien.native_language_normalized || 'Non spécifié'
+                          comedien.languages_native_normalized && comedien.languages_native_normalized.length > 0
+                            ? (Array.isArray(comedien.languages_native_normalized) ? comedien.languages_native_normalized.join(', ') : comedien.languages_native_normalized)
+                            : 'Non spécifié'
                         )}
                       </span>
                     </div>
@@ -1106,32 +1218,27 @@ export default function ComedienProfile() {
                       <span className="key-info-value">
                         {isEditing ? (
                           <div>
-                            <select 
-                              value="" 
+                            <select
+                              value=""
                               onChange={(e) => {
                                 if (e.target.value && !(editedData.languages_fluent_normalized || []).includes(e.target.value)) {
                                   handleFieldChange('languages_fluent', [...(editedData.languages_fluent_normalized || []), e.target.value]);
                                 }
                               }}
                               className="edit-input-inline"
-                              style={{ minWidth: '200px', marginBottom: '8px' }}
+                              style={{ width: '180px', marginBottom: '8px' }}
                             >
                               <option value="">Ajouter une langue parlée couramment</option>
-                              <option value="Anglais">Anglais</option>
-                              <option value="Français">Français</option>
-                              <option value="Néerlandais">Néerlandais</option>
-                              <option value="Allemand">Allemand</option>
-                              <option value="Espagnol">Espagnol</option>
-                              <option value="Italien">Italien</option>
-                              <option value="Portugais">Portugais</option>
-                              <option value="Arabe">Arabe</option>
-                              <option value="Chinois">Chinois</option>
-                              <option value="Russe">Russe</option>
-                              <option value="Japonais">Japonais</option>
-                              <option value="Polonais">Polonais</option>
-                              <option value="Roumain">Roumain</option>
-                              <option value="Turc">Turc</option>
-                              <option value="Grec">Grec</option>
+                              <optgroup label="Langues courantes">
+                                {LANGUAGE_SELECT_OPTIONS.common.map(lang => (
+                                  <option key={lang} value={lang}>{lang}</option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="Autres langues">
+                                {LANGUAGE_SELECT_OPTIONS.other.map(lang => (
+                                  <option key={lang} value={lang}>{lang}</option>
+                                ))}
+                              </optgroup>
                             </select>
                             {(editedData.languages_fluent_normalized || []).length > 0 && (
                               <div className="edit-checkbox-group" style={{ marginTop: '8px' }}>
@@ -1179,32 +1286,27 @@ export default function ComedienProfile() {
                       <span className="key-info-value">
                         {isEditing ? (
                           <div>
-                            <select 
-                              value="" 
+                            <select
+                              value=""
                               onChange={(e) => {
                                 if (e.target.value && !(editedData.languages_notions_normalized || []).includes(e.target.value)) {
                                   handleFieldChange('languages_notions', [...(editedData.languages_notions_normalized || []), e.target.value]);
                                 }
                               }}
                               className="edit-input-inline"
-                              style={{ minWidth: '200px', marginBottom: '8px' }}
+                              style={{ width: '180px', marginBottom: '8px' }}
                             >
                               <option value="">Ajouter une langue avec notions</option>
-                              <option value="Anglais">Anglais</option>
-                              <option value="Français">Français</option>
-                              <option value="Néerlandais">Néerlandais</option>
-                              <option value="Allemand">Allemand</option>
-                              <option value="Espagnol">Espagnol</option>
-                              <option value="Italien">Italien</option>
-                              <option value="Portugais">Portugais</option>
-                              <option value="Arabe">Arabe</option>
-                              <option value="Chinois">Chinois</option>
-                              <option value="Russe">Russe</option>
-                              <option value="Japonais">Japonais</option>
-                              <option value="Polonais">Polonais</option>
-                              <option value="Roumain">Roumain</option>
-                              <option value="Turc">Turc</option>
-                              <option value="Grec">Grec</option>
+                              <optgroup label="Langues courantes">
+                                {LANGUAGE_SELECT_OPTIONS.common.map(lang => (
+                                  <option key={lang} value={lang}>{lang}</option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="Autres langues">
+                                {LANGUAGE_SELECT_OPTIONS.other.map(lang => (
+                                  <option key={lang} value={lang}>{lang}</option>
+                                ))}
+                              </optgroup>
                             </select>
                             {(editedData.languages_notions_normalized || []).length > 0 && (
                               <div className="edit-checkbox-group" style={{ marginTop: '8px' }}>
@@ -1303,7 +1405,7 @@ export default function ComedienProfile() {
                                 placeholder="email@agence.com"
                               />
                             ) : (
-                              comedien.agent_email ? <a href={`mailto:${comedien.agent_email}`}>{comedien.agent_email}</a> : 'Non spécifié'
+                              comedien.agent_email ? <CopyableContact value={comedien.agent_email} type="email" href={`mailto:${comedien.agent_email}`} /> : 'Non spécifié'
                             )}
                           </span>
                         </div>
@@ -1319,7 +1421,7 @@ export default function ComedienProfile() {
                                 placeholder="06 12 34 56 78"
                               />
                             ) : (
-                              comedien.agent_phone ? <a href={`tel:${comedien.agent_phone}`}>{comedien.agent_phone}</a> : 'Non spécifié'
+                              comedien.agent_phone ? <CopyableContact value={comedien.agent_phone} type="phone" href={`tel:${comedien.agent_phone}`} /> : 'Non spécifié'
                             )}
                           </span>
                         </div>
@@ -1376,7 +1478,7 @@ export default function ComedienProfile() {
                                 placeholder="email@agence.com"
                               />
                             ) : (
-                              comedien.agent_email_2 ? <a href={`mailto:${comedien.agent_email_2}`}>{comedien.agent_email_2}</a> : 'Non spécifié'
+                              comedien.agent_email_2 ? <CopyableContact value={comedien.agent_email_2} type="email" href={`mailto:${comedien.agent_email_2}`} /> : 'Non spécifié'
                             )}
                           </span>
                         </div>
@@ -1392,7 +1494,7 @@ export default function ComedienProfile() {
                                 placeholder="06 12 34 56 78"
                               />
                             ) : (
-                              comedien.agent_phone_2 ? <a href={`tel:${comedien.agent_phone_2}`}>{comedien.agent_phone_2}</a> : 'Non spécifié'
+                              comedien.agent_phone_2 ? <CopyableContact value={comedien.agent_phone_2} type="phone" href={`tel:${comedien.agent_phone_2}`} /> : 'Non spécifié'
                             )}
                           </span>
                         </div>
@@ -1510,7 +1612,7 @@ export default function ComedienProfile() {
                     )}
                     {(comedien.city || isEditing) && (
                       <div className="key-info-item">
-                        <span className="key-info-label">Ville</span>
+                        <span className="key-info-label">Domiciliation fiscale</span>
                         <span className="key-info-value">
                           {isEditing ? (
                             <input 
@@ -1913,9 +2015,9 @@ export default function ComedienProfile() {
                         <span className="key-info-label">Instagram</span>
                         <span className="key-info-value">
                           {isEditing ? (
-                            <input 
-                              type="url" 
-                              value={editedData.instagram_url || ''} 
+                            <input
+                              type="url"
+                              value={editedData.instagram_url || ''}
                               onChange={(e) => handleFieldChange('instagram_url', e.target.value)}
                               className="edit-input-inline"
                               placeholder="https://instagram.com/..."
@@ -1923,6 +2025,25 @@ export default function ComedienProfile() {
                             />
                           ) : (
                             <a href={comedien.instagram_url} target="_blank" rel="noopener noreferrer">{comedien.instagram_url}</a>
+                          )}
+                        </span>
+                      </div>
+                    )}
+                    {(comedien.tiktok_url || isEditing) && (
+                      <div className="key-info-item">
+                        <span className="key-info-label">TikTok</span>
+                        <span className="key-info-value">
+                          {isEditing ? (
+                            <input
+                              type="url"
+                              value={editedData.tiktok_url || ''}
+                              onChange={(e) => handleFieldChange('tiktok_url', e.target.value)}
+                              className="edit-input-inline"
+                              placeholder="https://tiktok.com/@..."
+                              style={{ minWidth: '250px' }}
+                            />
+                          ) : (
+                            <a href={comedien.tiktok_url} target="_blank" rel="noopener noreferrer">{comedien.tiktok_url}</a>
                           )}
                         </span>
                       </div>
@@ -1999,6 +2120,103 @@ export default function ComedienProfile() {
                             />
                           ) : (
                             <a href={comedien.actor_video2} target="_blank" rel="noopener noreferrer">Voir la vidéo 2</a>
+                          )}
+                        </span>
+                      </div>
+                    )}
+                    {((comedien.additional_videos && comedien.additional_videos.length > 0) || isEditing) && (
+                      <div className="key-info-item">
+                        <span className="key-info-label">Vidéos supplémentaires</span>
+                        <span className="key-info-value">
+                          {isEditing ? (
+                            <div style={{ width: '100%' }}>
+                              <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                                <input
+                                  type="url"
+                                  placeholder="Ajouter une vidéo (YouTube, Vimeo, etc.)"
+                                  value={tempVideo}
+                                  onChange={(e) => setTempVideo(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault()
+                                      addVideo()
+                                    }
+                                  }}
+                                  style={{
+                                    flex: 1,
+                                    padding: '8px',
+                                    borderRadius: '4px',
+                                    border: '1px solid #ddd'
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={addVideo}
+                                  style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: '#0070f3',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    fontWeight: 500
+                                  }}
+                                >
+                                  Ajouter
+                                </button>
+                              </div>
+                              {(editedData.additional_videos || []).length > 0 && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                  {(editedData.additional_videos || []).map((video: string, index: number) => (
+                                    <div
+                                      key={index}
+                                      style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '8px 12px',
+                                        backgroundColor: '#f0f0f0',
+                                        borderRadius: '8px'
+                                      }}
+                                    >
+                                      <span
+                                        style={{
+                                          flex: 1,
+                                          fontSize: '14px',
+                                          wordBreak: 'break-all'
+                                        }}
+                                      >
+                                        {video}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => removeVideo(index)}
+                                        style={{
+                                          padding: '4px 8px',
+                                          backgroundColor: '#ef4444',
+                                          color: 'white',
+                                          border: 'none',
+                                          borderRadius: '4px',
+                                          cursor: 'pointer',
+                                          fontWeight: 'bold',
+                                          fontSize: '16px'
+                                        }}
+                                      >
+                                        ×
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              {comedien.additional_videos.map((video: string, index: number) => (
+                                <a key={index} href={video} target="_blank" rel="noopener noreferrer" style={{ display: 'block' }}>
+                                  Vidéo {index + 1}
+                                </a>
+                              ))}
+                            </div>
                           )}
                         </span>
                       </div>

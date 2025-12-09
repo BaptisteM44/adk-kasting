@@ -48,7 +48,9 @@ export default function AboutPage() {
               Qui sommes-nous ?
             </h2>
             <p className="text-reveal text-reveal--delay-1">
-              Depuis 2004, ADK-KASTING œuvre principalement dans le casting de fiction cinématographique, courts et longs métrages. ADK-KASTING offre, aux comédiens domiciliés en Belgique et au Luxembourg, la possibilité de mettre en lumière leur profil. Mais ADK-KASTING NE SE VEUT PAS, pour autant, agence de comédiens. Le but n’est pas ici de VENDRE qui que ce soit plutôt qu’un(e) autre. Elle NE SE VEUT PAS NON PLUS, simple vitrine de comédiens. Il s’agit bien d’une structure désirée par un directeur de casting dans le but d’optimaliser son travail. Sa seule philosophie est de se mettre au service de votre envie, de votre vision, de votre projet. Depuis 2007, la société est, en outre, chargée de la supervision des films de 3ème année à l’IAD (exercice dirigé par Benoît Mariage).
+              Depuis 2004, ADK-KASTING œuvre principalement dans le casting de fiction cinématographique, courts et longs métrages. ADK-KASTING offre aux comédiens la possibilité de mettre en lumière leur profil. 
+              <br /> Mais ADK-KASTING NE SE VEUT PAS, pour autant, agence de comédiens. Le but n’est pas ici de VENDRE qui que ce soit plutôt qu’un(e) autre. 
+              <br /> Elle NE SE VEUT PAS NON PLUS simple vitrine de comédiens. Il s’agit bien d’une structure désirée par un.e directeurice de casting dans le but d’optimaliser leur travail. Leur seule philosophie est de se mettre au service de votre envie, de votre vision, de votre projet.
             </p>
             <a href="mailto:info@adk-kasting.com" className="hero-button button-reveal">
               Contactez-nous
@@ -66,9 +68,9 @@ export default function AboutPage() {
               La société se distingue des autres agences ou directeurs de castings par deux éléments qui lui tiennent à cœur :
             </p>
             <p className="text-reveal text-reveal--delay-3 bullet-list">
-              • Une offre abondante et, sans cesse renouvelée, d'extraits vidéos, plus à même de rendre compte du talent d'un comédien, que ne pourrait le faire une simple photo. Ces vidéos sont, soit le fruit des castings pris en charge par la société ou alors des projets des comédiens eux-mêmes.
+              • Une offre abondante sans cesse renouvelée d'extraits vidéos plus à même de rendre compte du talent d'un comédien que ne pourrait le faire une simple photo.
               <br /><br />
-              • Un mélange équilibré de comédiens professionnels, à l'expérience riche et variée et de comédiens non professionnels au talent étonnant. Ce mélange trouve sa source dans l'historique de la société qui a fait ses gammes autour de personnalités telles que Benoît Mariagé et Bouli Lanners qui favorisent ce type de rencontres.
+              • Un mélange équilibré de comédiens professionnels, à l'expérience riche et variée et de comédiens non professionnels au talent étonnant. Ce mélange trouve sa source dans l'historique de la société qui a fait ses gammes autour de personnalités telles que Benoît Mariage et Bouli Lanners qui favorisent ce type de rencontres.
             </p>
           </div>
         </div>
@@ -85,15 +87,6 @@ export default function AboutPage() {
             referrerPolicy="no-referrer-when-downgrade"
             title="Localisation ADK-KASTING"
           />
-          {/* <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5041.6006978547875!2d4.376618912648913!3d50.8163376608332!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c3c46405a8cde5%3A0x1ab7b983e081e3a7!2sADK-Kasting!5e0!3m2!1sfr!2sbe!4v1762183909561!5m2!1sfr!2sbe" 
-          width="600" 
-          height="450" 
-          style="border:0;" 
-          allowfullscreen="" 
-          loading="lazy" 
-          referrerpolicy="no-referrer-when-downgrade">
-
-          </iframe> */}
         </div>
 
         {/* Section 4 - Les moyens de transport (sans bouton) */}
@@ -154,13 +147,12 @@ export default function AboutPage() {
                   DF
                 </div>
                 <h3>DORIANE FLAMAND</h3>
-                <h4>Actionnaire</h4>
                 <p>Directrice de casting</p>
               </div>
             </div>
             
             <p className="text-reveal text-reveal--delay-3 team-description">
-              La société engage également, occasionnellement, des stagiaires, réalisateurs et/ou des comédiens en vue de faire passer des castings et de donner la réplique. pour plus d'infos à ce sujet, n'hésitez pas à nous contacter.
+                La société accueille également des stagiaires, futur.es réalisateurices ou comédien.nes en vue de compléter leur formation. Pour plus d'infos à ce sujet, n'hésitez pas à nous contacter.
             </p>
           </div>
         </div>

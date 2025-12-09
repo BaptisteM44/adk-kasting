@@ -141,13 +141,13 @@ export default function HomePage() {
               Vous êtes à la recherche d'un·e comédien·ne ?
             </h2>
             <p className="text-reveal text-reveal--delay-1">
-              L'agence ADK-Kasting dispose d'une base de données de près de 3000 comédiens belges et internationaux, professionnels ou non.
+              L'agence ADK-KASTING dispose d'une base de données de près de 8000 comédiens belges et internationaux, professionnels ou non.
               <br />
-              Vous aurez accès, sur ce site, à une galerie de plusieurs centaines de comédiens·nes, professionnel·les, non professionnel·les, enfants, adolescents ou adultes. Cette communauté riche et variée est le fruit de plusieurs années de castings sur plus d'une centaine de projets… longs-métrages ou autres.
+              Vous aurez accès, sur ce site, à une très large galerie de comédiens·nes, professionnel·les, non professionnel·les, enfants, adolescents ou adultes. Cette communauté riche et variée est le fruit de plusieurs années de castings sur plusieurs centaines de projets… longs-métrages ou séries.
             </p>
-            <button className="hero-button button-reveal">
-              Contactez nous
-            </button>
+            <a href="#footer-contact" className="hero-button button-reveal">
+              Contactez-nous
+            </a>
           </div>
         </div>
 
@@ -157,10 +157,9 @@ export default function HomePage() {
               Vous êtes comédien·ne ?
             </h2>
             <p className="text-reveal text-reveal--delay-3">
-              ADK-Kasting est en permanence à la recherche de talents.
+              ADK-KASTING est en permanence à la recherche de talents.
               <br />
-              En vous inscrivant sur ce site, vous créez votre profil et le mettez à jour quand vous le souhaitez. Vous pouvez également ajouter des photos et extraits vidéos. ADK-Kasting.com étant régulièrement utilisé par des réalisateurs, vous augmentez ainsi vos chances de visibilité.
-            </p>
+              En vous inscrivant sur ce site, vous créez votre profil et le mettez à jour quand vous le souhaitez. Vous pouvez également ajouter des photos et extraits vidéos. Notre site adk-kasting.com étant régulièrement utilisé par des réalisateurs, vous augmentez ainsi vos chances de visibilité.            </p>
             <Link href="/inscription">
               <button className="hero-button button-reveal text-reveal--delay-4">
                 Inscrivez vous

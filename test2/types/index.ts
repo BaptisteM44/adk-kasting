@@ -51,6 +51,7 @@ export interface Comedien {
   actor_photo5?: string // Photo 5 WordPress
   actor_photo_1?: string // Variante photo WordPress
   showreel_url?: string // URL showreel (format migré)
+  additional_videos?: string[] // Vidéos supplémentaires
   actor_showreal?: string // Showreel WordPress
   actor_video1?: string // Vidéo 1 WordPress
   actor_video2?: string // Vidéo 2 WordPress
@@ -78,6 +79,8 @@ export interface Comedien {
   website_url?: string // Format migré
   imdb_url?: string // Format migré
   facebook_url?: string // Format migré
+  instagram_url?: string // Instagram
+  tiktok_url?: string // TikTok
   linkedin_url?: string // Format migré
   other_profile_url?: string // Format migré
   actor_profile_facebook?: string // Facebook WordPress
@@ -136,7 +139,8 @@ export interface Comedien {
   admin_rating?: number // 1-5 étoiles, seulement visible par admins
   created_at: string
   updated_at: string
-  is_active: boolean
+  status: ComedienStatus // Statut du profil (pending, published, trash)
+  is_active: boolean // Compatibilité : synchro auto avec status via trigger DB
 }
 
 export interface AdminRating {
@@ -158,6 +162,10 @@ export interface AdminComment {
   created_at: string
   updated_at: string
 }
+
+// Type pour les statuts de profil
+// Workflow: pending (inscription) → approved (validé admin) → published (payé) | trash (supprimé)
+export type ComedienStatus = 'pending' | 'approved' | 'published' | 'trash'
 
 // Formulaire d'inscription
 export interface InscriptionFormData {
@@ -201,11 +209,14 @@ export interface InscriptionFormData {
   showreel_url?: string
   video_1_url?: string
   video_2_url?: string
+  additional_videos?: string[] // Vidéos supplémentaires
 
   // Site web et profils
   website_url?: string
   imdb_url?: string
   facebook_url?: string
+  instagram_url?: string
+  tiktok_url?: string
   linkedin_url?: string
   other_profile_url?: string
 
@@ -217,7 +228,7 @@ export interface InscriptionFormData {
   eye_color: string
 
   // Langues
-  native_language: string // Langue(s) maternelle(s)
+  native_language: string[] // Langue(s) maternelle(s) - array pour supporter plusieurs langues
   languages_fluent?: string[] // Langues parlées couramment
   languages_notions?: string[] // Langues avec notions
 

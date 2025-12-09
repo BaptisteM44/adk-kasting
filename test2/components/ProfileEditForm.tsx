@@ -14,11 +14,25 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
   const [formData, setFormData] = useState<any>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+  // États pour gérer l'affichage des champs "Autre"
+  const [showOtherDance, setShowOtherDance] = useState(false)
+  const [showOtherMusic, setShowOtherMusic] = useState(false)
+  const [showOtherDiverse, setShowOtherDiverse] = useState(false)
+  const [showOtherActivities, setShowOtherActivities] = useState(false)
+
+  // États pour l'input temporaire de chaque catégorie
+  const [tempDance, setTempDance] = useState('')
+  const [tempMusic, setTempMusic] = useState('')
+  const [tempDiverse, setTempDiverse] = useState('')
+  const [tempActivities, setTempActivities] = useState('')
+  const [tempVideo, setTempVideo] = useState('')
+
   useEffect(() => {
     // Initialiser avec les données du comédien
     setFormData({
       ...comedien,
       // S'assurer que les tableaux existent
+      native_language: comedien.languages_native_normalized || [],
       languages_fluent: comedien.languages_fluent_normalized || [],
       languages_notions: comedien.languages_notions_normalized || [],
       driving_licenses: comedien.driving_licenses_normalized || [],
@@ -26,7 +40,20 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
       music_skills: comedien.music_skills_normalized || [],
       diverse_skills: comedien.diverse_skills_normalized || [],
       desired_activities: comedien.desired_activities_normalized || [],
+      // Compétences personnalisées
+      dance_skills_other: comedien.dance_skills_other || [],
+      music_skills_other: comedien.music_skills_other || [],
+      diverse_skills_other: comedien.diverse_skills_other || [],
+      desired_activities_other: comedien.desired_activities_other || [],
+      // Vidéos supplémentaires
+      additional_videos: comedien.additional_videos || [],
     })
+
+    // Initialiser les états des champs "Autre"
+    setShowOtherDance(Array.isArray(comedien.dance_skills_other) && comedien.dance_skills_other.length > 0)
+    setShowOtherMusic(Array.isArray(comedien.music_skills_other) && comedien.music_skills_other.length > 0)
+    setShowOtherDiverse(Array.isArray(comedien.diverse_skills_other) && comedien.diverse_skills_other.length > 0)
+    setShowOtherActivities(Array.isArray(comedien.desired_activities_other) && comedien.desired_activities_other.length > 0)
   }, [comedien])
 
   const handleChange = (field: string, value: any) => {
@@ -50,6 +77,38 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
         return { ...prev, [field]: currentArray.filter((item: string) => item !== value) }
       }
     })
+  }
+
+  // Fonction pour ajouter une compétence personnalisée
+  const addCustomSkill = (field: string, value: string, setTemp: (v: string) => void) => {
+    if (!value.trim()) return
+    const current = formData[field] || []
+    if (!current.includes(value.trim())) {
+      handleChange(field, [...current, value.trim()])
+    }
+    setTemp('')
+  }
+
+  // Fonction pour supprimer une compétence personnalisée
+  const removeCustomSkill = (field: string, value: string) => {
+    const current = formData[field] || []
+    handleChange(field, current.filter((item: string) => item !== value))
+  }
+
+  // Fonction pour ajouter une vidéo supplémentaire
+  const addVideo = () => {
+    if (!tempVideo.trim()) return
+    const currentVideos = formData.additional_videos || []
+    if (!currentVideos.includes(tempVideo.trim())) {
+      handleChange('additional_videos', [...currentVideos, tempVideo.trim()])
+    }
+    setTempVideo('')
+  }
+
+  // Fonction pour supprimer une vidéo supplémentaire
+  const removeVideo = (index: number) => {
+    const currentVideos = formData.additional_videos || []
+    handleChange('additional_videos', currentVideos.filter((_: string, i: number) => i !== index))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -420,13 +479,17 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
         <h3>Langues</h3>
         
         <div className="form-field">
-          <label htmlFor="native_language">Langue maternelle</label>
+          <label htmlFor="native_language">Langue(s) maternelle(s)</label>
           <select
             id="native_language"
-            value={formData.native_language || formData.native_language_normalized || ''}
-            onChange={(e) => handleChange('native_language', e.target.value)}
+            value=""
+            onChange={(e) => {
+              if (e.target.value && !(formData.native_language || []).includes(e.target.value)) {
+                handleChange('native_language', [...(formData.native_language || []), e.target.value])
+              }
+            }}
           >
-            <option value="">Sélectionner</option>
+            <option value="">Ajouter une langue maternelle</option>
             <option value="Français">Français</option>
             <option value="Néerlandais">Néerlandais</option>
             <option value="Anglais">Anglais</option>
@@ -435,8 +498,31 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
             <option value="Italien">Italien</option>
             <option value="Portugais">Portugais</option>
             <option value="Arabe">Arabe</option>
-            <option value="Autre">Autre</option>
+            <option value="Chinois">Chinois</option>
+            <option value="Russe">Russe</option>
+            <option value="Japonais">Japonais</option>
+            <option value="Coréen">Coréen</option>
+            <option value="Hindi">Hindi</option>
+            <option value="Bengali">Bengali</option>
           </select>
+          {formData.native_language && formData.native_language.length > 0 && (
+            <div className="selected-languages">
+              {formData.native_language.map((lang: string, index: number) => (
+                <span key={index} className="language-tag">
+                  {lang}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newLanguages = formData.native_language?.filter((_: any, i: number) => i !== index) || []
+                      handleChange('native_language', newLanguages)
+                    }}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="form-field">
@@ -474,7 +560,7 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
 
       {/* Compétences */}
       <section className="form-section">
-        <h3>Compétences artistiques</h3>
+        <h3>Compétences</h3>
         
         <div className="form-field">
           <label>Permis de conduire</label>
@@ -505,7 +591,28 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
                 {danse}
               </label>
             ))}
+            <label className="checkbox-label">
+              <input type="checkbox" checked={showOtherDance} onChange={(e) => { setShowOtherDance(e.target.checked); if (!e.target.checked) { handleChange('dance_skills_other', []); setTempDance(''); } }} />
+              Autre
+            </label>
           </div>
+          {showOtherDance && (
+            <div style={{ marginTop: '10px' }}>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                <input type="text" placeholder="Ajouter une compétence de danse" value={tempDance} onChange={(e) => setTempDance(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomSkill('dance_skills_other', tempDance, setTempDance))} style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }} />
+                <button type="button" onClick={() => addCustomSkill('dance_skills_other', tempDance, setTempDance)} style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #393939', backgroundColor: '#393939', color: 'white', cursor: 'pointer' }}>Ajouter</button>
+              </div>
+              {(formData.dance_skills_other || []).length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {(formData.dance_skills_other || []).map((skill: string) => (
+                    <span key={skill} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#f0f0f0', borderRadius: '20px', fontSize: '14px' }}>
+                      {skill}<button type="button" onClick={() => removeCustomSkill('dance_skills_other', skill)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', lineHeight: '1' }}>×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="form-field">
@@ -521,7 +628,28 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
                 {musique}
               </label>
             ))}
+            <label className="checkbox-label">
+              <input type="checkbox" checked={showOtherMusic} onChange={(e) => { setShowOtherMusic(e.target.checked); if (!e.target.checked) { handleChange('music_skills_other', []); setTempMusic(''); } }} />
+              Autre
+            </label>
           </div>
+          {showOtherMusic && (
+            <div style={{ marginTop: '10px' }}>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                <input type="text" placeholder="Ajouter une compétence musicale" value={tempMusic} onChange={(e) => setTempMusic(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomSkill('music_skills_other', tempMusic, setTempMusic))} style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }} />
+                <button type="button" onClick={() => addCustomSkill('music_skills_other', tempMusic, setTempMusic)} style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #393939', backgroundColor: '#393939', color: 'white', cursor: 'pointer' }}>Ajouter</button>
+              </div>
+              {(formData.music_skills_other || []).length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {(formData.music_skills_other || []).map((skill: string) => (
+                    <span key={skill} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#f0f0f0', borderRadius: '20px', fontSize: '14px' }}>
+                      {skill}<button type="button" onClick={() => removeCustomSkill('music_skills_other', skill)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', lineHeight: '1' }}>×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="form-field">
@@ -537,7 +665,28 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
                 {skill}
               </label>
             ))}
+            <label className="checkbox-label">
+              <input type="checkbox" checked={showOtherDiverse} onChange={(e) => { setShowOtherDiverse(e.target.checked); if (!e.target.checked) { handleChange('diverse_skills_other', []); setTempDiverse(''); } }} />
+              Autre
+            </label>
           </div>
+          {showOtherDiverse && (
+            <div style={{ marginTop: '10px' }}>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                <input type="text" placeholder="Ajouter une autre compétence" value={tempDiverse} onChange={(e) => setTempDiverse(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomSkill('diverse_skills_other', tempDiverse, setTempDiverse))} style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }} />
+                <button type="button" onClick={() => addCustomSkill('diverse_skills_other', tempDiverse, setTempDiverse)} style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #393939', backgroundColor: '#393939', color: 'white', cursor: 'pointer' }}>Ajouter</button>
+              </div>
+              {(formData.diverse_skills_other || []).length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {(formData.diverse_skills_other || []).map((skill: string) => (
+                    <span key={skill} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#f0f0f0', borderRadius: '20px', fontSize: '14px' }}>
+                      {skill}<button type="button" onClick={() => removeCustomSkill('diverse_skills_other', skill)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', lineHeight: '1' }}>×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
@@ -579,7 +728,7 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
               placeholder="IMDB"
             />
           </div>
-          
+
           <div className="form-field">
             <label htmlFor="linkedin_url">Profil LinkedIn</label>
             <input
@@ -588,6 +737,30 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
               value={formData.linkedin_url || ''}
               onChange={(e) => handleChange('linkedin_url', e.target.value)}
               placeholder="LinkedIn"
+            />
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-field">
+            <label htmlFor="instagram_url">Instagram</label>
+            <input
+              type="url"
+              id="instagram_url"
+              value={formData.instagram_url || ''}
+              onChange={(e) => handleChange('instagram_url', e.target.value)}
+              placeholder="Instagram"
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="tiktok_url">TikTok</label>
+            <input
+              type="url"
+              id="tiktok_url"
+              value={formData.tiktok_url || ''}
+              onChange={(e) => handleChange('tiktok_url', e.target.value)}
+              placeholder="TikTok"
             />
           </div>
         </div>
@@ -606,8 +779,8 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
 
       {/* Vidéos */}
       <section className="form-section">
-        <h3>Vidéos & Showreel</h3>
-        
+        <h3>Vidéos & bande démo</h3>
+
         <div className="form-field">
           <label htmlFor="showreel_url">Showreel principal</label>
           <input
@@ -641,6 +814,89 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
               placeholder="https://vimeo.com/..."
             />
           </div>
+        </div>
+
+        <div className="form-field">
+          <label>Vidéos supplémentaires</label>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+            <input
+              type="url"
+              placeholder="Ajouter une vidéo (YouTube, Vimeo, etc.)"
+              value={tempVideo}
+              onChange={(e) => setTempVideo(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  addVideo()
+                }
+              }}
+              style={{
+                flex: 1,
+                padding: '8px',
+                borderRadius: '4px',
+                border: '1px solid #ddd'
+              }}
+            />
+            <button
+              type="button"
+              onClick={addVideo}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#0070f3',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: 500
+              }}
+            >
+              Ajouter
+            </button>
+          </div>
+
+          {(formData.additional_videos || []).length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {(formData.additional_videos || []).map((video: string, index: number) => (
+                <div
+                  key={index}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 12px',
+                    backgroundColor: '#f0f0f0',
+                    borderRadius: '8px'
+                  }}
+                >
+                  <span
+                    style={{
+                      flex: 1,
+                      fontSize: '14px',
+                      wordBreak: 'break-all'
+                    }}
+                  >
+                    {video}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeVideo(index)}
+                    style={{
+                      padding: '4px 8px',
+                      backgroundColor: '#ef4444',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                      fontSize: '16px'
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -702,6 +958,75 @@ export default function ProfileEditForm({ comedien, onSave, onCancel, loading = 
                 {activite}
               </label>
             ))}
+
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={showOtherActivities}
+                onChange={(e) => {
+                  setShowOtherActivities(e.target.checked)
+                  if (!e.target.checked) {
+                    handleChange('desired_activities_other', [])
+                    setTempActivities('')
+                  }
+                }}
+              />
+              Autre
+            </label>
+            {showOtherActivities && (
+              <div style={{ marginTop: '10px' }}>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                  <input
+                    type="text"
+                    placeholder="Ajouter une activité"
+                    value={tempActivities}
+                    onChange={(e) => setTempActivities(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomSkill('desired_activities_other', tempActivities, setTempActivities))}
+                    style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => addCustomSkill('desired_activities_other', tempActivities, setTempActivities)}
+                    style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #393939', backgroundColor: '#393939', color: 'white', cursor: 'pointer' }}
+                  >
+                    Ajouter
+                  </button>
+                </div>
+                {(formData.desired_activities_other || []).length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {(formData.desired_activities_other || []).map((activity: string) => (
+                      <span
+                        key={activity}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '6px 12px',
+                          backgroundColor: '#f0f0f0',
+                          borderRadius: '20px',
+                          fontSize: '14px'
+                        }}
+                      >
+                        {activity}
+                        <button
+                          type="button"
+                          onClick={() => removeCustomSkill('desired_activities_other', activity)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '16px',
+                            lineHeight: '1'
+                          }}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </section>

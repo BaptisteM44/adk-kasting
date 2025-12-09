@@ -52,7 +52,7 @@ console.log('Output JS:', unserializePHP(phpLangue))
 console.log()
 
 // Test 2: Compétences musique
-const phpMusic = 'A:1:{i:0, S:15:"autre (à vent)", }'
+const phpMusic = 'A:1:{i:0, S:15:"Autre (à vent)", }'
 console.log('Input PHP:', phpMusic)
 console.log('Output JS:', unserializePHP(phpMusic))
 console.log()
@@ -63,7 +63,7 @@ const mockComedien = {
   native_language: 'a:1:{i:0;s:9:"Français";}',
   languages_fluent: [],
   languages_notions: [],
-  music_skills: 'A:1:{i:0, S:15:"autre (à vent)", }',
+  music_skills: 'A:1:{i:0, S:15:"Autre (à vent)", }',
   actor_languages_native: 'a:2:{i:0;s:9:"Français";i:1;s:7:"Anglais";}',
   photos: [],
   actor_photo1: 'https://example.com/photo1.jpg',

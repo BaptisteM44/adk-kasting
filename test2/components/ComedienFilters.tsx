@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react'
 import { Input, Select } from './ui/Input'
 import { Button } from './ui/Button'
 import type { ComedienFilters as ComedienFiltersType } from '@/types'
+import { LANGUAGE_OPTIONS } from '@/lib/languages'
+import { NATIONALITY_OPTIONS } from '@/lib/nationalities'
 
 interface ComedienFiltersProps {
   filters: ComedienFiltersType
@@ -112,36 +114,11 @@ export const ComedienFilters: React.FC<ComedienFiltersProps> = ({
 
   ]
 
-  const languageOptions = [
-    { value: '', label: 'Indifférent' },
-    { value: 'Français', label: 'Français' },
-    { value: 'Anglais', label: 'Anglais' },
-    { value: 'Espagnol', label: 'Espagnol' },
-    { value: 'Italien', label: 'Italien' },
-    { value: 'Allemand', label: 'Allemand' },
-    { value: 'Néerlandais', label: 'Néerlandais' },
-    { value: 'Portugais', label: 'Portugais' },
-    { value: 'Russe', label: 'Russe' },
-    { value: 'Arabe', label: 'Arabe' },
-    { value: 'Chinois', label: 'Chinois' },
-    { value: 'Japonais', label: 'Japonais' }
-  ]
+  // Utiliser la liste complète des langues depuis lib/languages.ts
+  const languageOptions = LANGUAGE_OPTIONS
 
-  const nationalityOptions = [
-    { value: '', label: 'Toutes' },
-    { value: 'Française', label: 'Française' },
-    { value: 'Belge', label: 'Belge' },
-    { value: 'Suisse', label: 'Suisse' },
-    { value: 'Canadienne', label: 'Canadienne' },
-    { value: 'Americaine', label: 'Américaine' },
-    { value: 'Britannique', label: 'Britannique' },
-    { value: 'Allemande', label: 'Allemande' },
-    { value: 'Italienne', label: 'Italienne' },
-    { value: 'Espagnole', label: 'Espagnole' },
-    { value: 'Portugaise', label: 'Portugaise' },
-    { value: 'Néerlandaise', label: 'Néerlandaise' },
-    { value: 'Autre', label: 'Autre' }
-  ]
+  // Utiliser la liste complète des nationalités depuis lib/nationalities.ts
+  const nationalityOptions = NATIONALITY_OPTIONS
 
   // Compétences de danse - fusionner prédéfinies + personnalisées
   const predefinedDanceSkills = ['Classique', 'Salsa', 'Tango', 'Rock', 'Danse de salon', 'Hip hop']
@@ -152,7 +129,7 @@ export const ComedienFilters: React.FC<ComedienFiltersProps> = ({
   ]
 
   // Compétences musicales - fusionner prédéfinies + personnalisées
-  const predefinedMusicSkills = ['Piano', 'Guitare', 'Violon', 'Batterie', 'Saxophone / Trompette', 'Flûte', 'Autre (à vent)', 'Autre (à cordes)']
+  const predefinedMusicSkills = ['Piano', 'Guitare', 'Violon', 'Batterie', 'Saxophone / Trompette', 'Flûte', 'autre (à vent)', 'autre (à cordes)']
   const allMusicSkills = Array.from(new Set([...predefinedMusicSkills, ...customSkills.music_skills])).sort()
   const musicSkillsOptions = [
     { value: '', label: 'Indifférent' },
@@ -232,6 +209,7 @@ export const ComedienFilters: React.FC<ComedienFiltersProps> = ({
           onChange={(e) => handleFilterChange('languages_fluent', e.target.value)}
           options={languageOptions}
           placeholder="Langue maternelle"
+          style={{ width: '200px' }}
         />
 
         <Select
@@ -255,110 +233,156 @@ export const ComedienFilters: React.FC<ComedienFiltersProps> = ({
 
       {/* Filtres avancés */}
       {showAdvanced && (
-        <div className="filters__grid" style={{ marginTop: '1.5rem' }}>
-          <Select
-            value={filters.build || ''}
-            onChange={(e) => handleFilterChange('build', e.target.value)}
-            options={buildOptions}
-            placeholder="Morphologie"
-          />
+        <div style={{ marginTop: '1.5rem' }}>
+          {/* Section Caractéristiques physiques */}
+          <div style={{ marginBottom: '2rem' }}>
+            <h4 style={{
+              fontSize: '0.9rem',
+              fontWeight: 600,
+              marginBottom: '1rem',
+              color: '#333',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}>
+              Caractéristiques physiques
+            </h4>
+            <div className="filters__grid">
+              <Select
+                value={filters.build || ''}
+                onChange={(e) => handleFilterChange('build', e.target.value)}
+                options={buildOptions}
+                placeholder="Morphologie"
+              />
 
-          <Select
-            value={filters.languages || ''}
-            onChange={(e) => handleFilterChange('languages', e.target.value)}
-            options={languageOptions}
-            placeholder="Autre langue"
-          />
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <Input
+                  className='input_taille'
+                  type="number"
+                  min="140"
+                  max="220"
+                  value={filters.height_min || ''}
+                  onChange={(e) => handleFilterChange('height_min', e.target.value ? parseInt(e.target.value) : undefined)}
+                  placeholder="Taille min"
+                />
+                <Input
+                  className='input_taille'
+                  type="number"
+                  min="140"
+                  max="220"
+                  value={filters.height_max || ''}
+                  onChange={(e) => handleFilterChange('height_max', e.target.value ? parseInt(e.target.value) : undefined)}
+                  placeholder="Taille max"
+                />
+              </div>
 
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <Input
-              className='input_taille'
-              type="number"
-              min="140"
-              max="220"
-              value={filters.height_min || ''}
-              onChange={(e) => handleFilterChange('height_min', e.target.value ? parseInt(e.target.value) : undefined)}
-              placeholder="Taille min"
-            />
-            <Input
-              className='input_taille'
-              type="number"
-              min="140"
-              max="220"
-              value={filters.height_max || ''}
-              onChange={(e) => handleFilterChange('height_max', e.target.value ? parseInt(e.target.value) : undefined)}
-              placeholder="Taille max"
-            />
+              <Select
+                value={filters.hair_color || ''}
+                onChange={(e) => handleFilterChange('hair_color', e.target.value)}
+                options={hairColorOptions}
+                placeholder="Couleur de cheveux"
+              />
+
+              <Select
+                value={filters.eye_color || ''}
+                onChange={(e) => handleFilterChange('eye_color', e.target.value)}
+                options={eyeColorOptions}
+                placeholder="Couleur des yeux"
+              />
+            </div>
           </div>
 
-          <Select
-            value={filters.hair_color || ''}
-            onChange={(e) => handleFilterChange('hair_color', e.target.value)}
-            options={hairColorOptions}
-            placeholder="Couleur de cheveux"
-          />
+          {/* Section Localisation */}
+          <div style={{ marginBottom: '2rem' }}>
+            <h4 style={{
+              fontSize: '0.9rem',
+              fontWeight: 600,
+              marginBottom: '1rem',
+              color: '#333',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}>
+              Localisation
+            </h4>
+            <div className="filters__grid">
+              <Input
+                value={filters.city || ''}
+                onChange={(e) => handleFilterChange('city', e.target.value)}
+                placeholder="Ville"
+              />
 
-          <Select
-            value={filters.eye_color || ''}
-            onChange={(e) => handleFilterChange('eye_color', e.target.value)}
-            options={eyeColorOptions}
-            placeholder="Couleur des yeux"
-          />
+              <Select
+                value={filters.nationality || ''}
+                onChange={(e) => handleFilterChange('nationality', e.target.value)}
+                options={nationalityOptions}
+                placeholder="Nationalité"
+              />
+            </div>
+          </div>
 
-          <Input
-            value={filters.city || ''}
-            onChange={(e) => handleFilterChange('city', e.target.value)}
-            placeholder="Ville"
-          />
+          {/* Section Compétences & Expérience */}
+          <div>
+            <h4 style={{
+              fontSize: '0.9rem',
+              fontWeight: 600,
+              marginBottom: '1rem',
+              color: '#333',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}>
+              Compétences & Expérience
+            </h4>
+            <div className="filters__grid">
+              <Select
+                value={filters.experience_level || ''}
+                onChange={(e) => handleFilterChange('experience_level', e.target.value)}
+                options={experienceLevelOptions}
+                placeholder="Niveau d'expérience"
+              />
 
-          <Select
-            value={filters.nationality || ''}
-            onChange={(e) => handleFilterChange('nationality', e.target.value)}
-            options={nationalityOptions}
-            placeholder="Nationalité"
-          />
+              <Select
+                value={filters.languages || ''}
+                onChange={(e) => handleFilterChange('languages', e.target.value)}
+                options={languageOptions}
+                placeholder="Autre langue"
+                style={{ width: '160px' }}
+              />
 
-          <Select
-            value={filters.experience_level || ''}
-            onChange={(e) => handleFilterChange('experience_level', e.target.value)}
-            options={experienceLevelOptions}
-            placeholder="Niveau d'expérience"
-          />
+              <Select
+                value={filters.dance_skills || ''}
+                onChange={(e) => handleFilterChange('dance_skills', e.target.value)}
+                options={danceSkillsOptions}
+                placeholder="Compétences de danse"
+              />
 
-          <Select
-            value={filters.dance_skills || ''}
-            onChange={(e) => handleFilterChange('dance_skills', e.target.value)}
-            options={danceSkillsOptions}
-            placeholder="Compétences de danse"
-          />
+              <Select
+                value={filters.music_skills || ''}
+                onChange={(e) => handleFilterChange('music_skills', e.target.value)}
+                options={musicSkillsOptions}
+                placeholder="Compétences musicales"
+              />
 
-          <Select
-            value={filters.music_skills || ''}
-            onChange={(e) => handleFilterChange('music_skills', e.target.value)}
-            options={musicSkillsOptions}
-            placeholder="Compétences musicales"
-          />
+              <Select
+                value={filters.wp_skills || ''}
+                onChange={(e) => handleFilterChange('wp_skills', e.target.value)}
+                options={diverse_skills}
+                placeholder="Compétences diverses"
+              />
 
-          <Select
-            value={filters.wp_skills || ''}
-            onChange={(e) => handleFilterChange('wp_skills', e.target.value)}
-            options={diverse_skills}
-            placeholder="Compétences"
-          />
+              <Select
+                value={filters.driving_licenses || ''}
+                onChange={(e) => handleFilterChange('driving_licenses', e.target.value)}
+                options={drivingLicenseOptions}
+                placeholder="Permis de conduire"
+              />
 
-          <Select
-            value={filters.driving_licenses || ''}
-            onChange={(e) => handleFilterChange('driving_licenses', e.target.value)}
-            options={drivingLicenseOptions}
-            placeholder="Permis de conduire"
-          />
-
-          <Select
-            value={filters.desired_activities || ''}
-            onChange={(e) => handleFilterChange('desired_activities', e.target.value)}
-            options={desiredActivitiesOptions}
-            placeholder="Activités souhaitées"
-          />
+              <Select
+                value={filters.desired_activities || ''}
+                onChange={(e) => handleFilterChange('desired_activities', e.target.value)}
+                options={desiredActivitiesOptions}
+                placeholder="Activités souhaitées"
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

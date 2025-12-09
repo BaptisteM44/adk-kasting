@@ -49,24 +49,7 @@ export default function FAQPage() {
               Questions Fréquemment Posées
             </h2>
             <p className="text-reveal text-reveal--delay-1">
-              Trouvez rapidement les réponses à vos questions les plus courantes sur ADK Kasting. Notre équipe est là pour vous accompagner dans votre parcours artistique.
-            </p>
-            <Link href="/connexion">
-              <button className="hero-button button-reveal">
-                Se connecter
-              </button>
-            </Link>
-          </div>
-        </div>
-
-        {/* Section 2 - Simple titre + paragraphe */}
-        <div className="hero-part hero-part--register">
-          <div className="hero-content">
-            <h2 className="text-reveal text-reveal--delay-2">
-              Besoin d'aide ?
-            </h2>
-            <p className="text-reveal text-reveal--delay-3">
-              Nous avons rassemblé les questions les plus fréquemment posées par notre communauté de comédiens et de professionnels. Si vous ne trouvez pas la réponse à votre question, n'hésitez pas à nous contacter directement.
+              Trouvez rapidement les réponses à vos questions les plus courantes sur ADK-KASTING. 
             </p>
           </div>
         </div>
@@ -76,25 +59,33 @@ export default function FAQPage() {
         {/* Section 3 - FAQ Questions */}
         <div className="hero-part hero-part--transport">
           <div className="hero-content">
-            <h2 className="text-reveal">
-              Questions les plus fréquentes
-            </h2>
             <div className="faq-list">
               <div className="text-reveal text-reveal--delay-1">
-                <h3>Comment puis-je m'inscrire sur ADK Kasting ?</h3>
+                <h3>Comment puis-je m'inscrire sur ADK-KASTING ?</h3>
                 <p>L'inscription est simple et gratuite. Cliquez sur "Inscription" et remplissez votre profil complet avec vos informations personnelles et professionnelles.</p>
               </div>
               <div className="text-reveal text-reveal--delay-2">
-                <h3>Quels types de profils recherchez-vous ?</h3>
-                <p>Nous recherchons tous types de profils : comédiens professionnels et amateurs, figurants, doubleurs, cascadeurs, danseurs, mannequins, etc.</p>
+                <h3>À qui s’adresse ce site ?</h3>
+                <p>Aux comédiens professionnels, aux amateurs, adultes, enfants et ados…</p>
               </div>
               <div className="text-reveal text-reveal--delay-3">
                 <h3>Y a-t-il des frais d'inscription ?</h3>
-                <p>Non, l'inscription sur ADK Kasting est entièrement gratuite. Nous ne percevons aucun frais ni commission sur les cachets des comédiens.</p>
+                <p>L’inscription chez ADK-KASTING est gratuite. Néanmoins, si vous désirez que votre profil soit public (c’est à dire apparent sur le site), un forfait unique de 25€ est demandé pour la publication. Si vous ne payez pas, votre profil ne sera pas visible sur le site mais nous aurons toutefois accès à vos données. 
+                    Les paiements s’effectuent au numéro de compte IBAN :BE75 0689 0495 4251 – BIC GKCCBEBB en mentionnant votre nom et prénom en communication 
+                    <br /><u> <b>Attention : Avant que nous ne validions votre inscription, veuillez n’effectuer aucun paiement!</b></u>
+                    <br />
+                    A quoi sert la participation aux frais ?
+                    Cette participation aux frais nous permet de financer la mise à jour quotidienne du site ainsi que l’espace que nous occupons sur le net.</p>
+              </div>
+              <div className="text-reveal text-reveal--delay-4">
+                <h3>Comment puis-je être appelé.e pour un casting ?</h3>
+                <p>Vous serez contacté.e par ADK pour tout rôle qui pourrait vous correspondre après sélection de notre part ou de la part du/ de la réalisateurice. Cette sélection se fait sur base de votre matériel (photos / bande démo).</p>
               </div>
               <div className="text-reveal text-reveal--delay-4">
                 <h3>Comment fonctionne le processus de casting ?</h3>
-                <p>Vous recevez des notifications pour les castings correspondant à votre profil, postulez en ligne, et si vous êtes sélectionné, le directeur de casting vous contacte directement.</p>
+                <p>Vous recevez des notifications pour les castings correspondant à votre profil, postulez en ligne, et si vous êtes sélectionné, le directeur de casting vous contacte directement.
+                  <br />Dans certains cas, nous postons également des annonces sur nos réseaux (Instagram, Facebook). N’hésitez pas à les consulter régulièrement.
+                </p>
               </div>
             </div>
           </div>
@@ -109,7 +100,7 @@ export default function FAQPage() {
             <div className="support-info">
               <div className="text-reveal text-reveal--delay-1">
                 <h3>Support technique</h3>
-                <p>Pour toute question technique concernant votre profil ou l'utilisation de la plateforme, contactez notre équipe support.</p>
+                <p>Pour toute question technique concernant votre profil ou l'utilisation de la plateforme, contactez- nous à info@adk kasting.com. Nous y répondrons au plus vite.</p>
               </div>
               <div className="text-reveal text-reveal--delay-2">
                 <h3>Questions sur les castings</h3>

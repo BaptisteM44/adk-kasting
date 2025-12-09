@@ -16,7 +16,7 @@ Votre VPS doit avoir :
 ## 1. Connexion au VPS
 
 ```bash
-ssh votre-user@votre-ip-vps
+ssh root@147.79.101.169
 ```
 
 ---
@@ -65,19 +65,19 @@ nano .env.local
 Copier-coller votre configuration (même que en local) :
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://mhkrjhxpqovmawlhvarn.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=votre_anon_key
-SUPABASE_SERVICE_ROLE_KEY=votre_service_role_key
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1oa3JqaHhwcW92bWF3bGh2YXJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5OTQ0MzYsImV4cCI6MjA2NzU3MDQzNn0.PdkckuT7ik7GJ9d7eY9owsgxewO0d0Yszc58T8lMTiA
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1oa3JqaHhwcW92bWF3bGh2YXJuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTk5NDQzNiwiZXhwIjoyMDY3NTcwNDM2fQ.NV332aBzD_jfL-cVprO93mRagSy2zNSLY3l9DK3sfXk
 
 # URL du site en production
-NEXT_PUBLIC_SITE_URL=https://votre-domaine.com
+NEXT_PUBLIC_SITE_URL=https://adk-kasting.com/
 
 # SMTP
 SMTP_HOST=smtp.hostinger.com
 SMTP_PORT=465
 SMTP_SECURE=true
-SMTP_USER=info@adk-kasting.com
-SMTP_PASSWORD=votre_mot_de_passe
-EMAIL_FROM=info@adk-kasting.com
+SMTP_USER=michael@adk-kasting.com
+SMTP_PASSWORD=Easyrider2019$$
+EMAIL_FROM=michael@adk-kasting.com
 ADMIN_EMAIL=michael@adk-kasting.com
 ```
 
@@ -146,7 +146,7 @@ Contenu :
 ```nginx
 server {
     listen 80;
-    server_name votre-domaine.com www.votre-domaine.com;
+    server_name adk-kasting.com www.adk-kasting.com;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -180,7 +180,7 @@ sudo apt install -y certbot python3-certbot-nginx
 
 ### Générer le certificat SSL
 ```bash
-sudo certbot --nginx -d votre-domaine.com -d www.votre-domaine.com
+sudo certbot --nginx -d adk-kasting.com -d www.adk-kasting.com
 ```
 
 Suivez les instructions. Certbot va automatiquement :
@@ -218,7 +218,7 @@ curl http://localhost:3000  # Devrait retourner du HTML
 
 ### Tester Nginx
 ```bash
-curl http://votre-domaine.com  # Devrait retourner votre site
+curl https://adk-kasting.com/  # Devrait retourner votre site
 ```
 
 ### Vérifier les logs

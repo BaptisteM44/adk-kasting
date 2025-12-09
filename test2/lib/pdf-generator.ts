@@ -602,10 +602,10 @@ export const generateComedienPDF = async (comedien: any) => {
     const mainPhoto = photos[0] || null
 
     // Préparer les langues par niveau
-    const nativeLanguage = comedien.native_language_normalized || null
+    const nativeLanguages = comedien.languages_native_normalized || []
     const fluentLanguages = comedien.languages_fluent_normalized || []
     const notionLanguages = comedien.languages_notions_normalized || []
-    const hasLanguages = nativeLanguage || fluentLanguages.length > 0 || notionLanguages.length > 0
+    const hasLanguages = nativeLanguages.length > 0 || fluentLanguages.length > 0 || notionLanguages.length > 0
 
     // Charger et redessiner l'image en haute qualité SANS étirement
     let photoBase64 = ''
@@ -755,12 +755,13 @@ export const generateComedienPDF = async (comedien: any) => {
       }
 
       .admin-section {
-        grid-column: 1 / -1;
         background: #fffbea;
-        border-left: 2.5px solid #ffc107;
-        padding: 5px;
-        border-radius: 1px;
-        margin-top: 2px;
+        border-left: 3px solid #ffc107;
+        padding: 8px 12px;
+        border-radius: 2px;
+        margin-top: 4px;
+        width: fit-content;
+        max-width: 100%;
       }
 
       .admin-section-label {
@@ -1036,17 +1037,17 @@ export const generateComedienPDF = async (comedien: any) => {
                 <div class="section">
                   <h3>🌍 Langues</h3>
                   <div class="section-content">
-                    ${nativeLanguage ? `
+                    ${nativeLanguages.length > 0 ? `
                       <div>
-                        <div style="font-size: 8px; font-weight: 700; color: #555; text-transform: uppercase;">Maternelle</div>
+                        <div style="font-size: 8px; font-weight: 700; color: #555; text-transform: uppercase;">Maternelle${nativeLanguages.length > 1 ? 's' : ''}</div>
                         <div class="tags">
-                          <span class="tag light">${nativeLanguage}</span>
+                          ${nativeLanguages.map((lang: string) => `<span class="tag light">${lang}</span>`).join('')}
                         </div>
                       </div>
                     ` : ''}
                     ${fluentLanguages.length > 0 ? `
                       <div>
-                        <div style="font-size: 8px; font-weight: 700; color: #555; text-transform: uppercase; margin-top: ${nativeLanguage ? '8px' : '0'};">Couramment</div>
+                        <div style="font-size: 8px; font-weight: 700; color: #555; text-transform: uppercase; margin-top: ${nativeLanguages.length > 0 ? '8px' : '0'};">Couramment</div>
                         <div class="tags">
                           ${fluentLanguages.map((lang: string) => `<span class="tag light">${lang}</span>`).join('')}
                         </div>
@@ -1054,7 +1055,7 @@ export const generateComedienPDF = async (comedien: any) => {
                     ` : ''}
                     ${notionLanguages.length > 0 ? `
                       <div>
-                        <div style="font-size: 8px; font-weight: 700; color: #555; text-transform: uppercase; margin-top: ${(nativeLanguage || fluentLanguages.length > 0) ? '8px' : '0'};">Notions</div>
+                        <div style="font-size: 8px; font-weight: 700; color: #555; text-transform: uppercase; margin-top: ${(nativeLanguages.length > 0 || fluentLanguages.length > 0) ? '8px' : '0'};">Notions</div>
                         <div class="tags">
                           ${notionLanguages.map((lang: string) => `<span class="tag light">${lang}</span>`).join('')}
                         </div>
@@ -1065,48 +1066,52 @@ export const generateComedienPDF = async (comedien: any) => {
               ` : ''}
 
               <!-- Compétences -->
-              ${(comedien.driving_licenses_normalized?.length > 0 ||
-                 comedien.dance_skills_normalized?.length > 0 ||
-                 comedien.music_skills_normalized?.length > 0 ||
-                 comedien.diverse_skills_normalized?.length > 0) ? `
-                <div class="section">
-                  <h3>🎯 Compétences</h3>
-                  <div class="section-content">
-                    ${comedien.driving_licenses_normalized?.length > 0 ? `
-                      <div>
-                        <div style="font-size: 8px; font-weight: 700; color: #555; text-transform: uppercase;">Permis</div>
-                        <div class="tags">
-                          ${comedien.driving_licenses_normalized.map((s: string) => `<span class="tag light">${s}</span>`).join('')}
+              ${(() => {
+                const allDance = [...(comedien.dance_skills_normalized || []), ...(comedien.dance_skills_other || [])]
+                const allMusic = [...(comedien.music_skills_normalized || []), ...(comedien.music_skills_other || [])]
+                const allDiverse = [...(comedien.diverse_skills_normalized || []), ...(comedien.diverse_skills_other || [])]
+                const hasSkills = comedien.driving_licenses_normalized?.length > 0 || allDance.length > 0 || allMusic.length > 0 || allDiverse.length > 0
+
+                return hasSkills ? `
+                  <div class="section">
+                    <h3>🎯 Compétences</h3>
+                    <div class="section-content">
+                      ${comedien.driving_licenses_normalized?.length > 0 ? `
+                        <div>
+                          <div style="font-size: 8px; font-weight: 700; color: #555; text-transform: uppercase;">Permis</div>
+                          <div class="tags">
+                            ${comedien.driving_licenses_normalized.map((s: string) => `<span class="tag light">${s}</span>`).join('')}
+                          </div>
                         </div>
-                      </div>
-                    ` : ''}
-                    ${comedien.dance_skills_normalized?.length > 0 ? `
-                      <div style="margin-top: 3px;">
-                        <div style="font-size: 8px; font-weight: 700; color: #555; text-transform: uppercase;">Danse</div>
-                        <div class="tags">
-                          ${comedien.dance_skills_normalized.map((s: string) => `<span class="tag light">${s}</span>`).join('')}
+                      ` : ''}
+                      ${allDance.length > 0 ? `
+                        <div style="margin-top: 8px;">
+                          <div style="font-size: 8px; font-weight: 700; color: #555; text-transform: uppercase;">Danse</div>
+                          <div class="tags">
+                            ${allDance.map((s: string) => `<span class="tag light">${s}</span>`).join('')}
+                          </div>
                         </div>
-                      </div>
-                    ` : ''}
-                    ${comedien.music_skills_normalized?.length > 0 ? `
-                      <div style="margin-top: 3px;">
-                        <div style="font-size: 8px; font-weight: 700; color: #555; text-transform: uppercase;">Musique</div>
-                        <div class="tags">
-                          ${comedien.music_skills_normalized.map((s: string) => `<span class="tag light">${s}</span>`).join('')}
+                      ` : ''}
+                      ${allMusic.length > 0 ? `
+                        <div style="margin-top: 8px;">
+                          <div style="font-size: 8px; font-weight: 700; color: #555; text-transform: uppercase;">Musique</div>
+                          <div class="tags">
+                            ${allMusic.map((s: string) => `<span class="tag light">${s}</span>`).join('')}
+                          </div>
                         </div>
-                      </div>
-                    ` : ''}
-                    ${comedien.diverse_skills_normalized?.length > 0 ? `
-                      <div style="margin-top: 3px;">
-                        <div style="font-size: 8px; font-weight: 700; color: #555; text-transform: uppercase;">Autres</div>
-                        <div class="tags">
-                          ${comedien.diverse_skills_normalized.map((s: string) => `<span class="tag light">${s}</span>`).join('')}
+                      ` : ''}
+                      ${allDiverse.length > 0 ? `
+                        <div style="margin-top: 8px;">
+                          <div style="font-size: 8px; font-weight: 700; color: #555; text-transform: uppercase;">Autres</div>
+                          <div class="tags">
+                            ${allDiverse.map((s: string) => `<span class="tag light">${s}</span>`).join('')}
+                          </div>
                         </div>
-                      </div>
-                    ` : ''}
+                      ` : ''}
+                    </div>
                   </div>
-                </div>
-              ` : ''}
+                ` : ''
+              })()}
             </div>
 
             <!-- COL 2 -->
@@ -1248,9 +1253,9 @@ async function loadImageAsBase64(imageUrl: string): Promise<string> {
     img.crossOrigin = 'anonymous'
     
     img.onload = () => {
-      // Dimensions cibles (aspect ratio 3:4)
-      const targetWidth = 300
-      const targetHeight = 400
+      // Dimensions cibles haute qualité (aspect ratio 3:4)
+      const targetWidth = 900
+      const targetHeight = 1200
       
       // Calculer les dimensions pour que l'image couvre tout le conteneur SANS étirement
       const imgRatio = img.naturalWidth / img.naturalHeight

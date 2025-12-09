@@ -37,7 +37,7 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
     eye_color: '',
     
     // Langues (WordPress format)
-    native_language: '',
+    native_language: [] as string[], // Array pour supporter plusieurs langues maternelles
     languages_fluent: [],
     languages_notions: [],
     
@@ -46,7 +46,13 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
     dance_skills: [],
     music_skills: [],
     wp_skills: [],
-    
+
+    // Compétences personnalisées (champs "Autre") - arrays pour multiples valeurs
+    dance_skills_other: [],
+    music_skills_other: [],
+    diverse_skills_other: [],
+    desired_activities_other: [],
+
     // Agence/Agent (WordPress format)
     agency_name: '',
     agent_name: '',
@@ -62,6 +68,8 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
     // Réseaux sociaux (WordPress format)
     website_url: '',
     facebook_url: '',
+    instagram_url: '',
+    tiktok_url: '',
     imdb_url: '',
     linkedin_url: '',
     other_profile_url: '',
@@ -71,6 +79,7 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
     
     // Vidéos (WordPress format)
     showreel_url: '',
+    additional_videos: [], // Vidéos supplémentaires
 
     // Expérience
     experience_level: '',
@@ -93,6 +102,51 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // États pour gérer l'affichage des champs "Autre"
+  const [showOtherDance, setShowOtherDance] = useState(false)
+  const [showOtherMusic, setShowOtherMusic] = useState(false)
+  const [showOtherDiverse, setShowOtherDiverse] = useState(false)
+  const [showOtherActivities, setShowOtherActivities] = useState(false)
+
+  // États pour l'input temporaire de chaque catégorie
+  const [tempDance, setTempDance] = useState('')
+  const [tempMusic, setTempMusic] = useState('')
+  const [tempDiverse, setTempDiverse] = useState('')
+  const [tempActivities, setTempActivities] = useState('')
+  const [tempVideo, setTempVideo] = useState('')
+
+  // Fonction pour ajouter une compétence personnalisée
+  const addCustomSkill = (field: 'dance_skills_other' | 'music_skills_other' | 'diverse_skills_other' | 'desired_activities_other', value: string, setTemp: (v: string) => void) => {
+    if (!value.trim()) return
+    const current = formData[field] || []
+    if (!current.includes(value.trim())) {
+      handleChange(field, [...current, value.trim()])
+    }
+    setTemp('')
+  }
+
+  // Fonction pour supprimer une compétence personnalisée
+  const removeCustomSkill = (field: 'dance_skills_other' | 'music_skills_other' | 'diverse_skills_other' | 'desired_activities_other', value: string) => {
+    const current = formData[field] || []
+    handleChange(field, current.filter((item: string) => item !== value))
+  }
+
+  // Fonction pour ajouter une vidéo
+  const addVideo = () => {
+    if (!tempVideo.trim()) return
+    const currentVideos = formData.additional_videos || []
+    if (!currentVideos.includes(tempVideo.trim())) {
+      handleChange('additional_videos', [...currentVideos, tempVideo.trim()])
+    }
+    setTempVideo('')
+  }
+
+  // Fonction pour supprimer une vidéo
+  const removeVideo = (index: number) => {
+    const currentVideos = formData.additional_videos || []
+    handleChange('additional_videos', currentVideos.filter((_, i) => i !== index))
+  }
 
   // Fonction pour calculer l'âge à partir de la date de naissance
   const calculateAge = (birthDate: string): number => {
@@ -131,6 +185,11 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
     if (!formData.city.trim()) newErrors.city = 'La ville est requise'
     if (!formData.zip_code.trim()) newErrors.zip_code = 'Le code postal est requis'
 
+    // Validation langue maternelle
+    if (!formData.native_language || formData.native_language.length === 0) {
+      newErrors.native_language = 'Veuillez sélectionner au moins une langue maternelle'
+    }
+
     // Validation email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (formData.email && !emailRegex.test(formData.email)) {
@@ -149,6 +208,11 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
       }
     }
 
+    // Validation photo principale obligatoire
+    if (!files.photo_files[0]) {
+      newErrors.photo_1 = 'La photo principale est obligatoire'
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -157,6 +221,14 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
     e.preventDefault()
     if (validateForm()) {
       onSubmit(formData)
+    } else {
+      // Scroller vers la première erreur
+      setTimeout(() => {
+        const firstError = document.querySelector('.field-error')
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }, 100)
     }
   }
 
@@ -595,7 +667,7 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
       {/* 📸 Section Photos WordPress (5 photos) */}
       <section className="form-section">
         <h3>Photos de profil</h3>
-        <p className="section-description">Téléchargez jusqu'à 5 photos professionnelles (JPG/PNG, max 5MB chacune)</p>
+        <p className="section-description">La première photo est obligatoire. Vous pouvez ajouter jusqu'à 4 photos supplémentaires (JPG/PNG, max 5MB chacune).</p>
         
         <div className="photos-upload-grid">
           {[0, 1, 2, 3, 4].map((index) => (
@@ -606,10 +678,11 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
                 accept=".jpg,.jpeg,.png,.webp"
                 value={files.photo_files[index]}
                 onChange={(file) => handlePhotoChange(index, file)}
-                description={index === 0 ? "Photo principale" : "Photo secondaire"}
+                description={index === 0 ? "Photo principale (obligatoire)" : "Photo secondaire (optionnelle)"}
                 maxSize={5}
-                required={index === 0} // Seule la première photo est obligatoire
+                required={index === 0} // Première photo obligatoire, les autres optionnelles
               />
+              {index === 0 && renderError('photo_1')}
             </div>
           ))}
         </div>
@@ -745,7 +818,7 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
               onChange={(e) => handleChange('build', e.target.value)}
               required
             >
-              <option value="">Sélectionner</option>
+              <option value="">corpulence</option>
               <option value="Mince">Mince</option>
               <option value="Moyenne">Moyenne</option>
               <option value="Forte">Forte</option>
@@ -763,7 +836,7 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
               onChange={(e) => handleChange('ethnicity', e.target.value)}
               required
             >
-              <option value="">Sélectionner</option>
+              <option value="">Sélectionner votre type</option>
               <option value="Européen">Européen</option>
               <option value="Nord africain">Nord africain</option>
               <option value="Africain">Africain</option>
@@ -786,7 +859,7 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
               onChange={(e) => handleChange('hair_color', e.target.value)}
               required
             >
-              <option value="">Sélectionner</option>
+              <option value="">couleur de vos cheveux</option>
               <option value="Blond">Blond</option>
               <option value="Chatain clair">Chatain clair</option>
               <option value="Chatain foncé">Chatain foncé</option>
@@ -808,7 +881,7 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
             onChange={(e) => handleChange('eye_color', e.target.value)}
             required
           >
-            <option value="">Sélectionner</option>
+            <option value="">couleur de vos yeux</option>
             <option value="Bleu">Bleu</option>
             <option value="Vert">Vert</option>
             <option value="Brun">Brun</option>
@@ -826,11 +899,14 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
           <label htmlFor="native_language">Langue(s) maternelle(s)</label>
           <select
             id="native_language"
-            value={formData.native_language}
-            onChange={(e) => handleChange('native_language', e.target.value)}
-            required
+            value=""
+            onChange={(e) => {
+              if (e.target.value && !(formData.native_language || []).includes(e.target.value)) {
+                handleChange('native_language', [...(formData.native_language || []), e.target.value])
+              }
+            }}
           >
-            <option value="">Sélectionner votre langue maternelle</option>
+            <option value="">Ajouter une langue maternelle</option>
             <option value="Anglais">Anglais</option>
             <option value="Français">Français</option>
             <option value="Néerlandais">Néerlandais</option>
@@ -1451,6 +1527,25 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
             <option value="Zoulou">Zoulou</option>
             <option value="Zuñi">Zuñi</option>
           </select>
+          {formData.native_language && formData.native_language.length > 0 && (
+            <div className="selected-languages">
+              {formData.native_language.map((lang, index) => (
+                <span key={index} className="language-tag">
+                  {lang}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newLanguages = formData.native_language?.filter((_, i) => i !== index) || []
+                      handleChange('native_language', newLanguages)
+                    }}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          {renderError('native_language')}
         </div>
 
         <div className="form-field">
@@ -2760,7 +2855,7 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
 
       {/* Compétences WordPress détaillées */}
       <section className="form-section">
-        <h3>Compétences artistiques</h3>
+        <h3>Compétences</h3>
         
         <div className="form-field">
           <label>Permis de conduire</label>
@@ -2791,7 +2886,64 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
                 {danse}
               </label>
             ))}
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={showOtherDance}
+                onChange={(e) => {
+                  setShowOtherDance(e.target.checked)
+                  if (!e.target.checked) {
+                    handleChange('dance_skills_other', [])
+                    setTempDance('')
+                  }
+                }}
+              />
+              Autre
+            </label>
           </div>
+          {showOtherDance && (
+            <div style={{ marginTop: '10px' }}>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                <input
+                  type="text"
+                  className="other-skill-input"
+                  placeholder="Ajouter une compétence de danse"
+                  value={tempDance}
+                  onChange={(e) => setTempDance(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      addCustomSkill('dance_skills_other', tempDance, setTempDance)
+                    }
+                  }}
+                  style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => addCustomSkill('dance_skills_other', tempDance, setTempDance)}
+                  style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #393939', backgroundColor: '#393939', color: 'white', cursor: 'pointer' }}
+                >
+                  Ajouter
+                </button>
+              </div>
+              {(formData.dance_skills_other || []).length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {(formData.dance_skills_other || []).map((skill: string) => (
+                    <span key={skill} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#f0f0f0', borderRadius: '20px', fontSize: '14px' }}>
+                      {skill}
+                      <button
+                        type="button"
+                        onClick={() => removeCustomSkill('dance_skills_other', skill)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', lineHeight: '1' }}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="form-field">
@@ -2807,13 +2959,52 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
                 {musique}
               </label>
             ))}
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={showOtherMusic}
+                onChange={(e) => {
+                  setShowOtherMusic(e.target.checked)
+                  if (!e.target.checked) {
+                    handleChange('music_skills_other', [])
+                    setTempMusic('')
+                  }
+                }}
+              />
+              Autre
+            </label>
           </div>
+          {showOtherMusic && (
+            <div style={{ marginTop: '10px' }}>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                <input
+                  type="text"
+                  placeholder="Ajouter une compétence musicale"
+                  value={tempMusic}
+                  onChange={(e) => setTempMusic(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomSkill('music_skills_other', tempMusic, setTempMusic))}
+                  style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                />
+                <button type="button" onClick={() => addCustomSkill('music_skills_other', tempMusic, setTempMusic)} style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #393939', backgroundColor: '#393939', color: 'white', cursor: 'pointer' }}>Ajouter</button>
+              </div>
+              {(formData.music_skills_other || []).length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {(formData.music_skills_other || []).map((skill: string) => (
+                    <span key={skill} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#f0f0f0', borderRadius: '20px', fontSize: '14px' }}>
+                      {skill}
+                      <button type="button" onClick={() => removeCustomSkill('music_skills_other', skill)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', lineHeight: '1' }}>×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="form-field">
           <label>Autres compétences</label>
           <div className="checkbox-group">
-            {['Doublage', 'Chant', 'Acrobatie', 'Arts martial', 'Equitation', 'Sport de combat'].map(skill => (
+            {['Doublage', 'Chant', 'Acrobatie', 'Art martial', 'Equitation', 'Sport de combat'].map(skill => (
               <label key={skill} className="checkbox-label">
                 <input
                   type="checkbox"
@@ -2823,7 +3014,46 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
                 {skill}
               </label>
             ))}
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={showOtherDiverse}
+                onChange={(e) => {
+                  setShowOtherDiverse(e.target.checked)
+                  if (!e.target.checked) {
+                    handleChange('diverse_skills_other', [])
+                    setTempDiverse('')
+                  }
+                }}
+              />
+              Autre
+            </label>
           </div>
+          {showOtherDiverse && (
+            <div style={{ marginTop: '10px' }}>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                <input
+                  type="text"
+                  placeholder="Ajouter une autre compétence"
+                  value={tempDiverse}
+                  onChange={(e) => setTempDiverse(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomSkill('diverse_skills_other', tempDiverse, setTempDiverse))}
+                  style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                />
+                <button type="button" onClick={() => addCustomSkill('diverse_skills_other', tempDiverse, setTempDiverse)} style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #393939', backgroundColor: '#393939', color: 'white', cursor: 'pointer' }}>Ajouter</button>
+              </div>
+              {(formData.diverse_skills_other || []).length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {(formData.diverse_skills_other || []).map((skill: string) => (
+                    <span key={skill} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#f0f0f0', borderRadius: '20px', fontSize: '14px' }}>
+                      {skill}
+                      <button type="button" onClick={() => removeCustomSkill('diverse_skills_other', skill)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', lineHeight: '1' }}>×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
@@ -2865,7 +3095,7 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
               placeholder="IMDB"
             />
           </div>
-          
+
           <div className="form-field">
             <label htmlFor="linkedin_url">Profil LinkedIn</label>
             <input
@@ -2874,6 +3104,30 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
               value={formData.linkedin_url || ''}
               onChange={(e) => handleChange('linkedin_url', e.target.value)}
               placeholder="Linkedin"
+            />
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-field">
+            <label htmlFor="instagram_url">Instagram</label>
+            <input
+              type="url"
+              id="instagram_url"
+              value={formData.instagram_url || ''}
+              onChange={(e) => handleChange('instagram_url', e.target.value)}
+              placeholder="Instagram"
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="tiktok_url">TikTok</label>
+            <input
+              type="url"
+              id="tiktok_url"
+              value={formData.tiktok_url || ''}
+              onChange={(e) => handleChange('tiktok_url', e.target.value)}
+              placeholder="TikTok"
             />
           </div>
         </div>
@@ -2892,9 +3146,9 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
 
       {/* 🎬 Médias & Vidéos WordPress */}
       <section className="form-section">
-        <h3>Vidéos & Showreel</h3>
+        <h3>Vidéos & bande démo</h3>
         <p className="section-description">Ajoutez vos vidéos professionnelles (liens YouTube, Vimeo, etc.)</p>
-        
+
         <div className="form-field">
           <label htmlFor="showreel_url">Showreel principal</label>
           <input
@@ -2906,18 +3160,41 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
           />
         </div>
 
-        <div className="form-row">
-          <div className="form-field">
-            <label htmlFor="video_1_url">Vidéo 1</label>
+        <div className="form-field">
+          <label>Vidéos supplémentaires</label>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
             <input
               type="url"
-              id="video_1_url"
-              value={formData.video_1_url || ''}
-              onChange={(e) => handleChange('video_1_url', e.target.value)}
-              placeholder="https://youtube.com/watch?v=..."
+              placeholder="Ajouter une vidéo (YouTube, Vimeo, etc.)"
+              value={tempVideo}
+              onChange={(e) => setTempVideo(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addVideo())}
+              style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
             />
+            <button
+              type="button"
+              onClick={addVideo}
+              style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #393939', backgroundColor: '#393939', color: 'white', cursor: 'pointer' }}
+            >
+              Ajouter
+            </button>
           </div>
-          
+          {(formData.additional_videos || []).length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {(formData.additional_videos || []).map((video: string, index: number) => (
+                <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', backgroundColor: '#f0f0f0', borderRadius: '8px' }}>
+                  <span style={{ flex: 1, fontSize: '14px', wordBreak: 'break-all' }}>{video}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeVideo(index)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', lineHeight: '1', color: '#d32f2f' }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -2943,32 +3220,10 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
         </div>
 
         <div className="form-field">
-          <label htmlFor="experience">Expérience professionnelle</label>
-          <textarea
-            id="experience"
-            value={formData.experience || ''}
-            onChange={(e) => handleChange('experience', e.target.value)}
-            placeholder="Décrivez vos expériences professionnelles : films, théâtre, publicités, etc."
-            rows={4}
-          />
-        </div>
-
-        <div className="form-field">
-          <label htmlFor="certificates">Formation & Diplômes</label>
-          <textarea
-            id="certificates"
-            value={formData.certificates || ''}
-            onChange={(e) => handleChange('certificates', e.target.value)}
-            placeholder="Formations en art dramatique, diplômes, stages, workshops, etc."
-            rows={3}
-          />
-        </div>
-
-        <div className="form-field">
           <label>Sphère(s) d'activité(s) désirée(s)</label>
           <div className="checkbox-group">
             {[
-              'Long métrage', 'Court métrage', 'Film d\'étudiant', 
+              'Long métrage', 'Court métrage', 'Film d\'étudiant',
               'Publicité', 'Doublage', 'Films d\'entreprise', 'Films institutionnels'
             ].map(activite => (
               <label key={activite} className="checkbox-label">
@@ -2980,7 +3235,46 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
                 {activite}
               </label>
             ))}
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={showOtherActivities}
+                onChange={(e) => {
+                  setShowOtherActivities(e.target.checked)
+                  if (!e.target.checked) {
+                    handleChange('desired_activities_other', [])
+                    setTempActivities('')
+                  }
+                }}
+              />
+              Autre
+            </label>
           </div>
+          {showOtherActivities && (
+            <div style={{ marginTop: '10px' }}>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                <input
+                  type="text"
+                  placeholder="Ajouter une activité souhaitée"
+                  value={tempActivities}
+                  onChange={(e) => setTempActivities(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomSkill('desired_activities_other', tempActivities, setTempActivities))}
+                  style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                />
+                <button type="button" onClick={() => addCustomSkill('desired_activities_other', tempActivities, setTempActivities)} style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #393939', backgroundColor: '#393939', color: 'white', cursor: 'pointer' }}>Ajouter</button>
+              </div>
+              {(formData.desired_activities_other || []).length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {(formData.desired_activities_other || []).map((activity: string) => (
+                    <span key={activity} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#f0f0f0', borderRadius: '20px', fontSize: '14px' }}>
+                      {activity}
+                      <button type="button" onClick={() => removeCustomSkill('desired_activities_other', activity)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', lineHeight: '1' }}>×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           {renderError('desired_activities')}
         </div>
       </section>
@@ -3048,7 +3342,7 @@ export default function InscriptionFormComplete({ onSubmit, loading = false }: I
       </section>
 
       <button type="submit" disabled={loading} className="submit-button">
-        {loading ? 'Inscription...' : 'S\'inscrire'}
+        {loading ? 'Inscription...' : 'Valider'}
       </button>
       
       </div>

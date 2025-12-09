@@ -1,8 +1,14 @@
 // pages/api/auth/register.ts
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { phpSerialize } from '@/lib/php-serialize'
 import bcrypt from 'bcryptjs'
+
+// Client admin avec service role key pour bypass RLS lors de l'inscription
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export default async function handler(
   req: NextApiRequest,
@@ -54,11 +60,14 @@ export default async function handler(
       // Réseaux sociaux
       website_url,
       facebook_url,
+      instagram_url,
+      tiktok_url,
       imdb_url,
       linkedin_url,
       other_profile_url,
       // Vidéos
       showreel_url,
+      additional_videos,
       // Expérience
       experience,
       certificates,
@@ -76,8 +85,8 @@ export default async function handler(
     // Hasher le mot de passe
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Créer le comédien avec is_active = false par défaut
-    const { data: comedien, error } = await supabase
+    // Créer le comédien avec service role key (bypass RLS pour inscription)
+    const { data: comedien, error } = await supabaseAdmin
       .from('comediens')
       .insert({
         // Authentification
@@ -108,12 +117,14 @@ export default async function handler(
         eye_color: eye_color || '',
 
         // Langues - sérialisées au format WordPress
-        native_language: native_language || '',
-        // actor_languages_native combine langue maternelle + langues parlées couramment
-        actor_languages_native: phpSerialize([
-          ...(native_language ? [native_language] : []),
-          ...(languages_fluent || [])
-        ]),
+        // native_language: première langue maternelle pour compatibilité
+        native_language: Array.isArray(native_language) && native_language.length > 0
+          ? native_language[0]
+          : (native_language || ''),
+        // actor_languages_native: toutes les langues maternelles sérialisées
+        actor_languages_native: phpSerialize(
+          Array.isArray(native_language) ? native_language : (native_language ? [native_language] : [])
+        ),
         actor_languages_notions: phpSerialize(languages_notions || []),
 
         // Compétences - sérialisées au format WordPress
@@ -121,10 +132,6 @@ export default async function handler(
         actor_driving_license: phpSerialize(driving_licenses || []),
         actor_dance_skills: phpSerialize(dance_skills || []),
         actor_music_skills: phpSerialize(music_skills || []),
-
-        // Arrays PostgreSQL (PAS sérialisés) - null si vides
-        dance_skills: dance_skills && dance_skills.length > 0 ? dance_skills : null,
-        music_skills: music_skills && music_skills.length > 0 ? music_skills : null,
 
         // Activités désirées - sérialisées au format WordPress
         wp_activity_domain: phpSerialize(desired_activities || []),
@@ -145,6 +152,8 @@ export default async function handler(
         // Réseaux sociaux
         website_url: website_url || '',
         facebook_url: facebook_url || '',
+        instagram_url: instagram_url || '',
+        tiktok_url: tiktok_url || '',
         imdb_url: imdb_url || '',
         linkedin_url: linkedin_url || '',
         other_profile_url: other_profile_url || '',
@@ -152,6 +161,7 @@ export default async function handler(
         // Vidéos
         showreel_url: showreel_url || '',
         actor_video1: showreel_url || '',
+        additional_videos: additional_videos && additional_videos.length > 0 ? additional_videos : null,
 
         // Expérience
         experience_level: experience_level || '',
@@ -159,7 +169,8 @@ export default async function handler(
         certificates: certificates || '',
 
         // Statut
-        is_active: false // Important : profil en attente de validation
+        status: 'pending', // Nouveau profil en attente de validation
+        is_active: false // Synchro auto via trigger DB
       })
       .select()
       .single()
