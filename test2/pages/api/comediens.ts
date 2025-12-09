@@ -14,6 +14,17 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  // TEMP DEBUG: Return early with request params to see what's being received
+  if (req.query.debug === 'true') {
+    return res.status(200).json({
+      debug: {
+        include_all_statuses: req.query.include_all_statuses,
+        status: req.query.status,
+        allParams: req.query
+      }
+    })
+  }
+  
   try {
     switch (req.method) {
       case 'GET':
