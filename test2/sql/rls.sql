@@ -38,6 +38,14 @@ CREATE POLICY "Seuls les admins peuvent gérer les films" ON films
 CREATE POLICY "Tout le monde peut voir les comédiens actifs" ON comediens
     FOR SELECT USING (is_active = true);
 
+CREATE POLICY "Les admins peuvent voir tous les comédiens" ON comediens
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM user_profiles 
+            WHERE id = auth.uid() AND role = 'admin'
+        )
+    );
+
 CREATE POLICY "Les comédiens peuvent mettre à jour leur propre profil" ON comediens
     FOR UPDATE USING (
         auth.uid() = user_id OR

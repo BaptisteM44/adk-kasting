@@ -72,9 +72,13 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
     if (!include_all_statuses) {
       const statusFilter = (status as string) || 'published'
       query = query.eq('status', statusFilter)
+      console.log('Non-admin filter: status =', statusFilter)
     } else if (status) {
       // Si admin veut voir un statut spécifique
       query = query.eq('status', status as string)
+      console.log('Admin filter: status =', status)
+    } else {
+      console.log('Admin no status filter - returning all')
     }
 
   // Filtrage par permis de conduire - colonne WordPress avec données sérialisées PHP
@@ -178,7 +182,9 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
     .order('id', { ascending: true }) // Ordre de base pour la stabilité
     .range(startIndex, startIndex + limitNum - 1)
 
+  console.log('Executing query with:', {include_all_statuses, status, pageNum, limitNum})
   const { data, error, count } = await query
+  console.log('Query result count:', count, 'data rows:', data?.length, 'first status:', data?.[0]?.status)
 
   if (error) throw error
 
