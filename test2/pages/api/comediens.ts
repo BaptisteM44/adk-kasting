@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { supabase } from '@/lib/supabase'
 import { createClient } from '@supabase/supabase-js'
+import * as fs from 'fs'
 
 // Client avec service role key pour bypass RLS
 const supabaseAdmin = createClient(
@@ -57,7 +58,6 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
 
   try {
     // DEBUG - write to file so we can see in production
-    const fs = require('fs')
     const debugLog = `${new Date().toISOString()} | include_all_statuses=${include_all_statuses} (${typeof include_all_statuses}) | status=${status}\n`
     fs.appendFileSync('/tmp/adk_debug.log', debugLog)
     
@@ -191,7 +191,6 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
   console.log('Query result count:', count, 'data rows:', data?.length, 'first status:', data?.[0]?.status)
   
   // Debug log to file
-  const fs = require('fs')
   const resultLog = `${new Date().toISOString()} | RESULT count=${count} rows=${data?.length} first_status=${data?.[0]?.status}\n`
   fs.appendFileSync('/tmp/adk_debug.log', resultLog)
 
