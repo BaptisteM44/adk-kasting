@@ -59,7 +59,11 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
   try {
     // DEBUG - write to file so we can see in production
     const debugLog = `${new Date().toISOString()} | include_all_statuses=${include_all_statuses} (${typeof include_all_statuses}) | status=${status}\n`
-    fs.appendFileSync('/tmp/adk_debug.log', debugLog)
+    try {
+      fs.appendFileSync('/var/www/adk-kasting/test2/logs/api_comediens.log', debugLog)
+    } catch (e) {
+      console.error('Failed to write debug log:', e)
+    }
     
     console.log('=== API Comediens Debug ===')
     console.log('include_all_statuses:', include_all_statuses, 'type:', typeof include_all_statuses)
@@ -192,7 +196,11 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
   
   // Debug log to file
   const resultLog = `${new Date().toISOString()} | RESULT count=${count} rows=${data?.length} first_status=${data?.[0]?.status}\n`
-  fs.appendFileSync('/tmp/adk_debug.log', resultLog)
+  try {
+    fs.appendFileSync('/var/www/adk-kasting/test2/logs/api_comediens.log', resultLog)
+  } catch (e) {
+    console.error('Failed to write result log:', e)
+  }
 
   if (error) throw error
 
