@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { Layout } from '@/components/Layout'
 import { useAuth } from '@/components/AuthProvider'
 import { AuthGuard } from '@/components/AuthGuard'
 import { Button } from '@/components/ui/Button'
-import { supabase } from '@/lib/supabase'
 import type { Comedien } from '@/types'
 
 interface AdminComment {
@@ -63,6 +63,7 @@ export default function DashboardPage() {
 
 function DashboardContent() {
   const { user } = useAuth()
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [pendingComediens, setPendingComediens] = useState<ComedienWithComments[]>([])
@@ -95,40 +96,12 @@ function DashboardContent() {
 
       if (json.message) throw new Error(json.message)
 
-      // Charger les commentaires pour chaque comédien
-      const comediensWithComments = await Promise.all(
-        (json.data || []).map(async (comedien: Comedien) => {
-          // Essayer d'abord la table admin_comments
-          let comments = []
-          let adminComment = comedien.admin_comment // Le champ direct de la table comediens
-
-          if (!adminComment) {
-            // Si pas de commentaire direct, chercher dans la table admin_comments
-            const { data: adminComments, error: commentsError } = await supabase
-              .from('admin_comments')
-              .select('*')
-              .eq('comedien_id', comedien.id)
-              .order('created_at', { ascending: false })
-
-            if (commentsError) {
-              console.error(`Erreur chargement commentaires pour ${comedien.id}:`, commentsError)
-            }
-            comments = adminComments || []
-          }
-
-          return {
-            ...comedien,
-            admin_comment: adminComment,
-            admin_comments: comments
-          }
-        })
-      )
-
+      // Les commentaires sont déjà inclus dans json.data depuis l'API
       // Ajouter les nouveaux profils à la liste existante
       if (pageNum === 1) {
-        setPendingComediens(comediensWithComments)
+        setPendingComediens(json.data || [])
       } else {
-        setPendingComediens(prev => [...prev, ...comediensWithComments])
+        setPendingComediens(prev => [...prev, ...(json.data || [])])
       }
 
       setTotalCount(json.pagination?.total || 0)
@@ -207,6 +180,32 @@ function DashboardContent() {
     <>
       <Head>
         <title>Validation des inscriptions - ADK</title>
+        <style>{`
+          @media (max-width: 768px) {
+            .comedien-card-container {
+              flex-direction: column !important;
+            }
+            .comedien-photo {
+              width: 100% !important;
+              max-width: 200px !important;
+              margin: 0 auto 15px !important;
+            }
+            .comedien-photo img {
+              width: 100% !important;
+              height: auto !important;
+            }
+            .comedien-actions {
+              flex-direction: row !important;
+              flex-wrap: wrap !important;
+              justify-content: center !important;
+              margin-top: 15px !important;
+            }
+            .comedien-actions button {
+              flex: 1 1 calc(50% - 5px) !important;
+              min-width: 0 !important;
+            }
+          }
+        `}</style>
       </Head>
       <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -264,17 +263,29 @@ function DashboardContent() {
               {pendingComediens.map((comedien) => (
                 <div
                   key={comedien.id}
+                  onClick={() => router.push(`/comediens/${comedien.id}`)}
                   style={{
                     border: '1px solid #ddd',
                     borderRadius: '8px',
                     padding: '15px',
-                    backgroundColor: '#fff'
+                    backgroundColor: '#fff',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)'
+                    e.currentTarget.style.transform = 'translateY(0)'
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '15px' }}>
+                  <div className="comedien-card-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '15px' }}>
                     {/* Photo */}
                     {(comedien.profile_picture || (comedien.photos && comedien.photos[0])) && (
-                      <div style={{ flexShrink: 0 }}>
+                      <div className="comedien-photo" style={{ flexShrink: 0 }}>
                         <img
                           src={comedien.profile_picture || comedien.photos[0]}
                           alt={`${comedien.first_name} ${comedien.last_name}`}
@@ -293,7 +304,7 @@ function DashboardContent() {
                     )}
 
                     {/* Infos */}
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <h3 style={{ margin: 0 }}>{comedien.first_name} {comedien.last_name}</h3>
                         <StatusBadge status={comedien.status} />
@@ -306,41 +317,35 @@ function DashboardContent() {
                       <p><strong>Yeux:</strong> {comedien.eye_color || 'N/A'}</p>
                       <p><strong>Inscription:</strong> {new Date(comedien.created_at).toLocaleDateString()}</p>
                       
-                      {/* Afficher le commentaire admin s'il existe */}
-                      {(comedien.admin_comment || (comedien.admin_comments && comedien.admin_comments.length > 0)) && (
-                        <div style={{ 
-                          marginTop: '15px', 
-                          padding: '10px', 
-                          backgroundColor: '#fff3cd', 
-                          border: '1px solid #ffc107',
-                          borderRadius: '4px'
+                      {/* Afficher les commentaires admin s'ils existent */}
+                      {comedien.admin_comments && comedien.admin_comments.length > 0 && (
+                        <div style={{
+                          marginTop: '15px',
+                          padding: '12px',
+                          backgroundColor: '#f5f5f5',
+                          border: '1px solid #ddd',
+                          borderRadius: '6px'
                         }}>
-                          <strong>📝 Notes admin:</strong>
-                          {comedien.admin_comment && (
-                            <div style={{ marginTop: '5px', fontSize: '14px', color: '#856404' }}>
-                              {comedien.admin_comment}
+                          <strong style={{ color: '#333' }}>📝 Notes admin:</strong>
+                          {comedien.admin_comments.map((comment: AdminComment) => (
+                            <div key={comment.id} style={{ marginTop: '8px', fontSize: '14px' }}>
+                              <div style={{ color: '#555', lineHeight: '1.5' }}>
+                                {comment.comment}
+                              </div>
+                              <div style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
+                                {comment.admin_name} - {new Date(comment.created_at).toLocaleDateString()}
+                              </div>
                             </div>
-                          )}
-                          {comedien.admin_comments && comedien.admin_comments.length > 0 && (
-                            <div style={{ marginTop: '10px' }}>
-                              {comedien.admin_comments.map((comment: any) => (
-                                <div key={comment.id} style={{ marginTop: '5px', fontSize: '14px' }}>
-                                  <span style={{ color: '#856404' }}>
-                                    {comment.comment}
-                                  </span>
-                                  <span style={{ fontSize: '12px', color: '#666', marginLeft: '10px' }}>
-                                    - {comment.admin_name} ({new Date(comment.created_at).toLocaleDateString()})
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                          ))}
                         </div>
                       )}
                     </div>
-                    <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
+                    <div className="comedien-actions" style={{ display: 'flex', gap: '10px', flexDirection: 'column', flexShrink: 0 }}>
                       <Button
-                        onClick={() => handleStatusChange(comedien.id, 'published')}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleStatusChange(comedien.id, 'published')
+                        }}
                         disabled={loading || comedien.status === 'published'}
                         style={{
                           backgroundColor: comedien.status === 'published' ? '#ddd' : '#22c55e',
@@ -356,7 +361,10 @@ function DashboardContent() {
                         ✓ Publier (payé)
                       </Button>
                       <Button
-                        onClick={() => handleStatusChange(comedien.id, 'approved')}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleStatusChange(comedien.id, 'approved')
+                        }}
                         disabled={loading || comedien.status === 'approved'}
                         style={{
                           backgroundColor: comedien.status === 'approved' ? '#ddd' : '#3b82f6',
@@ -372,7 +380,10 @@ function DashboardContent() {
                         👍 Valider
                       </Button>
                       <Button
-                        onClick={() => handleStatusChange(comedien.id, 'pending')}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleStatusChange(comedien.id, 'pending')
+                        }}
                         disabled={loading || comedien.status === 'pending'}
                         style={{
                           backgroundColor: comedien.status === 'pending' ? '#ddd' : '#f59e0b',
@@ -388,7 +399,10 @@ function DashboardContent() {
                         ⏸ En attente
                       </Button>
                       <Button
-                        onClick={() => handleStatusChange(comedien.id, 'trash')}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleStatusChange(comedien.id, 'trash')
+                        }}
                         disabled={loading || comedien.status === 'trash'}
                         style={{
                           backgroundColor: comedien.status === 'trash' ? '#ddd' : 'white',

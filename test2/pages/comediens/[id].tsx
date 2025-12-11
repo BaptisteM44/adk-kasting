@@ -19,9 +19,12 @@ export default function ComedienProfile() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null) // Photo sélectionnée
-  const [adminComment, setAdminComment] = useState('')
+  const [adminComments, setAdminComments] = useState<any[]>([])
+  const [newComment, setNewComment] = useState('')
   const [isSavingComment, setIsSavingComment] = useState(false)
   const [showCommentForm, setShowCommentForm] = useState(false)
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
+  const [editingCommentText, setEditingCommentText] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [editedData, setEditedData] = useState<any>({})
   const [originalData, setOriginalData] = useState<any>({}) // Données originales de la base
@@ -60,14 +63,13 @@ export default function ComedienProfile() {
   const fetchComedien = async () => {
     try {
       setLoading(true)
-      
-      const { data, error } = await supabase
-        .from('comediens')
-        .select('*')
-        .eq('id', id)
-        .single()
-      
-      if (error) throw error
+
+      // Utiliser l'API au lieu de Supabase direct pour bypass RLS
+      const response = await fetch(`/api/comediens/${id}`)
+      if (!response.ok) {
+        throw new Error('Erreur lors du chargement du profil')
+      }
+      const data = await response.json()
       
       // Debug: voir ce que contient languages
       console.log('🔍 DEBUG RAW DATA from DB:', {
@@ -123,6 +125,12 @@ export default function ComedienProfile() {
       editedCopy.languages_fluent = [...(editedCopy.languages_fluent_normalized || [])]
       editedCopy.languages_notions = [...(editedCopy.languages_notions_normalized || [])]
 
+      console.log('🔍 DESIRED ACTIVITIES DEBUG:', {
+        desired_activities_normalized: editedCopy.desired_activities_normalized,
+        desired_activities: editedCopy.desired_activities,
+        wp_activity_domain: data.wp_activity_domain
+      })
+
       setEditedData(editedCopy)
 
       // Vérifier que les copies sont vraiment indépendantes
@@ -131,7 +139,7 @@ export default function ComedienProfile() {
         comedienCopy.dance_skills_normalized === editedCopy.dance_skills_normalized)
 
       setOriginalData(data) // Garder les données brutes pour comparaison
-      setAdminComment(data.admin_comment || '')
+      setAdminComments(data.admin_comments || [])
 
       // Initialiser les états des champs "Autre"
       setShowOtherDance(Array.isArray(data.dance_skills_other) && data.dance_skills_other.length > 0)
@@ -147,30 +155,106 @@ export default function ComedienProfile() {
   }
 
   const handleSaveComment = async () => {
-    if (!isAdmin) return
+    if (!isAdmin || !newComment.trim()) return
 
     try {
       setIsSavingComment(true)
 
-      const response = await fetch(`/api/comediens/${id}/comment`, {
-        method: 'PUT',
+      const response = await fetch(`/api/comediens/${id}/comments`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          comment: adminComment,
-          isAdmin: true
+          comment: newComment,
+          // Ne pas passer admin_id car il peut ne pas exister dans auth.users
+          admin_name: user?.email || 'Admin'
         })
       })
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.message || 'Erreur lors de la sauvegarde')
+        throw new Error(data.error || 'Erreur lors de la sauvegarde')
       }
 
-      alert('Commentaire sauvegardé !')
+      const savedComment = await response.json()
+
+      // Ajouter le nouveau commentaire à la liste
+      setAdminComments([savedComment, ...adminComments])
+      setNewComment('')
+      setShowCommentForm(false)
+      alert('Commentaire ajouté !')
     } catch (error: any) {
       alert('Erreur lors de la sauvegarde : ' + error.message)
+    } finally {
+      setIsSavingComment(false)
+    }
+  }
+
+  const handleEditComment = async (commentId: string) => {
+    if (!isAdmin || !editingCommentText.trim()) return
+
+    try {
+      setIsSavingComment(true)
+
+      const response = await fetch(`/api/comediens/${id}/comments`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          comment_id: commentId,
+          comment: editingCommentText
+        })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Erreur lors de la modification')
+      }
+
+      const updatedComment = await response.json()
+
+      // Mettre à jour le commentaire dans la liste
+      setAdminComments(adminComments.map(c =>
+        c.id === commentId ? updatedComment : c
+      ))
+      setEditingCommentId(null)
+      setEditingCommentText('')
+      alert('Commentaire modifié !')
+    } catch (error: any) {
+      alert('Erreur lors de la modification : ' + error.message)
+    } finally {
+      setIsSavingComment(false)
+    }
+  }
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!isAdmin || !confirm('Voulez-vous vraiment supprimer ce commentaire ?')) return
+
+    try {
+      setIsSavingComment(true)
+
+      const response = await fetch(`/api/comediens/${id}/comments`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          comment_id: commentId
+        })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Erreur lors de la suppression')
+      }
+
+      // Retirer le commentaire de la liste
+      setAdminComments(adminComments.filter(c => c.id !== commentId))
+      alert('Commentaire supprimé !')
+    } catch (error: any) {
+      alert('Erreur lors de la suppression : ' + error.message)
     } finally {
       setIsSavingComment(false)
     }
@@ -180,10 +264,28 @@ export default function ComedienProfile() {
     if (!canEdit) return
     if (isEditing) {
       // Si on annule, restaurer les données originales
-      setEditedData(comedien)
+      // Recréer editedData avec les champs pour les checkboxes
+      const restored = { ...comedien }
+      restored.dance_skills = [...(comedien.dance_skills_normalized || [])]
+      restored.music_skills = [...(comedien.music_skills_normalized || [])]
+      restored.diverse_skills = [...(comedien.diverse_skills_normalized || [])]
+      restored.desired_activities = [...(comedien.desired_activities_normalized || [])]
+      restored.driving_licenses = [...(comedien.driving_licenses_normalized || [])]
+      restored.languages_fluent = [...(comedien.languages_fluent_normalized || [])]
+      restored.languages_notions = [...(comedien.languages_notions_normalized || [])]
+      setEditedData(restored)
     } else {
       // Entrer en mode édition : initialiser editedData avec les données actuelles
-      setEditedData(comedien)
+      // Créer les champs pour les checkboxes à partir des données normalisées
+      const editable = { ...comedien }
+      editable.dance_skills = [...(comedien.dance_skills_normalized || [])]
+      editable.music_skills = [...(comedien.music_skills_normalized || [])]
+      editable.diverse_skills = [...(comedien.diverse_skills_normalized || [])]
+      editable.desired_activities = [...(comedien.desired_activities_normalized || [])]
+      editable.driving_licenses = [...(comedien.driving_licenses_normalized || [])]
+      editable.languages_fluent = [...(comedien.languages_fluent_normalized || [])]
+      editable.languages_notions = [...(comedien.languages_notions_normalized || [])]
+      setEditedData(editable)
     }
     setIsEditing(!isEditing)
   }
@@ -963,57 +1065,168 @@ export default function ComedienProfile() {
                   </div>
                 </div>
 
-                {/* Colonne droite : Commentaire admin */}
+                {/* Colonne droite : Commentaires admin */}
                 {isAdmin && (
                   <div className="admin-comment-column">
+                    <h3 style={{ marginBottom: '15px', fontSize: '16px' }}>📝 Notes admin</h3>
+
+                    {/* Formulaire d'ajout */}
                     {!showCommentForm ? (
-                      <div className="comment-display">
-                        {adminComment ? (
-                          <>
-                            <div className="comment-text">{adminComment}</div>
-                            <button 
-                              onClick={() => setShowCommentForm(true)}
-                              className="comment-edit-btn"
-                            >
-                              Modifier
-                            </button>
-                          </>
-                        ) : (
-                          <button 
-                            onClick={() => setShowCommentForm(true)}
-                            className="comment-add-btn"
-                          >
-                            + Ajouter un commentaire
-                          </button>
-                        )}
-                      </div>
+                      <button
+                        onClick={() => setShowCommentForm(true)}
+                        className="comment-add-btn"
+                        style={{ marginBottom: '15px', width: '100%' }}
+                      >
+                        + Ajouter un commentaire
+                      </button>
                     ) : (
-                      <div className="comment-form">
-                        <input
-                          type="text"
-                          value={adminComment}
-                          onChange={(e) => setAdminComment(e.target.value)}
-                          placeholder="Commentaire privé..."
+                      <div className="comment-form" style={{ marginBottom: '15px' }}>
+                        <textarea
+                          value={newComment}
+                          onChange={(e) => setNewComment(e.target.value)}
+                          placeholder="Ajouter une note privée..."
                           className="comment-input"
+                          style={{ width: '100%', minHeight: '80px', padding: '10px', marginBottom: '8px' }}
                         />
-                        <button 
-                          onClick={async () => {
-                            await handleSaveComment();
-                            setShowCommentForm(false);
-                          }}
-                          disabled={isSavingComment}
-                          className="comment-save-btn"
-                        >
-                          {isSavingComment ? '...' : '✓'}
-                        </button>
-                        <button 
-                          onClick={() => setShowCommentForm(false)}
-                          className="comment-cancel-btn"
-                        >
-                          ✕
-                        </button>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            onClick={handleSaveComment}
+                            disabled={isSavingComment || !newComment.trim()}
+                            className="comment-save-btn"
+                          >
+                            {isSavingComment ? 'Enregistrement...' : 'Enregistrer'}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowCommentForm(false)
+                              setNewComment('')
+                            }}
+                            className="comment-cancel-btn"
+                          >
+                            Annuler
+                          </button>
+                        </div>
                       </div>
                     )}
+
+                    {/* Liste des commentaires */}
+                    <div className="comments-list">
+                      {adminComments.length === 0 ? (
+                        <p style={{ color: '#999', fontStyle: 'italic', fontSize: '14px' }}>
+                          Aucun commentaire
+                        </p>
+                      ) : (
+                        adminComments.map((comment) => (
+                          <div
+                            key={comment.id}
+                            style={{
+                              padding: '12px',
+                              backgroundColor: '#f5f5f5',
+                              border: '1px solid #ddd',
+                              borderRadius: '6px',
+                              marginBottom: '10px'
+                            }}
+                          >
+                            {editingCommentId === comment.id ? (
+                              // Mode édition
+                              <>
+                                <textarea
+                                  value={editingCommentText}
+                                  onChange={(e) => setEditingCommentText(e.target.value)}
+                                  style={{
+                                    width: '100%',
+                                    minHeight: '60px',
+                                    padding: '8px',
+                                    marginBottom: '8px',
+                                    borderRadius: '4px',
+                                    border: '1px solid #ddd'
+                                  }}
+                                />
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                  <button
+                                    onClick={() => handleEditComment(comment.id)}
+                                    disabled={isSavingComment}
+                                    style={{
+                                      padding: '6px 12px',
+                                      backgroundColor: '#22c55e',
+                                      color: 'white',
+                                      border: 'none',
+                                      borderRadius: '4px',
+                                      cursor: 'pointer',
+                                      fontSize: '12px'
+                                    }}
+                                  >
+                                    {isSavingComment ? '...' : 'Enregistrer'}
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setEditingCommentId(null)
+                                      setEditingCommentText('')
+                                    }}
+                                    style={{
+                                      padding: '6px 12px',
+                                      backgroundColor: '#999',
+                                      color: 'white',
+                                      border: 'none',
+                                      borderRadius: '4px',
+                                      cursor: 'pointer',
+                                      fontSize: '12px'
+                                    }}
+                                  >
+                                    Annuler
+                                  </button>
+                                </div>
+                              </>
+                            ) : (
+                              // Mode affichage
+                              <>
+                                <div style={{ fontSize: '14px', color: '#555', lineHeight: '1.5', marginBottom: '8px' }}>
+                                  {comment.comment}
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <div style={{ fontSize: '12px', color: '#999' }}>
+                                    {comment.admin_name} - {new Date(comment.created_at).toLocaleDateString()}
+                                  </div>
+                                  <div style={{ display: 'flex', gap: '8px' }}>
+                                    <button
+                                      onClick={() => {
+                                        setEditingCommentId(comment.id)
+                                        setEditingCommentText(comment.comment)
+                                      }}
+                                      style={{
+                                        padding: '4px 8px',
+                                        backgroundColor: '#3b82f6',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '11px'
+                                      }}
+                                    >
+                                      ✏️ Modifier
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteComment(comment.id)}
+                                      style={{
+                                        padding: '4px 8px',
+                                        backgroundColor: '#ef4444',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '11px'
+                                      }}
+                                    >
+                                      🗑️ Supprimer
+                                    </button>
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

@@ -26,9 +26,20 @@ export const ComedienCard: React.FC<ComedienCardProps> = ({ comedien }) => {
   const isAdmin = user?.role === 'admin'
   const [loadingPDF, setLoadingPDF] = useState(false)
   const [currentRating, setCurrentRating] = useState(comedien.admin_rating || 0)
+  const [copiedText, setCopiedText] = useState('')
 
   const handleRatingUpdate = (newRating: number) => {
     setCurrentRating(newRating)
+  }
+
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedText(label)
+      setTimeout(() => setCopiedText(''), 2000)
+    } catch (err) {
+      console.error('Erreur lors de la copie:', err)
+    }
   }
 
   const handleDownloadPDF = async (e: React.MouseEvent) => {
@@ -134,24 +145,44 @@ export const ComedienCard: React.FC<ComedienCardProps> = ({ comedien }) => {
           )}
 
           <p className="comedien-card__detail text-body">
-            <a
-              href={`mailto:${comedien.email}`}
+            <span
               className="comedien-card__email"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                copyToClipboard(comedien.email, comedien.email)
+              }}
+              style={{
+                cursor: 'pointer',
+                color: copiedText === comedien.email ? '#22c55e' : 'inherit',
+                transition: 'color 0.2s'
+              }}
+              title={copiedText === comedien.email ? '✓ Copié !' : 'Cliquer pour copier'}
             >
               {comedien.email}
-            </a>
+              {copiedText === comedien.email && <span style={{ marginLeft: '6px', fontSize: '14px', color: '#22c55e' }}>✓</span>}
+            </span>
           </p>
 
           {comedien.phone && (
             <p className="comedien-card__detail">
-              <a 
-                href={`tel:${comedien.phone}`} 
+              <span
                 className="comedien-card__phone"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  copyToClipboard(comedien.phone, comedien.phone)
+                }}
+                style={{
+                  cursor: 'pointer',
+                  color: copiedText === comedien.phone ? '#22c55e' : 'inherit',
+                  transition: 'color 0.2s'
+                }}
+                title={copiedText === comedien.phone ? '✓ Copié !' : 'Cliquer pour copier'}
               >
                 {comedien.phone}
-              </a>
+                {copiedText === comedien.phone && <span style={{ marginLeft: '6px', fontSize: '14px', color: '#22c55e' }}>✓</span>}
+              </span>
             </p>
           )}
 

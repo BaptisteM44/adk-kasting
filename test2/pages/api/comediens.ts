@@ -2,7 +2,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { supabase } from '@/lib/supabase'
 import { createClient } from '@supabase/supabase-js'
-import * as fs from 'fs'
 
 // Client avec service role key pour bypass RLS
 const supabaseAdmin = createClient(
@@ -69,14 +68,6 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
   } = req.query
 
   try {
-    // DEBUG - write to file so we can see in production
-    const debugLog = `${new Date().toISOString()} | include_all_statuses=${include_all_statuses} (${typeof include_all_statuses}) | status=${status}\n`
-    try {
-      fs.appendFileSync('/var/www/adk-kasting/test2/logs/api_comediens.log', debugLog)
-    } catch (e) {
-      console.error('Failed to write debug log:', e)
-    }
-    
     console.log('=== API Comediens Debug ===')
     console.log('include_all_statuses:', include_all_statuses, 'type:', typeof include_all_statuses)
     console.log('status:', status)
@@ -205,14 +196,6 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
   console.log('Executing query with:', {include_all_statuses, status, pageNum, limitNum})
   const { data, error, count } = await query
   console.log('Query result count:', count, 'data rows:', data?.length, 'first status:', data?.[0]?.status)
-  
-  // Debug log to file
-  const resultLog = `${new Date().toISOString()} | RESULT count=${count} rows=${data?.length} first_status=${data?.[0]?.status}\n`
-  try {
-    fs.appendFileSync('/var/www/adk-kasting/test2/logs/api_comediens.log', resultLog)
-  } catch (e) {
-    console.error('Failed to write result log:', e)
-  }
 
   if (error) throw error
 
@@ -245,8 +228,27 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
 
   const shuffledData = data ? shuffleArray(data, dateSeed) : [];
 
+  // Si c'est une requête admin (include_all_statuses), charger aussi les commentaires
+  let dataWithComments = shuffledData
+  if (include_all_statuses) {
+    dataWithComments = await Promise.all(
+      shuffledData.map(async (comedien) => {
+        const { data: comments } = await supabaseAdmin
+          .from('admin_comments')
+          .select('*')
+          .eq('comedien_id', comedien.id)
+          .order('created_at', { ascending: false })
+
+        return {
+          ...comedien,
+          admin_comments: comments || []
+        }
+      })
+    )
+  }
+
   return res.status(200).json({
-    data: shuffledData,
+    data: dataWithComments,
     pagination: {
       page: pageNum,
       limit: limitNum,
