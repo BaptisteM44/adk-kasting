@@ -525,7 +525,9 @@
     width: 100%;
     box-sizing: border-box;
     justify-items: center; // Centre les items dans leurs cellules
-
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
     @media (max-width: $breakpoint-sm) {
       padding: 24px 16px;
       gap: 32px;
@@ -533,9 +535,13 @@
     @media (max-width: 843px) {
       gap: 24px;
     }
+        @media (max-width: 577px) {
+      justify-content: center;
+    }
     @media (max-width: 549px) {
       gap: 24px;
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      justify-content: center;
     }
   }
 }
